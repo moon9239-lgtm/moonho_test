@@ -1,0 +1,17 @@
+.cache/
+.tmp_last_supabase_query.sql
+
+node_modules/
+__pycache__/
+*.pyc
+
+*.log
+server.err.log
+server.out.log
+
+pipc_minutes_crawler/data/
+pipc_minutes_crawler/downloads/
+pipc_committee_decisions_crawler/data/
+pipc_committee_decisions_crawler/downloads/
+
+pipc_knowledge_base/99_raw/decisions/**/images/

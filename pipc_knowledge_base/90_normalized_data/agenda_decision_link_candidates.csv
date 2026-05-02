@@ -1,0 +1,150 @@
+meeting_idx_id,agenda_key,decision_idx_id,link_method,confidence,notes
+7071,deliberation_decision:01:1,2026-0204,same_decision_date+case_number_overlap,0.98,"case overlap: 2023조총0042, 2024조총0025"
+7065,deliberation_decision:01:1,2026-0070,same_decision_date+case_number_overlap,0.98,case overlap: 2025조총0045
+7065,deliberation_decision:02:2,2026-0071,same_decision_date+case_number_overlap,0.98,"case overlap: 2024조삼0008, 2024조삼0009, 2024조삼0010, 2024조삼0011, 2024조삼0012, 2024조삼0013, 2024조삼0014, 2024조삼0015, 2024조삼0016, 2024조삼0017, 2024조삼0018, 2024조삼0019, 2024조삼0020, 2024조삼0021, 2024조삼0022, 2024조삼0023, 2024조삼0024, 2024조삼0025"
+7051,deliberation_decision:01:1,2025-0864,same_decision_date+case_number_overlap,0.98,case overlap: 2023조일0035
+7051,deliberation_decision:02:2,2025-0865,same_decision_date+case_number_overlap,0.98,case overlap: 2024조이0080
+7044,deliberation_decision:01:1,2025-0843,same_decision_date+title_similarity,0.82,title/date candidate
+7044,deliberation_decision:02:2,2025-0850,same_decision_date+case_number_overlap,0.98,case overlap: 2024조이0109
+7044,deliberation_decision:03:3,2025-0851,same_decision_date+case_number_overlap,0.98,case overlap: 2024조이0092
+7043,deliberation_decision:03:4,2025-0786,same_decision_date+case_number_overlap,0.98,case overlap: 2025조이0034
+7041,deliberation_decision:01:1,2025-0714,same_decision_date+case_number_overlap,0.98,case overlap: 2025조삼0001
+7041,deliberation_decision:03:3,2025-0715,same_decision_date+case_number_overlap,0.98,case overlap: 2023조일0007
+7039,deliberation_decision:01:1,2025-0687,same_decision_date+case_number_overlap,0.98,case overlap: 2025조이0056
+7033,deliberation_decision:01:1,2025-0614,same_decision_date+case_number_overlap,0.98,case overlap: 2024조일0043
+7033,deliberation_decision:02:2,2025-0614,same_decision_date+case_number_overlap,0.98,case overlap: 2023조총0051
+7033,deliberation_decision:03:3,2025-0612,same_decision_date+case_number_overlap,0.98,case overlap: 2024조삼0001
+7030,deliberation_decision:01:1,2025-0578,same_decision_date+case_number_overlap,0.98,"case overlap: 2025조이0032, 2024조이0090"
+7026,deliberation_decision:01:1,2025-0542,same_decision_date+case_number_overlap,0.98,"case overlap: 2023조일0021, 2024조일0027"
+7024,deliberation_decision:01:1,2025-0492,same_decision_date+case_number_overlap,0.98,case overlap: 2024조삼0004
+7024,deliberation_decision:02:2,2025-0493,same_decision_date+case_number_overlap,0.98,"case overlap: 2024조이0010, 2023조이0055"
+7024,deliberation_decision:04:4,2025-0495,same_decision_date+case_number_overlap,0.98,"case overlap: 2024조총0059, 2024조총0067"
+7018,deliberation_decision:01:1,2025-0419,same_decision_date+title_similarity,0.82,title/date candidate
+7018,deliberation_decision:04:4,2025-0422,same_decision_date+case_number_overlap,0.98,"case overlap: 2025조총0020, 2025조총0021, 2025조총0025"
+7018,deliberation_decision:05:8,2025-0426,same_decision_date+case_number_overlap,0.98,"case overlap: 2024조일0013, 2025조일0025"
+7014,deliberation_decision:01:1,2025-0373,same_decision_date+title_similarity,0.82,title/date candidate
+7012,deliberation_decision:01:2,2025-0339,same_decision_date+title_similarity,0.82,title/date candidate
+7010,deliberation_decision:03:4,2025-0272,same_decision_date+case_number_overlap,0.98,"case overlap: 2024조이0081, 2023조이0014"
+7006,deliberation_decision:02:4,2025-0233,same_decision_date+case_number_overlap,0.98,case overlap: 2024조일0034
+7003,deliberation_decision:01:1,2025-0185,same_decision_date+case_number_overlap,0.98,case overlap: 2024조이0079
+6999,deliberation_decision:03:3,2025-0143,same_decision_date+case_number_overlap,0.98,"case overlap: 2023조이0128, 2023조삼0046"
+6996,deliberation_decision:01:1,2025-0106,same_decision_date+case_number_overlap,0.98,"case overlap: 2023조이0062, 2023조이0131"
+6996,deliberation_decision:02:3,2025-0107,same_decision_date+case_number_overlap,0.98,case overlap: 2024조삼0003
+6994,deliberation_decision:01:1,2025-0072,same_decision_date+case_number_overlap,0.98,case overlap: 2024조삼0005
+6994,deliberation_decision:03:3,2025-0074,same_decision_date+case_number_overlap,0.98,case overlap: 2023조이0130
+6990,deliberation_decision:01:1,2025-0040,same_decision_date+case_number_overlap,0.98,case overlap: 2023조총0053
+6983,deliberation_decision:01:2,2024-1192,same_decision_date+case_number_overlap,0.98,case overlap: 2021조이0163
+6981,deliberation_decision:01:1,2024-1123,same_decision_date+case_number_overlap,0.98,case overlap: 2024조총0010
+6975,deliberation_decision:01:1,2024-1089,same_decision_date+case_number_overlap,0.98,"case overlap: 2023조이0115, 2023조이0035"
+6979,deliberation_decision:02:2,2024-1034,same_decision_date+case_number_overlap,0.98,"case overlap: 2024조이0011, 2024조이0008"
+6979,deliberation_decision:03:3,2024-1035,same_decision_date+title_similarity,0.82,title/date candidate
+6974,deliberation_decision:01:1,2024-0949,same_decision_date+case_number_overlap,0.98,"case overlap: 2024조총0003, 2023조이0078"
+6974,deliberation_decision:02:2,2024-0950,same_decision_date+case_number_overlap,0.98,case overlap: 2024조일0012
+6969,deliberation_decision:01:1,2024-0888,same_decision_date+title_similarity,0.82,title/date candidate
+6967,deliberation_decision:02:2,2024-0847,same_decision_date+case_number_overlap,0.98,case overlap: 2023조이0124
+6963,deliberation_decision:01:1,2024-0761,same_decision_date+case_number_overlap,0.98,case overlap: 2024조일0013
+6956,deliberation_decision:03:3,2024-0622,same_decision_date+title_similarity,0.82,title/date candidate
+6954,deliberation_decision:02:2,2024-0524,same_decision_date+case_number_overlap,0.98,case overlap: 2023조삼0032
+6954,deliberation_decision:03:3,2024-0525,same_decision_date+title_similarity,0.82,title/date candidate
+6951,deliberation_decision:01:1,2024-0462,same_decision_date+case_number_overlap,0.98,case overlap: 2023조이0023
+6947,deliberation_decision:01:1,2024-0350,same_decision_date+case_number_overlap,0.98,case overlap: 2023조일0116
+6944,deliberation_decision:01:1,2024-0293,same_decision_date+case_number_overlap,0.98,case overlap: 2021조총0072
+6944,deliberation_decision:02:2,2024-0294,same_decision_date+case_number_overlap,0.98,case overlap: 2023조이0013
+6940,deliberation_decision:01:1,2024-0234,same_decision_date+case_number_overlap,0.98,case overlap: 2024조이0016
+6940,deliberation_decision:06:6,2024-0239,same_decision_date+case_number_overlap,0.98,case overlap: 2023조일0096
+6940,deliberation_decision:07:7,2024-0240,same_decision_date+title_similarity,0.82,title/date candidate
+6930,deliberation_decision:03:3,2024-0116,same_decision_date+case_number_overlap,0.98,case overlap: 2023조일0051
+6930,deliberation_decision:04:4,2024-0126,same_decision_date+title_similarity,0.82,title/date candidate
+6927,deliberation_decision:01:1,2024-0072,same_decision_date+case_number_overlap,0.98,case overlap: 2023조총0027
+6927,deliberation_decision:02:2,2024-0073,same_decision_date+case_number_overlap,0.98,case overlap: 2022조일0047
+6927,deliberation_decision:03:3,2024-0081,same_decision_date+title_similarity,0.82,title/date candidate
+6927,deliberation_decision:03:3,2024-0082,same_decision_date+title_similarity,0.82,title/date candidate
+6920,deliberation_decision:01:1,2024-0042,same_decision_date+case_number_overlap,0.98,case overlap: 2023조삼0025
+6918,deliberation_decision:01:1,2024-0001,same_decision_date+title_similarity,0.82,title/date candidate
+6916,deliberation_decision:01:1,2023-0595,same_decision_date+case_number_overlap,0.98,case overlap: 2023조이0057
+6916,deliberation_decision:02:2,2023-0596,same_decision_date+title_similarity,0.82,title/date candidate
+6914,deliberation_decision:02:2,2023-0563,same_decision_date+case_number_overlap,0.98,case overlap: 2021조이0095
+6914,deliberation_decision:03:3,2023-0564,same_decision_date+title_similarity,0.82,title/date candidate
+6908,deliberation_decision:02:2,2023-0529,same_decision_date+case_number_overlap,0.98,case overlap: 2023조총0017
+6906,deliberation_decision:01:1,2023-0505,same_decision_date+case_number_overlap,0.98,case overlap: 2023조일0035
+6906,deliberation_decision:03:3,2023-0507,same_decision_date+case_number_overlap,0.98,case overlap: 2023조이0020
+6905,deliberation_decision:03:3,2023-0453,same_decision_date+case_number_overlap,0.98,case overlap: 2022조총0066
+6905,deliberation_decision:04:4,2023-0454,same_decision_date+title_similarity,0.82,title/date candidate
+6905,deliberation_decision:05:5,2023-0455,same_decision_date+case_number_overlap,0.98,case overlap: 2022조이0070
+6903,deliberation_decision:07:7,2023-0421,same_decision_date+title_similarity,0.82,title/date candidate
+6903,deliberation_decision:08:8,2023-0422,same_decision_date+title_similarity,0.82,title/date candidate
+6903,deliberation_decision:09:9,2023-0411,same_decision_date+title_similarity,0.82,title/date candidate
+6895,deliberation_decision:01:1,2023-0378,same_decision_date+case_number_overlap,0.98,case overlap: 2021조일0028
+6895,deliberation_decision:02:2,2023-0379,same_decision_date+case_number_overlap,0.98,case overlap: 2023조일0061
+6895,deliberation_decision:03:3,2023-0380,same_decision_date+case_number_overlap,0.98,case overlap: 2022조일0005
+6895,deliberation_decision:04:4,2023-0379,same_decision_date+title_similarity,0.82,title/date candidate
+6895,deliberation_decision:05:5,2023-0397,same_decision_date+case_number_overlap,0.98,case overlap: 2023조총0008
+6893,deliberation_decision:01:1,2023-0351,same_decision_date+case_number_overlap,0.98,case overlap: 2021조이0173
+6893,deliberation_decision:01:1,2023-0346,same_decision_date+case_number_overlap,0.98,"case overlap: 2021조일0148, 2021조일0149, 2021조일0150, 2021조일0151, 2021조일0152, 2021조일0153, 2021조일0154, 2021조일0155, 2021조일0156, 2021조일0157, 2021조일0158, 2021조일0159, 2021조일0160, 2021조일0161, 2021조일0162, 2021조일0163, 2021조일0164, 2021조일0165, 2021조일0166, 2021조일0167, 2021조일0168, 2021조일0169, 2021조일0170, 2021조일0171, 2021조일0172, 2021조일0173, 2021조일0174, 2021조일0175, 2021조일0176, 2021조일0177, 2021조일0178, 2021조일0179, 2021조일0180, 2021조일0181"
+6893,deliberation_decision:02:2,2023-0347,same_decision_date+case_number_overlap,0.98,case overlap: 2023조이0003
+6891,deliberation_decision:01:1,2023-0320,same_decision_date+case_number_overlap,0.98,case overlap: 2022조일0069
+6891,deliberation_decision:03:3,2023-0322,same_decision_date+case_number_overlap,0.98,case overlap: 2022조이0028
+6890,deliberation_decision:01:1,2023-0269,same_decision_date+case_number_overlap,0.98,case overlap: 2021조일0117
+6890,deliberation_decision:02:2,2023-0270,same_decision_date+case_number_overlap,0.98,case overlap: 2022조이0086
+6888,deliberation_decision:01:1,2023-0227,same_decision_date+case_number_overlap,0.98,case overlap: 2021조총0037
+6888,deliberation_decision:02:2,2023-0226,same_decision_date+title_similarity,0.82,title/date candidate
+6888,deliberation_decision:03:3,2023-0225,same_decision_date+case_number_overlap,0.98,case overlap: 2022조삼0014
+6883,deliberation_decision:01:1,2023-0185,same_decision_date+case_number_overlap,0.98,case overlap: 2022조일0037
+6880,deliberation_decision:01:1,2023-0181,same_decision_date+case_number_overlap,0.98,case overlap: 2021조총0022
+6880,deliberation_decision:02:2,2023-0182,same_decision_date+case_number_overlap,0.98,case overlap: 2022조이0038
+6876,deliberation_decision:01:1,2023-0151,same_decision_date+case_number_overlap,0.98,case overlap: 2023조일0008
+6876,deliberation_decision:02:2,2023-0150,same_decision_date+case_number_overlap,0.98,case overlap: 2021조이0085
+6873,deliberation_decision:02:2,2023-0106,same_decision_date+case_number_overlap,0.98,case overlap: 2022조총0035
+6873,deliberation_decision:03:3,2023-0107,same_decision_date+case_number_overlap,0.98,case overlap: 2022조일0053
+6873,deliberation_decision:04:4,2023-0108,same_decision_date+case_number_overlap,0.98,case overlap: 2022조이0069
+6868,deliberation_decision:01:1,2023-0087,same_decision_date+case_number_overlap,0.98,case overlap: 2021조이0152
+6867,deliberation_decision:01:1,2023-0046,same_decision_date+case_number_overlap,0.98,case overlap: 2021조일0028
+6867,deliberation_decision:02:2,2023-0047,same_decision_date+case_number_overlap,0.98,case overlap: 2022조일0059
+6863,deliberation_decision:01:1,2023-0012,same_decision_date+case_number_overlap,0.98,case overlap: 2022조이0058
+6855,deliberation_decision:01:1,2022-0556,same_decision_date+case_number_overlap,0.98,case overlap: 2021조이0087
+6855,deliberation_decision:02:2,2022-0589,same_decision_date+case_number_overlap,0.98,case overlap: 2021조일0036
+6853,deliberation_decision:02:2,2022-0537,same_decision_date+case_number_overlap,0.98,case overlap: 2021조이0080
+6841,deliberation_decision:01:1,2022-0479,same_decision_date+case_number_overlap,0.98,case overlap: 2021조일0028
+6841,deliberation_decision:02:2,2023-0026,same_decision_date+case_number_overlap,0.98,case overlap: 2021조총0048
+6834,deliberation_decision:01:1,2022-0493,same_decision_date+case_number_overlap,0.98,case overlap: 2021조총0029
+6834,deliberation_decision:02:2,2022-0312,same_decision_date+case_number_overlap,0.98,case overlap: 2022조일0041
+6834,deliberation_decision:03:3,2022-0313,same_decision_date+case_number_overlap,0.98,case overlap: 2022조삼0001
+6831,deliberation_decision:05:5,2022-0290,same_decision_date+case_number_overlap,0.98,case overlap: 2021조이0162
+6828,deliberation_decision:01:1,2022-0268,same_decision_date+case_number_overlap,0.98,case overlap: 2022조총0001
+6828,deliberation_decision:02:2,2022-0266,same_decision_date+case_number_overlap,0.98,case overlap: 2021조일0069
+6821,deliberation_decision:01:1,2022-0227,same_decision_date+case_number_overlap,0.98,case overlap: 2020조총0044
+6818,deliberation_decision:01:1,2022-0188,same_decision_date+case_number_overlap,0.98,case overlap: 2020조이0024
+6815,deliberation_decision:01:3,2022-0165,same_decision_date+title_similarity,0.82,title/date candidate
+6815,deliberation_decision:02:4,2022-0164,same_decision_date+case_number_overlap,0.98,case overlap: 2020조이0020
+6815,deliberation_decision:03:5,2022-0161,same_decision_date+case_number_overlap,0.98,case overlap: 2021조총0080
+6813,deliberation_decision:01:1,2022-0134,same_decision_date+case_number_overlap,0.98,case overlap: 2021조일0101
+6813,deliberation_decision:02:2,2022-0135,same_decision_date+case_number_overlap,0.98,case overlap: 2021조일0144
+6809,deliberation_decision:01:1,2022-0122,same_decision_date+case_number_overlap,0.98,case overlap: 2019조일0006
+6809,deliberation_decision:02:2,2022-0123,same_decision_date+case_number_overlap,0.98,case overlap: 2021조일0063
+6804,deliberation_decision:01:1,2022-0078,same_decision_date+case_number_overlap,0.98,case overlap: 2021조일0040
+6804,deliberation_decision:02:2,2022-0079,same_decision_date+case_number_overlap,0.98,case overlap: 2021조이0152
+6801,deliberation_decision:01:1,2022-0058,same_decision_date+case_number_overlap,0.98,case overlap: 2020조이0007
+6798,deliberation_decision:01:1,2022-0035,same_decision_date+case_number_overlap,0.98,case overlap: 2020조이0037
+6796,deliberation_decision:01:1,2022-0026,same_decision_date+case_number_overlap,0.98,case overlap: 2021조이0185
+6789,deliberation_decision:01:1,2021-0691,same_decision_date+case_number_overlap,0.98,case overlap: 2020조일0029
+6789,deliberation_decision:02:2,2021-0692,same_decision_date+case_number_overlap,0.98,case overlap: 2021조일0031
+6785,deliberation_decision:01:1,2021-0655,same_decision_date+case_number_overlap,0.98,case overlap: 2021조일0100
+6785,deliberation_decision:02:2,2021-0656,same_decision_date+case_number_overlap,0.98,case overlap: 2021조일0114
+6785,deliberation_decision:02:2,2021-0657,same_decision_date+title_similarity,0.82,title/date candidate
+6785,deliberation_decision:03:3,2021-0656,same_decision_date+title_similarity,0.82,title/date candidate
+6785,deliberation_decision:03:3,2021-0657,same_decision_date+case_number_overlap,0.98,case overlap: 2021조이0161
+6784,deliberation_decision:02:2,2021-0637,same_decision_date+case_number_overlap,0.98,case overlap: 2021조이0061
+6781,deliberation_decision:01:1,2021-0615,same_decision_date+case_number_overlap,0.98,case overlap: 2021조일0054
+6781,deliberation_decision:02:2,2021-0616,same_decision_date+case_number_overlap,0.98,case overlap: 2021조이0099
+6774,deliberation_decision:02:3,2021-0532,same_decision_date+case_number_overlap,0.98,case overlap: 2021조이0038
+6771,deliberation_decision:01:1,2021-0493,same_decision_date+case_number_overlap,0.98,"case overlap: 2021조총0002, 2021조총0003, 2021조총0004, 2021조총0005, 2021조총0006, 2021조총0007, 2021조총0008, 2021조총0009, 2021조총0010, 2021조총0011, 2021조총0012, 2021조총0013"
+6768,deliberation_decision:01:1,2021-0482,same_decision_date+case_number_overlap,0.98,case overlap: 2021조일0033
+6765,deliberation_decision:02:2,2021-0416,same_decision_date+case_number_overlap,0.98,case overlap: 2021조일0045
+6761,deliberation_decision:01:1,2021-0394,same_decision_date+case_number_overlap,0.98,case overlap: 2021조이0055
+6752,deliberation_decision:01:1,2021-0303,same_decision_date+case_number_overlap,0.98,case overlap: 2020조이0002
+6749,deliberation_decision:01:1,2021-0275,same_decision_date+case_number_overlap,0.98,case overlap: 2020조일0001
+6746,deliberation_decision:01:1,2021-0257,same_decision_date+case_number_overlap,0.98,case overlap: 2021조이0013
+6743,deliberation_decision:02:2,2021-0233,same_decision_date+title_similarity,0.82,title/date candidate
+6731,deliberation_decision:02:2,2021-0084,same_decision_date+case_number_overlap,0.98,"case overlap: 2020조총0006, 2020조총0007, 2020조총0008, 2020조총0009, 2020조총0010, 2020조총0011, 2020조총0012, 2020조총0013, 2020조총0014, 2020조총0015, 2020조총0016, 2020조총0017, 2020조총0018, 2020조총0019, 2020조총0020, 2020조총0021, 2020조총0022, 2020조총0023, 2020조총0024, 2020조총0025, 2020조총0026, 2020조총0027, 2020조총0028, 2020조총0029, 2020조총0030, 2020조총0031, 2020조총0032, 2020조총0033, 2020조총0034, 2020조총0035"
+6731,deliberation_decision:05:5,2021-0087,same_decision_date+title_similarity,0.82,title/date candidate
+6722,deliberation_decision:01:1,2021-0038,same_decision_date+case_number_overlap,0.98,"case overlap: 2020조이0025, 2020조이0026, 2020조이0027, 2020조이0028"

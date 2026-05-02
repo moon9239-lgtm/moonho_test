@@ -1,0 +1,200 @@
+﻿[
+    {
+        "id":  "song_kyunghee",
+        "name":  "송경희",
+        "status":  "official",
+        "local_file":  "originals/song_kyunghee.png",
+        "source_page":  "https://www.privacy.go.kr/front/contents/cntntsView.do?contsNo=255",
+        "source_image":  "https://www.privacy.go.kr/assets/img/sub/in031_01.png",
+        "notes":  "개인정보 포털 위원 소개 공식 사진"
+    },
+    {
+        "id":  "lee_jungryul",
+        "name":  "이정렬",
+        "status":  "official",
+        "local_file":  "originals/lee_jungryul.png",
+        "source_page":  "https://www.privacy.go.kr/front/contents/cntntsView.do?contsNo=255",
+        "source_image":  "https://www.privacy.go.kr/assets/img/sub/in031_02.png",
+        "notes":  "개인정보 포털 위원 소개 공식 사진"
+    },
+    {
+        "id":  "kim_ilwhan",
+        "name":  "김일환",
+        "status":  "official",
+        "local_file":  "originals/kim_ilwhan.png",
+        "source_page":  "https://www.privacy.go.kr/front/contents/cntntsView.do?contsNo=255",
+        "source_image":  "https://www.privacy.go.kr/assets/img/sub/in031_03.png",
+        "notes":  "개인정보 포털 위원 소개 공식 사진"
+    },
+    {
+        "id":  "kim_jinwook",
+        "name":  "김진욱",
+        "status":  "official",
+        "local_file":  "originals/kim_jinwook.png",
+        "source_page":  "https://www.privacy.go.kr/front/contents/cntntsView.do?contsNo=255",
+        "source_image":  "https://www.privacy.go.kr/assets/img/sub/in031_04.png",
+        "notes":  "개인정보 포털 위원 소개 공식 사진"
+    },
+    {
+        "id":  "kim_jinhwan",
+        "name":  "김진환",
+        "status":  "official",
+        "local_file":  "originals/kim_jinhwan.png",
+        "source_page":  "https://www.privacy.go.kr/front/contents/cntntsView.do?contsNo=255",
+        "source_image":  "https://www.privacy.go.kr/assets/img/sub/in031_05.png",
+        "notes":  "개인정보 포털 위원 소개 공식 사진"
+    },
+    {
+        "id":  "kim_hwigang",
+        "name":  "김휘강",
+        "status":  "official",
+        "local_file":  "originals/kim_hwigang.png",
+        "source_page":  "https://www.privacy.go.kr/front/contents/cntntsView.do?contsNo=255",
+        "source_image":  "https://www.privacy.go.kr/assets/img/sub/in031_10.png",
+        "notes":  "개인정보 포털 위원 소개 공식 사진"
+    },
+    {
+        "id":  "park_sanghee",
+        "name":  "박상희",
+        "status":  "official",
+        "local_file":  "originals/park_sanghee.png",
+        "source_page":  "https://www.privacy.go.kr/front/contents/cntntsView.do?contsNo=255",
+        "source_image":  "https://www.privacy.go.kr/assets/img/sub/in031_06.png",
+        "notes":  "개인정보 포털 위원 소개 공식 사진"
+    },
+    {
+        "id":  "yoon_youngmi",
+        "name":  "윤영미",
+        "status":  "official",
+        "local_file":  "originals/yoon_youngmi.png",
+        "source_page":  "https://www.privacy.go.kr/front/contents/cntntsView.do?contsNo=255",
+        "source_image":  "https://www.privacy.go.kr/assets/img/sub/in031_07.png",
+        "notes":  "개인정보 포털 위원 소개 공식 사진"
+    },
+    {
+        "id":  "lee_munhan",
+        "name":  "이문한",
+        "status":  "official",
+        "local_file":  "originals/lee_munhan.png",
+        "source_page":  "https://www.privacy.go.kr/front/contents/cntntsView.do?contsNo=255",
+        "source_image":  "https://www.privacy.go.kr/assets/img/sub/in031_11.png",
+        "notes":  "개인정보 포털 위원 소개 공식 사진"
+    },
+    {
+        "id":  "go_haksu",
+        "name":  "고학수",
+        "status":  "user_selected_media_candidate",
+        "local_file":  "originals/go_haksu_user_selected.png",
+        "source_page":  "https://www.pipc.go.kr/np/default/page.do?mCode=F010040020",
+        "source_image":  "https://www.pipc.go.kr/np/resources/images/sub/face11.png",
+        "notes":  "사용자가 프로필용으로 교체 지정. PIPC 위원장 프로필 이미지"
+    },
+    {
+        "id":  "yoon_jongin",
+        "name":  "윤종인",
+        "status":  "official",
+        "local_file":  "originals/yoon_jongin.png",
+        "source_page":  "https://www.pipc.go.kr/np/default/page.do?mCode=F010040040",
+        "source_image":  "https://www.pipc.go.kr/np/resources/images/content/chair/CHAIR_01.png",
+        "notes":  "PIPC 역대 위원장 공식 사진. 원본 해상도 낮음"
+    },
+    {
+        "id":  "choi_youngjin",
+        "name":  "최영진",
+        "status":  "official",
+        "local_file":  "originals/choi_youngjin.png",
+        "source_page":  "https://www.pipc.go.kr/np/default/page.do?mCode=F010050020",
+        "source_image":  "https://www.pipc.go.kr/np/resources/images/content/vice/vice1.png",
+        "notes":  "PIPC 역대 부위원장 공식 사진"
+    },
+    {
+        "id":  "choi_janghyuk",
+        "name":  "최장혁",
+        "status":  "official",
+        "local_file":  "originals/choi_janghyuk.png",
+        "source_page":  "https://www.pipc.go.kr/np/default/page.do?mCode=F010050020",
+        "source_image":  "https://www.pipc.go.kr/np/resources/images/sub/profile2.png",
+        "notes":  "PIPC 역대 부위원장 공식 사진"
+    },
+    {
+        "id":  "kang_junghwa",
+        "name":  "강정화",
+        "status":  "user_selected_media_candidate",
+        "local_file":  "originals/kang_junghwa_user_selected.jpg",
+        "source_page":  "https://www.etnews.com/20200805000138",
+        "source_image":  "https://img.etnews.com/photonews/2008/1325989_20200805115230_520_0001.jpg",
+        "notes":  "사용자 지정 사진으로 교체. 현재 파일은 공개 합성사진에서 강정화 영역을 추출한 프로필용 참조"
+    },
+    {
+        "id":  "baek_daeyong",
+        "name":  "백대용",
+        "status":  "media_candidate_needs_verification",
+        "local_file":  "originals/baek_daeyong_media_candidate.jpg",
+        "source_page":  "https://www.etoday.co.kr/news/section/newsview_photo?idxno=1984261\u0026seq=1",
+        "source_image":  "https://img.etoday.co.kr/pto_db/2021/01/20210114115722_1568855_1200_1546.jpg",
+        "notes":  "검색 결과 제목이 \u0027[이슈\u0026인물] 백대용 소비자시민모임\u0027. 공개용 사용 전 권리 확인 필요"
+    },
+    {
+        "id":  "go_sunghak",
+        "name":  "고성학",
+        "status":  "media_candidate_needs_verification",
+        "local_file":  "originals/go_sunghak_media_candidate.jpg",
+        "source_page":  "https://v.daum.net/v/20250331181002709",
+        "source_image":  "https://t1.daumcdn.net/news/202503/31/etimesi/20250331181004283cboy.jpg",
+        "notes":  "검색 결과 제목이 \u0027개인정보보호협회(OPA) 고성학 상근부회장 취임\u0027. 공개용 사용 전 권리 확인 필요"
+    },
+    {
+        "id":  "yeom_heungyeol",
+        "name":  "염흥렬",
+        "status":  "user_selected_media_candidate",
+        "local_file":  "originals/yeom_heungyeol_media_candidate.jpg",
+        "source_page":  "https://zdnet.co.kr/view/?no=20230225155534",
+        "source_image":  "https://image.zdnet.co.kr/2023/02/25/e8a9bf9986ce6e90056faa71655319b7.jpg",
+        "notes":  "사용자 지정 이미지로 교체"
+    },
+    {
+        "id":  "ji_sungwoo",
+        "name":  "지성우",
+        "status":  "user_selected_media_candidate",
+        "local_file":  "originals/ji_sungwoo_user_selected_ajunews.jpg",
+        "source_page":  "https://www.ajunews.com/view/20171130111813169",
+        "source_image":  "https://image.ajunews.com/content/image/2017/11/30/20171130152922388328.jpg",
+        "notes":  "사용자가 프로필용으로 교체 지정. 아주경제 후보"
+    },
+    {
+        "id":  "jo_soyoung",
+        "name":  "조소영",
+        "status":  "user_selected_official",
+        "local_file":  "originals/jo_soyoung_user_selected.png",
+        "source_page":  "https://www.privacy.go.kr/front/contents/cntntsView.do?contsNo=255",
+        "source_image":  "https://www.privacy.go.kr/assets/img/sub/in031_08.png",
+        "notes":  "사용자가 프로필용으로 교체 지정. 개인정보 포털 위원 소개 공식 사진"
+    },
+    {
+        "id":  "lee_heejung",
+        "name":  "이희정",
+        "status":  "user_confirmed_media_candidate",
+        "local_file":  "originals/lee_heejung_user_confirmed.jpg",
+        "source_page":  "https://www.lec.co.kr/news/articleView.html?idxno=751198",
+        "source_image":  "https://www.lec.co.kr/news/photo/202512/751198_94178_2050.jpg",
+        "notes":  "사용자가 채팅에서 이희정 사진이라고 확인. 법률저널 기사 이미지로 저장. 공개용 사용 전 권리 확인 필요"
+    },
+    {
+        "id":  "seo_jongsik",
+        "name":  "서종식",
+        "status":  "user_confirmed_media_candidate",
+        "local_file":  "originals/seo_jongsik_media_candidate.gif",
+        "source_page":  "https://www.gynet.co.kr/news/articleView.html?idxno=28740",
+        "source_image":  "https://www.gynet.co.kr/news/photo/201501/28740_22811_4416.gif",
+        "notes":  "사용자가 채팅에서 서종식 사진이라고 확인. 광양뉴스 기사 이미지로 저장. 공개용 사용 전 권리 확인 필요"
+    },
+    {
+        "id":  "initial_20200805_group",
+        "name":  "1기 위원 단체사진",
+        "status":  "group_fallback",
+        "local_file":  "originals/initial_20200805_commissioners_group_zdnet.png",
+        "source_page":  "https://zdnet.co.kr/view/?no=20200805113524",
+        "source_image":  "https://image.zdnet.co.kr/2020/08/05/94baf24956dfce6ca6a11080fae9cd53.png",
+        "notes":  "개인정보보호위원회 초대 위원 7명 위촉 기사 이미지. 1기 비상임위원 개별 사진이 부족할 때 위치/외형 확인용 fallback"
+    }
+]

@@ -1,0 +1,10 @@
+{
+  "devDependencies": {
+    "kordoc": "^2.5.2",
+    "korean-law-mcp": "^3.5.4"
+  },
+  "dependencies": {
+    "@napi-rs/canvas": "^0.1.100",
+    "tesseract.js": "^7.0.0"
+  }
+}

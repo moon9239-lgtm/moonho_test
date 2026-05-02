@@ -1,0 +1,2 @@
+meeting_id,meeting_date,agenda_no,agenda_title,decision_id,decision_title,match_basis,confidence
+7071,2026-03-25,1,"개인정보보호 법규 위반행위에 대한 시정조치에 관한 건(2023조총0042, 2024조총0025)",2026-0204,"공공기관의 개인정보보호 법규 위반행위에 대한 시정조치에 관한 건(2023조총0042, 2024조총0025)","same_date;case_numbers;title_similarity",high

@@ -1,0 +1,357 @@
+normalized_law_name,article_raw,law_name_resolution_method,normalization_status,citation_count,decision_case_count,basis_date_count,selected_date_count,raw_law_names
+개인정보 보호법,제30조제1항제2호,normalized_alias,candidate,3,3,1,1,개인정보 보호법
+개인정보 보호법,제30조제1항제4호,normalized_alias,candidate,3,3,1,1,개인정보 보호법
+개인정보 보호법,제31조의2,inferred_default_pipa,candidate,3,3,3,3,
+표준 개인정보 보호지침,제34조제1항,source_text,needs_admin_rule_pass,3,3,3,3,표준 개인정보 보호지침
+중소기업기본법,제35조제3항,source_text,candidate,3,3,1,1,중소기업기본법
+개인정보 보호법,제37조,inferred_default_pipa,candidate,3,3,3,3,
+개인정보 보호법,제39조의12제2항,inferred_default_pipa,candidate,3,3,1,1,
+개인정보 보호법,제39조의15제1항제6호,inferred_default_pipa,candidate,3,3,3,3,
+개인정보 보호법,제3조제3항,inferred_default_pipa,candidate,3,3,3,3,
+개인정보 보호법,제3조제4항,inferred_default_pipa,candidate,3,3,3,3,
+개인정보 보호법,제3조제6항,inferred_default_pipa,candidate,3,3,3,3,
+개인정보 보호법,제48조의11제4항,inferred_default_pipa,candidate,3,3,3,3,
+개인정보 보호법,제48조의4,inferred_default_pipa,candidate,3,3,3,3,
+개인정보 보호법 위반에 대한 공표 및 공표명령 지침,제5조,source_text,needs_admin_rule_pass,3,3,1,1,개인정보 보호법 위반에 대한 공표 및 공표명령 지침
+개인정보 보호법 위반에 대한 공표 및 공표명령 지침(2023.10.11. 시행),제5조,source_text,needs_admin_rule_pass,3,3,1,1,개인정보 보호법 위반에 대한 공표 및 공표명령 지침(2023.10.11. 시행)
+舊 개인정보 보호법 위반에 대한 과태료 부과기준,제63조,source_text,needs_admin_rule_pass,3,3,2,2,舊 개인정보 보호법 위반에 대한 과태료 부과기준
+개인정보 보호법,제63조의2제1항,inferred_default_pipa,candidate,3,3,3,3,
+개인정보 보호법,제63조의2제3항,inferred_default_pipa,candidate,3,3,3,3,
+개인정보 보호법,제64조의3제1항제1호,inferred_default_pipa,candidate,3,3,2,2,
+개인정보 보호법,제6조제1항제1호,inferred_default_pipa,candidate,3,3,3,3,
+개인정보 보호법,제6조제1항제2호,inferred_default_pipa,candidate,3,3,3,3,
+개인정보 보호법,제75조제1항제1호,inferred_default_pipa,candidate,3,3,2,2,
+개인정보 보호법,제75조제2항제10호,inferred_default_pipa,candidate,3,3,1,1,
+개인정보 보호법,제75조제2항제17호,inferred_default_pipa,candidate,3,3,3,3,
+개인정보 보호법,제75조제2항제2호,inferred_default_pipa,candidate,3,3,3,3,
+개인정보 보호법,제75조제4항제5호,inferred_default_pipa,candidate,3,3,3,3,
+개인정보 보호법,제75조제5항,inferred_default_pipa,candidate,3,3,2,2,
+중소기업기본법,제7조,source_text,candidate,3,3,3,3,중소기업기본법
+개인정보 보호법,제8조제2항제2호,inferred_default_pipa,candidate,3,3,3,3,
+개인정보 보호법,제11조제2항,inferred_default_pipa,candidate,2,2,2,2,
+개인정보 보호법,제11조제6항,inferred_default_pipa,candidate,2,2,2,2,
+개인정보 보호법,제13조,inferred_default_pipa,candidate,2,2,2,2,
+개인정보 보호법,제14조,inferred_default_pipa,candidate,2,2,2,2,
+개인정보 보호법,제15조제1항제7호,inferred_default_pipa,candidate,2,2,1,1,
+개인정보 보호법,제15조제2항제5호,inferred_default_pipa,candidate,2,2,2,2,
+개인정보 보호법,제16조제1항,inferred_default_pipa,candidate,2,2,2,2,
+개인정보 보호법 및 시행령 개정사항 안내서(2023. 12. 29.),제17조,source_text,skip_non_law_reference,2,2,1,1,개인정보 보호법 및 시행령 개정사항 안내서(2023. 12. 29.)
+개인정보 보호법,제17조제3항,inferred_default_pipa,candidate,2,2,2,2,
+개인정보 보호법 및 시행령 개정사항 안내서(2023. 12. 29.),제18조,source_text,skip_non_law_reference,2,2,1,1,개인정보 보호법 및 시행령 개정사항 안내서(2023. 12. 29.)
+질서위반행위규제법,제19조제1항,source_text,candidate,2,2,1,1,질서위반행위규제법
+개인정보 보호법,제21조,normalized_alias,candidate,2,2,2,2,개인정보 보호법
+개인정보 보호법,제21조제1항,normalized_alias,candidate,2,2,2,2,개인정보 보호법
+개인정보 보호법,제22조의2,inferred_default_pipa,candidate,2,2,2,2,
+개인정보 보호법,제22조의2제1항,inferred_default_pipa,candidate,2,2,2,2,
+정보통신망 이용촉진 및 정보보호 등에 관한 법률,제22조제1항,source_text,candidate,2,2,1,1,舊정보통신망 이용촉진 및 정보보호 등에 관한 법률
+개인정보 보호법,제22조제1항제7호,inferred_default_pipa,candidate,2,2,1,1,
+개인정보 보호법,제22조제3항,inferred_default_pipa,candidate,2,2,2,2,
+개인정보 보호법,제23조의2제1항,inferred_default_pipa,candidate,2,2,2,2,
+개인정보 보호법,제23조제1항,normalized_alias,candidate,2,1,1,1,개인정보보호법; 개인정보 보호법
+개인정보 보호법,제26조제1항제3호,inferred_default_pipa,candidate,2,2,2,2,
+개인정보 보호법,제27조제1항,inferred_default_pipa,candidate,2,2,2,2,
+개인정보 보호법,제27조제2항,inferred_default_pipa,candidate,2,2,2,2,
+개인정보 보호법,제28조의4제2항,inferred_default_pipa,candidate,2,2,1,1,
+개인정보보호 법규 위반에 대한 과징금 부과기준,제28조의8제1항,source_text,needs_admin_rule_pass,2,2,2,2,개인정보보호 법규 위반에 대한 과징금 부과기준
+개인정보 보호법,제28조의8제1항,normalized_alias,candidate,2,2,1,1,개인정보 보호법
+개인정보 보호법 및 시행령 개정사항 안내서(2023. 12. 29.),제28조의8제1항제1호,source_text,skip_non_law_reference,2,2,1,1,개인정보 보호법 및 시행령 개정사항 안내서(2023. 12. 29.)
+개인정보 보호법,제28조의8제1항제1호,inferred_default_pipa,candidate,2,2,1,1,
+개인정보보호 법규 위반에 대한 과징금 부과기준4),제29조,source_text,needs_admin_rule_pass,2,2,2,2,개인정보보호 법규 위반에 대한 과징금 부과기준4)
+개인정보 보호법,제29조의5제2항,inferred_default_pipa,candidate,2,2,1,1,
+정보통신망 이용촉진 및 정보보호 등에 관한 법률,제2조제1항제1호,source_text,candidate,2,2,2,2,정보통신망 이용촉진 및 정보보호 등에 관한 법률
+개인정보 보호법,제30조제1항제8호,inferred_default_pipa,candidate,2,2,2,2,
+개인정보 보호법,제31조제1항,inferred_default_pipa,candidate,2,2,2,2,
+개인정보 보호법,제32조제1항,inferred_default_pipa,candidate,2,2,2,2,
+개인정보 보호법,제34조,normalized_alias,candidate,2,2,2,2,개인정보 보호법
+개인정보 보호법,제35조의2,inferred_default_pipa,candidate,2,2,2,2,
+개인정보 보호법,제37조의2,inferred_default_pipa,candidate,2,2,2,2,
+개인정보 보호법,제38조제1항,inferred_default_pipa,candidate,2,2,2,2,
+개인정보 보호법,제39조,inferred_default_pipa,candidate,2,2,2,2,
+개인정보 보호법,제39조의15제2항,inferred_default_pipa,candidate,2,2,2,2,
+개인정보 보호법,제39조의2,inferred_default_pipa,candidate,2,2,2,2,
+개인정보 보호법,제39조의3제3항,inferred_default_pipa,candidate,2,2,2,2,
+중소기업기본법,제39조의4,source_text,candidate,2,2,2,2,중소기업기본법
+개인정보 보호법 위반에 대한 공표 및 공표명령 지침,제3조제1항제3호,source_text,needs_admin_rule_pass,2,2,2,2,개인정보 보호법 위반에 대한 공표 및 공표명령 지침
+개인정보 보호 법규 위반에 대한 징계권고 기준,제3조제1항제4호,source_text,candidate,2,2,2,2,개인정보 보호 법규 위반에 대한 징계권고 기준
+개인정보 보호법,제3조제8항,inferred_default_pipa,candidate,2,2,2,2,
+"주민등록번호 유출 등에 대한 과징금 부과기준(고시 제2022-4호, 2022.10.20., 이하 ‘舊과징금 부과기준’)",제40조의2,source_text,needs_admin_rule_pass,2,2,1,1,"주민등록번호 유출 등에 대한 과징금 부과기준(고시 제2022-4호, 2022.10.20., 이하 ‘舊과징금 부과기준’)"
+근로기준법,제42조,source_text,candidate,2,2,2,2,근로기준법
+개인정보 보호법,제47조제2항,inferred_default_pipa,candidate,2,2,2,2,
+개인정보 보호법,제48조의4제3항,inferred_default_pipa,candidate,2,2,2,2,
+개인정보 보호법,제4조제1호,inferred_default_pipa,candidate,2,2,2,2,
+개인정보 보호법,제4조제3항제1호,inferred_default_pipa,candidate,2,2,2,2,
+개인정보 보호법,제58조제1항,inferred_default_pipa,candidate,2,2,1,1,
+개인정보 보호법,제58조제1항제3호,inferred_default_pipa,candidate,2,2,1,1,
+개인정보 보호법,제5조제3항,normalized_alias,candidate,2,2,1,1,개인정보 보호법
+개인정보 보호법,제60조,inferred_default_pipa,candidate,2,2,2,2,
+"개인정보 보호법 위반에 대한 과태료 부과기준(개인정보위 지침, ’23.9.15.시행)",제63조,source_text,needs_admin_rule_pass,2,2,2,2,"개인정보 보호법 위반에 대한 과태료 부과기준(개인정보위 지침, ’23.9.15.시행)"
+개인정보 보호법,제63조제1항,normalized_alias,candidate,2,2,1,1,개인정보 보호법
+개인정보 보호법,제64조,normalized_alias,candidate,2,2,2,2,개인정보 보호법
+개인정보 보호법 위반에 대한 과징금 부과기준,제64조의2제1항,source_text,needs_admin_rule_pass,2,2,2,2,개인정보 보호법 위반에 대한 과징금 부과기준
+개인정보보호 법규 위반에 대한 과징금 부과기준4),제64조의2제1항,source_text,needs_admin_rule_pass,2,2,2,2,개인정보보호 법규 위반에 대한 과징금 부과기준4)
+개인정보 보호법,제64조의2제1항제1호,inferred_default_pipa,candidate,2,2,2,2,
+개인정보 보호법,제66조,normalized_alias,candidate,2,2,2,2,개인정보 보호법
+개인정보 보호법 위반에 대한 공표 및 공표명령 지침,제6조제1항제2호,source_text,needs_admin_rule_pass,2,2,1,1,개인정보 보호법 위반에 대한 공표 및 공표명령 지침
+개인정보 보호법,제75조제4항,inferred_default_pipa,candidate,2,2,1,1,
+개인정보 보호법,제75조제4항제1호,inferred_default_pipa,candidate,2,2,2,2,
+개인정보 보호법,제76조제1항제2호,inferred_default_pipa,candidate,2,2,1,1,
+舊 개인정보보호법 위반에 대한 과태료 부과기준,제8조,source_text,needs_admin_rule_pass,2,2,1,1,舊 개인정보보호법 위반에 대한 과태료 부과기준
+개인정보 보호법,제8조제2항,normalized_alias,candidate,2,2,1,1,개인정보 보호법
+전기통신사업법,제8조제2항,source_text,candidate,2,2,1,1,전기통신사업법
+개인정보 보호법 위반에 대한 공표 및 공표명령 지침,제11조,source_text,needs_admin_rule_pass,1,1,1,1,개인정보 보호법 위반에 대한 공표 및 공표명령 지침
+소득세법,제127조,source_text,candidate,1,1,1,1,소득세법
+산업안전보건법,제129조,source_text,candidate,1,1,1,1,산업안전보건법
+개인정보 보호법,제12조의2,inferred_default_pipa,candidate,1,1,1,1,
+출입국관리법,제12조의2,source_text,candidate,1,1,1,1,출입국관리법
+개인정보 보호법,제12조의2제1항,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제12조제2항,inferred_default_pipa,candidate,1,1,1,1,
+여신전문금융업법,제14조의2,source_text,candidate,1,1,1,1,여신전문금융업법
+개인정보 보호법,제15조,normalized_alias,candidate,1,1,1,1,개인정보 보호법
+학원의 설립․운영 및 과외교습에 관한 법률,제15조의5제2항,source_text,candidate,1,1,1,1,학원의 설립․운영 및 과외교습에 관한 법률
+중소기업기본법,제15조제1항,source_text,candidate,1,1,1,1,중소기업기본법
+개인정보 보호법,제15조제1항제4호,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제15조제1항제5호,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제15조제1항제6호,inferred_default_pipa,candidate,1,1,1,1,
+중소기업기본법,제15조제2항,source_text,candidate,1,1,1,1,중소기업기본법
+개인정보 보호법,제15조제2항제2호,inferred_default_pipa,candidate,1,1,1,1,
+여신전문금융업법,제16조의2,source_text,candidate,1,1,1,1,여신전문금융업법
+학원의 설립․운영 및 과외교습에 관한 법률,제17조의4,source_text,candidate,1,1,1,1,학원의 설립․운영 및 과외교습에 관한 법률
+개인정보 보호법,제17조제1항제1호,inferred_default_pipa,candidate,1,1,1,1,
+청소년 보호법,제17조제1항제1호,source_text,candidate,1,1,1,1,청소년 보호법
+개인정보 보호법,제17조제1항제4호,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제18조,normalized_alias,candidate,1,1,1,1,개인정보 보호법
+개인정보 보호법,제18조제2항,normalized_alias,candidate,1,1,1,1,개인정보 보호법
+학점인정 등에 관한 법률 시행령,제19조의2,source_text,candidate,1,1,1,1,학점인정 등에 관한 법률 시행령
+개인정보 보호법,제20조,normalized_alias,candidate,1,1,1,1,개인정보 보호법
+개인정보 보호법,제20조의2,inferred_default_pipa,candidate,1,1,1,1,
+질서위반행위규제법,제20조제1항,source_text,candidate,1,1,1,1,질서위반행위규제법
+의료법,제21조,source_text,candidate,1,1,1,1,의료법
+소득세법,제21조,source_text,candidate,1,1,1,1,소득세법
+개인정보 보호법,제21조의2,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제21조의2제1항,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제21조의2제3항,inferred_default_pipa,candidate,1,1,1,1,
+근로기준법,제21조제1항,source_text,candidate,1,1,1,1,근로기준법
+의료법,제21조제2항,source_text,candidate,1,1,1,1,의료법
+중소기업기본법,제21조제3항,source_text,candidate,1,1,1,1,중소기업기본법
+장애인등에 대한 특수교육법,제22조,source_text,candidate,1,1,1,1,장애인등에 대한 특수교육법
+의료법,제22조,source_text,candidate,1,1,1,1,의료법
+의료법,제22조제1항,source_text,candidate,1,1,1,1,의료법
+중소기업기본법,제22조제5항,source_text,candidate,1,1,1,1,중소기업기본법
+舊 개인정보보호 법규 위반에 대한 과징금 부과기준,제22조제6항,source_text,needs_admin_rule_pass,1,1,1,1,舊 개인정보보호 법규 위반에 대한 과징금 부과기준
+개인정보 보호법,제235조,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제23조의2,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제23조의3,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제23조제1항제2호,normalized_alias,candidate,1,1,1,1,개인정보 보호법
+의료법,제23조제1항제2호,source_text,candidate,1,1,1,1,의료법
+개인정보 보호법,제23조제1항제2호,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제24조,normalized_alias,candidate,1,1,1,1,개인정보 보호법
+개인정보 보호법,제24조의2,normalized_alias,candidate,1,1,1,1,개인정보 보호법
+개인정보 보호법,제24조의2제2항,normalized_alias,candidate,1,1,1,1,개인정보 보호법
+중소기업기본법,제24조의2제2항,source_text,candidate,1,1,1,1,중소기업기본법
+개인정보 보호법,제24조의2제3항,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호 법규 위반에 대한 징계권고 기준,제24조제1항,source_text,candidate,1,1,1,1,개인정보 보호 법규 위반에 대한 징계권고 기준
+개인정보 보호법,제24조제1항제2호,inferred_default_pipa,candidate,1,1,1,1,
+중소기업기본법,제24조제3항,source_text,candidate,1,1,1,1,중소기업기본법
+개인정보 보호법,제24조제3항,normalized_alias,candidate,1,1,1,1,개인정보 보호법
+개인정보 보호법 위반에 대한 과징금 부과기준,제24조제3항,source_text,needs_admin_rule_pass,1,1,1,1,개인정보 보호법 위반에 대한 과징금 부과기준
+초·중등교육법,제25조의2,source_text,candidate,1,1,1,1,초·중등교육법
+개인정보 보호법,제25조제1항,normalized_alias,candidate,1,1,1,1,개인정보 보호법
+국세기본법,제26조의2제1항,source_text,candidate,1,1,1,1,국세기본법
+개인정보 보호법,제26조제5항,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제27조,normalized_alias,candidate,1,1,1,1,개인정보 보호법
+개인정보 보호법,제27조의2,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제27조제3항,inferred_default_pipa,candidate,1,1,1,1,
+출입국관리법,제28조,source_text,candidate,1,1,1,1,출입국관리법
+개인정보 보호법,제28조,normalized_alias,candidate,1,1,1,1,개인정보 보호법
+개인정보 보호법,제28조의11,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제28조의2,normalized_alias,candidate,1,1,1,1,개인정보 보호법
+개인정보 보호법,제28조의2제1항,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제28조의3,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제28조의3제1항,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제28조의4,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제28조의5제1항,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제28조의8제1항제1호,normalized_alias,candidate,1,1,1,1,개인정보 보호법
+개인정보 보호법,제28조의8제1항제3호,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제28조의8제4항,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제28조제1항,normalized_alias,candidate,1,1,1,1,개인정보 보호법
+표준 개인정보 보호지침,제28조제1항,source_text,needs_admin_rule_pass,1,1,1,1,표준 개인정보 보호지침
+개인정보 보호법,제28조제1항제6호,inferred_default_pipa,candidate,1,1,1,1,
+청소년 보호법,제28조제4항,source_text,candidate,1,1,1,1,청소년 보호법
+개인정보 보호법 시행령,제29조,source_text,candidate,1,1,1,1,개인정보 보호법 시행령
+개인정보 보호법 위반에 대한 과태료 부과기준,제29조,source_text,needs_admin_rule_pass,1,1,1,1,개인정보 보호법 위반에 대한 과태료 부과기준
+개인정보 보호법,제29조의10제1항제1호,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제29조의10제2항,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제29조의5제1항,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제29조의5제1항제1호,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제29조의7,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법 시행령,제2조,source_text,candidate,1,1,1,1,개인정보 보호법 시행령
+개인정보 보호법,제2조,normalized_alias,candidate,1,1,1,1,개인정보 보호법
+개인정보 보호법 위반에 대한 공표 및 공표명령 지침(’23.10.11. 시행),제2조,source_text,needs_admin_rule_pass,1,1,1,1,개인정보 보호법 위반에 대한 공표 및 공표명령 지침(’23.10.11. 시행)
+중소기업 기본법,제2조,source_text,candidate,1,1,1,1,중소기업 기본법
+중소기업기 본법,제2조,source_text,candidate,1,1,1,1,중소기업기 본법
+질서위반행위규제법 시행령,제2조의2제1항,source_text,candidate,1,1,1,1,질서위반행위규제법 시행령
+개인정보 보호법,제2조제15호,inferred_default_pipa,candidate,1,1,1,1,
+출입국관리법,제2조제15호,source_text,candidate,1,1,1,1,출입국관리법
+개인정보 보호법,제2조제1항,inferred_default_pipa,candidate,1,1,1,1,
+정보통신망 이용 촉진 및 정보보호 등에 관한 법률,제2조제1항제3호,source_text,candidate,1,1,1,1,정보통신망 이용 촉진 및 정보보호 등에 관한 법률
+개인정보 보호법,제2조제1항제6호,inferred_default_pipa,candidate,1,1,1,1,
+전자문서 및 전자거래 기본법,제2조제1호,source_text,candidate,1,1,1,1,전자문서 및 전자거래 기본법
+개인정보 보호법,제2조제22항,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제2조제2호,normalized_alias,candidate,1,1,1,1,개인정보 보호법
+한국연구재단법,제2조제2호,source_text,candidate,1,1,1,1,한국연구재단법
+"<br>으로, 같은 법</td><td>개인정보 보호법",제2조제2호,source_text,candidate,1,1,1,1,"<br>으로, 같은 법</td><td>개인정보 보호법"
+개인정보 보호법,제2조제3호,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제2조제4호,normalized_alias,candidate,1,1,1,1,개인정보 보호법
+청소년 보호법,제2조제4호,source_text,candidate,1,1,1,1,청소년 보호법
+개인정보 보호법,제2조제5항,inferred_default_pipa,candidate,1,1,1,1,
+민법,제2조제5호,source_text,candidate,1,1,1,1,민법
+지방자치법,제2조제5호,source_text,candidate,1,1,1,1,지방자치법
+한국연구재단법,제2조제5호,source_text,candidate,1,1,1,1,한국연구재단법
+| 지방자치법,제2조제5호,source_text,candidate,1,1,1,1,| 지방자치법
+전자서명법,제2조제6호,source_text,candidate,1,1,1,1,전자서명법
+한국연구재단법,제2조제6호,source_text,candidate,1,1,1,1,한국연구재단법
+| 지방자치법,제2조제6호,source_text,candidate,1,1,1,1,| 지방자치법
+개인정보 보호법,제2조제8호,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법 시행령,제30조,source_text,candidate,1,1,1,1,개인정보 보호법 시행령
+개인정보 보호법,제30조,normalized_alias,candidate,1,1,1,1,개인정보 보호법
+개인정보 보호법,제30조의2제1항제3호,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제30조제1항제1호,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제31조의2,normalized_alias,candidate,1,1,1,1,개인정보 보호법
+개인정보 보호법,제31조의2제1항,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제31조의2제3항,normalized_alias,candidate,1,1,1,1,개인정보 보호법
+개인정보 보호법,제31조의2제3항,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제31조제2항,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제31조제3항,inferred_default_pipa,candidate,1,1,1,1,
+민법,제32조,source_text,candidate,1,1,1,1,민법
+개인정보보호 법규 위반에 대한 과징금 부과기준,제32조,source_text,needs_admin_rule_pass,1,1,1,1,개인정보보호 법규 위반에 대한 과징금 부과기준
+개인정보 보호법,제32조제1항,normalized_alias,candidate,1,1,1,1,개인정보 보호법
+개인정보 보호법,제32조제6항,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제33조의2제2항,inferred_default_pipa,candidate,1,1,1,1,
+감염병의 예방 및 관리에 관한 법률,제33조의4,source_text,candidate,1,1,1,1,감염병의 예방 및 관리에 관한 법률
+개인정보 보호법,제33조제1항,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법 위반에 대한 과태료 부과기준,제34조의2,source_text,needs_admin_rule_pass,1,1,1,1,개인정보 보호법 위반에 대한 과태료 부과기준
+개인정보 보호법,제34조제2항,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제35조,normalized_alias,candidate,1,1,1,1,개인정보 보호법
+개인정보 보호법,제35조의2,normalized_alias,candidate,1,1,1,1,개인정보 보호법
+개인정보 보호법,제35조의2제1항,normalized_alias,candidate,1,1,1,1,개인정보 보호법
+의료법,제35조의2제1항,source_text,candidate,1,1,1,1,의료법
+개인정보 보호법,제35조의2제1항,inferred_default_pipa,candidate,1,1,1,1,
+의료법,제35조의2제1항제1호,source_text,candidate,1,1,1,1,의료법
+개인정보 보호법,제35조의2제1항제1호,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제35조의2제1항제2호,inferred_default_pipa,candidate,1,1,1,1,
+지방세기본법,제35조의2제4항,source_text,candidate,1,1,1,1,지방세기본법
+개인정보 보호법,제35조의2제4항,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제35조의2제4항제3호,normalized_alias,candidate,1,1,1,1,개인정보 보호법
+개인정보 보호법,제35조의2제4항제3호,inferred_default_pipa,candidate,1,1,1,1,
+의료법,제35조의2제4항제3호,source_text,candidate,1,1,1,1,의료법
+개인정보 보호법,제35조제3항,normalized_alias,candidate,1,1,1,1,개인정보 보호법
+개인정보 보호법,제35조제4항,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제35조제5항,inferred_default_pipa,candidate,1,1,1,1,
+보안업무규정,제36조,source_text,candidate,1,1,1,1,보안업무규정
+한국장학재단 설립 등에 관한 법률 시행령,제36조의2,source_text,candidate,1,1,1,1,한국장학재단 설립 등에 관한 법률 시행령
+개인정보 보호법,제37조,normalized_alias,candidate,1,1,1,1,개인정보 보호법
+개인정보 보호법,제37조제2항,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제39조의12,inferred_default_pipa,candidate,1,1,1,1,
+舊 개인정보보호 법규 위반에 대한 과징금 부과기준,제39조의15,source_text,needs_admin_rule_pass,1,1,1,1,舊 개인정보보호 법규 위반에 대한 과징금 부과기준
+개인정보 보호법,제39조의15제1항제1호,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제39조의15제4항,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제39조의3제2항제2호,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제39조의4제1항제3호,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제39조의9,inferred_default_pipa,candidate,1,1,1,1,
+출입국관리법,제3조,source_text,candidate,1,1,1,1,출입국관리법
+개인정보 보호법 위반에 대한 공표 및 공표명령 지침(’23.10.11. 시행),제3조,source_text,needs_admin_rule_pass,1,1,1,1,개인정보 보호법 위반에 대한 공표 및 공표명령 지침(’23.10.11. 시행)
+주류의 통신판매에 관한 명령위임 고시(국세청고시 제2023-12호),제3조,source_text,candidate,1,1,1,1,주류의 통신판매에 관한 명령위임 고시(국세청고시 제2023-12호)
+개인정보 보호 법규 위반에 대한 징계권고 기준,제3조제1항제3호,source_text,candidate,1,1,1,1,개인정보 보호 법규 위반에 대한 징계권고 기준
+개인정보 보호법,제3조제1항제6호,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제3조제1항제8호,inferred_default_pipa,candidate,1,1,1,1,
+질서위반행위규제법,제3조제2항,source_text,candidate,1,1,1,1,질서위반행위규제법
+개인정보 보호법,제3조제3항,normalized_alias,candidate,1,1,1,1,개인정보 보호법
+개인정보 보호법,제3조제5항,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제40조제2항,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제41조,normalized_alias,candidate,1,1,1,1,개인정보 보호법
+근로기준법,제41조제1항,source_text,candidate,1,1,1,1,근로기준법
+개인정보 보호법,제41조제2항,inferred_default_pipa,candidate,1,1,1,1,
+고용정책기본법 시행령,제43조의2제1항,source_text,candidate,1,1,1,1,고용정책기본법 시행령
+개인정보 보호법,제46조,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제48조,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제48조의2,normalized_alias,candidate,1,1,1,1,개인정보 보호법
+개인정보 보호법,제48조의2제1항,normalized_alias,candidate,1,1,1,1,개인정보 보호법
+개인정보 보호법,제48조의3,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제48조의4제4항,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제49조의11제1항,inferred_default_pipa,candidate,1,1,1,1,
+민사소송 등에서의 전자문서 이용 등에 관한 법률,제4조,source_text,candidate,1,1,1,1,민사소송 등에서의 전자문서 이용 등에 관한 법률
+개인정보 보호법,제4조제3호,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제4조제4항제5호,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제4조제5항제2호,inferred_default_pipa,candidate,1,1,1,1,
+한국장학재단 설립 등에 관한 법률,제50조의2제10호,source_text,candidate,1,1,1,1,한국장학재단 설립 등에 관한 법률
+개인정보 보호법,제530조,inferred_default_pipa,candidate,1,1,1,1,
+청소년성보호법,제56조,source_text,candidate,1,1,1,1,청소년성보호법
+개인정보 보호법,제59조제1호,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제59조제1호,normalized_alias,candidate,1,1,1,1,개인정보 보호법
+개인정보 보호법,제59조제3호,inferred_default_pipa,candidate,1,1,1,1,
+전기통신사업법,제5조,source_text,candidate,1,1,1,1,전기통신사업법
+생활물류서비스산업발전법,제5조,source_text,candidate,1,1,1,1,생활물류서비스산업발전법
+개인정보 보호법,제5조제1항,normalized_alias,candidate,1,1,1,1,개인정보 보호법
+주류의 통신판매에 관한 명령위임 고시(국세청고시 제2023-12호),제5조제1항제6호,source_text,candidate,1,1,1,1,주류의 통신판매에 관한 명령위임 고시(국세청고시 제2023-12호)
+개인정보보호 법규 위반에 대한 과징금 부과기준,제5조제2항,source_text,needs_admin_rule_pass,1,1,1,1,개인정보보호 법규 위반에 대한 과징금 부과기준
+개인정보의 안전성 확보조치 기준(고시 제2021-2호),제5조제6항,source_text,candidate,1,1,1,1,개인정보의 안전성 확보조치 기준(고시 제2021-2호)
+개인정보 보호법,제60조의2제2항제2호,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제61조제1항,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제61조제2항,normalized_alias,candidate,1,1,1,1,개인정보 보호법
+질서위반행위규제법,제63조,source_text,candidate,1,1,1,1,질서위반행위규제법
+개인정보 보호법,제64조의2제1항제3호,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제64조의2제1항제4호,inferred_default_pipa,candidate,1,1,1,1,
+개인정보보호 법규 위반에 대한 과징금 부과기준,제64조의2제1항제9호,source_text,needs_admin_rule_pass,1,1,1,1,개인정보보호 법규 위반에 대한 과징금 부과기준
+개인정보 보호 법규 위반에 대한 징계권고 기준,제64조의2제1항제9호,source_text,candidate,1,1,1,1,개인정보 보호 법규 위반에 대한 징계권고 기준
+개인정보 보호법,제64조의2제5항제4호,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제64조의2제6항,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제65조제1항,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제65조제2항,normalized_alias,candidate,1,1,1,1,개인정보 보호법
+개인정보 보호법,제69조,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제69조제1항,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제69조제2항,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법 위반에 대한 과태료 부과기준(지침),제6조,source_text,needs_admin_rule_pass,1,1,1,1,개인정보 보호법 위반에 대한 과태료 부과기준(지침)
+개인정보보호법령 및 지침․고시 해설(이하 ‘해설서’),제6조,source_text,candidate,1,1,1,1,개인정보보호법령 및 지침․고시 해설(이하 ‘해설서’)
+출입국관리법,제6조,source_text,candidate,1,1,1,1,출입국관리법
+형의 실효 등에 관한 법률,제6조,source_text,candidate,1,1,1,1,형의 실효 등에 관한 법률
+개인정보의 안전성 확보조치 기준(고시 제2021-2호),제6조,source_text,candidate,1,1,1,1,개인정보의 안전성 확보조치 기준(고시 제2021-2호)
+개인정보 보호법 위반에 대한 공표 및 공표명령 지침(’23.10.11. 시행),제6조,source_text,needs_admin_rule_pass,1,1,1,1,개인정보 보호법 위반에 대한 공표 및 공표명령 지침(’23.10.11. 시행)
+개인정보 보호법 위반에 대한 공표 및 공표명령 지침,제6조제1항제3호,source_text,needs_admin_rule_pass,1,1,1,1,개인정보 보호법 위반에 대한 공표 및 공표명령 지침
+개인정보 보호법,제6조제1항제3호,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제6조제1항제5호,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법 위반에 대한 공표 및 공표명령 지침,제6조제1항제5호,source_text,needs_admin_rule_pass,1,1,1,1,개인정보 보호법 위반에 대한 공표 및 공표명령 지침
+개인정보 보호법,제6조제2항제6호,inferred_default_pipa,candidate,1,1,1,1,
+개인정보의 안전성 확보조치 기준(고시 제2021-2호),제6조제3항,source_text,candidate,1,1,1,1,개인정보의 안전성 확보조치 기준(고시 제2021-2호)
+개인정보 보호법,제6조제3항제1호,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제6조제6항,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제71조제2호,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제73조,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제73조제1항,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제75조제2항제12호,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제75조제2항제25호,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제75조제2항제4호,normalized_alias,candidate,1,1,1,1,개인정보 보호법
+개인정보 보호법,제75조제2항제7호,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제75조제3항,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제75조제4항제6호,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제75조제4항제7호,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법 위반에 대한 과태료 부과기준,제76조,source_text,needs_admin_rule_pass,1,1,1,1,개인정보 보호법 위반에 대한 과태료 부과기준
+개인정보 보호법,제7조의8,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제7조의9,inferred_default_pipa,candidate,1,1,1,1,
+개인정보의 안전성 확보조치 기준(고시 제2021-2호),제7조제1항,source_text,candidate,1,1,1,1,개인정보의 안전성 확보조치 기준(고시 제2021-2호)
+개인정보 보호법,제7조제3항제2호,inferred_default_pipa,candidate,1,1,1,1,
+국세기본법,제81조의13,source_text,candidate,1,1,1,1,국세기본법
+개인정보 보호법,제83조제4항,inferred_default_pipa,candidate,1,1,1,1,
+국가공무원법,제83조제4항,source_text,candidate,1,1,1,1,국가공무원법
+개인정보 보호법,제84조,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제85조의3제1항,inferred_default_pipa,candidate,1,1,1,1,
+국세기본법,제85조의3제1항,source_text,candidate,1,1,1,1,국세기본법
+지방세기본법,제86조,source_text,candidate,1,1,1,1,지방세기본법
+장애인등에 대한 특수교육법,제8조,source_text,candidate,1,1,1,1,장애인등에 대한 특수교육법
+舊 개인정보 보호법 위반에 대한 과태료 부과기준,제8조,source_text,needs_admin_rule_pass,1,1,1,1,舊 개인정보 보호법 위반에 대한 과태료 부과기준
+개인정보 보호법 위반에 대한 공표 및 공표명령 지침,제8조,source_text,needs_admin_rule_pass,1,1,1,1,개인정보 보호법 위반에 대한 공표 및 공표명령 지침
+개인정보 보호법,제8조의2,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제8조제1항,normalized_alias,candidate,1,1,1,1,개인정보 보호법
+(舊)개인정보 보호 법규 위반에 대한 과징금 부과기준,제9조,source_text,needs_admin_rule_pass,1,1,1,1,(舊)개인정보 보호 법규 위반에 대한 과징금 부과기준
+개인정보 보호법,제9조제1항제2호,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제9조제2항제1호,inferred_default_pipa,candidate,1,1,1,1,
+개인정보 보호법,제9조제2호,inferred_default_pipa,candidate,1,1,1,1,
