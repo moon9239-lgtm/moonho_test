@@ -1,7 +1,9 @@
 import { buildMeetingDetailModel, buildSituationBoardModel } from "./data-model.mjs";
-import { renderMeetingDetail, renderSituationBoard } from "./renderers.mjs";
+import { buildAnimationTimeline } from "./animation-model.mjs";
+import { renderAnimationViewer, renderMeetingDetail, renderSituationBoard } from "./renderers.mjs";
 
 const dashboardData = window.PIPC_DASHBOARD_DATA || {};
+let activeMeetingId = null;
 
 function $(selector, root = document) {
   return root.querySelector(selector);
@@ -29,7 +31,15 @@ function init() {
 
 init();
 
+function transcriptToUtterances(text) {
+  return String(text || "")
+    .split(/\n+/)
+    .map((line, index) => ({ id: `u${index + 1}`, speaker: "속기록", text: line.trim() }))
+    .filter((item) => item.text);
+}
+
 function showMeetingDetail(id) {
+  activeMeetingId = id;
   const detail = buildMeetingDetailModel(dashboardData, id);
   const meetingTab = $("#tab-meeting");
   if (!meetingTab) return;
@@ -42,7 +52,26 @@ function showMeetingDetail(id) {
   if (title) title.textContent = "회의 상세 탐색";
 }
 
+function showAnimationViewer(id) {
+  const detail = buildMeetingDetailModel(dashboardData, id);
+  if (!detail.meeting) return;
+  activeMeetingId = id;
+  const meetingTab = $("#tab-meeting");
+  if (!meetingTab) return;
+  const timeline = buildAnimationTimeline({
+    meeting: detail.meeting,
+    utterances: transcriptToUtterances(detail.transcriptText),
+  });
+  meetingTab.innerHTML = renderAnimationViewer(timeline);
+}
+
 document.addEventListener("click", (event) => {
   const card = event.target.closest(".meeting-card[data-meeting-id]");
   if (card) showMeetingDetail(card.dataset.meetingId);
+
+  const animationButton = event.target.closest("[data-animation-meeting-id]");
+  if (animationButton) showAnimationViewer(animationButton.dataset.animationMeetingId);
+
+  const closeAnimationButton = event.target.closest("[data-close-animation]");
+  if (closeAnimationButton && activeMeetingId) showMeetingDetail(activeMeetingId);
 });

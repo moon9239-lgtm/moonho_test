@@ -1049,3 +1049,53 @@ tr:last-child td {
   text-align: left;
   cursor: pointer;
 }
+
+.animation-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 14px;
+}
+
+.animation-stage {
+  display: grid;
+  align-content: center;
+  gap: 18px;
+  min-height: 460px;
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-soft);
+  text-align: center;
+}
+
+.meeting-room-line,
+.meeting-room-table {
+  padding: 16px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: var(--surface);
+  font-weight: 800;
+}
+
+.animation-timeline {
+  max-height: 460px;
+  overflow: auto;
+  display: grid;
+  gap: 8px;
+}
+
+.animation-scene-item {
+  display: grid;
+  gap: 5px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  text-align: left;
+}
+
+@media (max-width: 960px) {
+  .animation-layout {
+    grid-template-columns: 1fr;
+  }
+}

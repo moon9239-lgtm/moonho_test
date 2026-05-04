@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { buildSituationBoardModel } from "../src/data-model.mjs";
-import { renderSituationBoard } from "../src/renderers.mjs";
+import { renderAnimationViewer, renderSituationBoard } from "../src/renderers.mjs";
 import { dashboardFixture } from "./fixtures/dashboard-fixture.mjs";
 
 test("renderSituationBoard includes operational KPIs and meeting cards", () => {
@@ -58,4 +58,27 @@ test("renderSituationBoard renders invalid numbers as zero", () => {
   assert.doesNotMatch(html, /NaN/);
   assert.doesNotMatch(html, /Infinity/);
   assert.match(html, /<div class="kpi-value">0<\/div>/);
+});
+
+test("renderAnimationViewer escapes timeline scene text", () => {
+  const html = renderAnimationViewer({
+    meetingLabel: `<script>alert("meeting")</script>`,
+    scenes: [
+      { speaker: `<script>alert("speaker")</script>`, text: `<script>alert("text")</script>` },
+    ],
+  });
+
+  assert.doesNotMatch(html, /<script>/);
+  assert.match(html, /&lt;script&gt;alert\(&quot;meeting&quot;\)&lt;\/script&gt;/);
+  assert.match(html, /&lt;script&gt;alert\(&quot;speaker&quot;\)&lt;\/script&gt;/);
+  assert.match(html, /&lt;script&gt;alert\(&quot;text&quot;\)&lt;\/script&gt;/);
+});
+
+test("renderAnimationViewer tolerates null timeline and invalid scenes", () => {
+  assert.doesNotThrow(() => renderAnimationViewer(null));
+  assert.doesNotThrow(() => renderAnimationViewer({ scenes: "bad" }));
+
+  const html = renderAnimationViewer(null);
+  assert.match(html, /animation-viewer/);
+  assert.doesNotMatch(html, /animation-scene-item/);
 });

@@ -100,3 +100,33 @@ export function renderMeetingDetail(detail) {
     </section>
   `;
 }
+
+export function renderAnimationViewer(timeline = {}) {
+  const scenes = Array.isArray(timeline?.scenes) ? timeline.scenes : [];
+  const sceneItems = scenes.map((scene, index) => `
+    <button class="animation-scene-item" type="button" data-scene-index="${index}">
+      <span>${escapeHtml(scene.speaker)}</span>
+      <strong>${escapeHtml(scene.text)}</strong>
+    </button>
+  `).join("");
+
+  return `
+    <section class="section-band animation-viewer">
+      <div class="section-header">
+        <div>
+          <h2>회의 애니메이션 재현</h2>
+          <p class="section-caption">${escapeHtml(timeline?.meetingLabel)} 속기록 기반 장면 타임라인</p>
+        </div>
+        <button class="tool-button" type="button" data-close-animation>속기록으로 돌아가기</button>
+      </div>
+      <div class="animation-layout">
+        <div class="animation-stage" aria-label="회의장 재현 무대">
+          <div class="meeting-room-line">위원장</div>
+          <div class="meeting-room-table">회의 진행</div>
+          <div class="meeting-room-line">위원 · 사무처 · 안건</div>
+        </div>
+        <div class="animation-timeline">${sceneItems}</div>
+      </div>
+    </section>
+  `;
+}
