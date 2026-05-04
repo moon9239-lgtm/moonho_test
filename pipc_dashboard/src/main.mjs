@@ -1,5 +1,5 @@
-import { buildSituationBoardModel } from "./data-model.mjs";
-import { renderSituationBoard } from "./renderers.mjs";
+import { buildMeetingDetailModel, buildSituationBoardModel } from "./data-model.mjs";
+import { renderMeetingDetail, renderSituationBoard } from "./renderers.mjs";
 
 const dashboardData = window.PIPC_DASHBOARD_DATA || {};
 
@@ -28,3 +28,21 @@ function init() {
 }
 
 init();
+
+function showMeetingDetail(id) {
+  const detail = buildMeetingDetailModel(dashboardData, id);
+  const meetingTab = $("#tab-meeting");
+  if (!meetingTab) return;
+  meetingTab.innerHTML = renderMeetingDetail(detail);
+  document.querySelector(".tab-view.active")?.classList.remove("active");
+  meetingTab.classList.add("active");
+  document.querySelector(".nav-item.active")?.classList.remove("active");
+  document.querySelector('.nav-item[data-tab="meeting"]')?.classList.add("active");
+  const title = $("#page-title");
+  if (title) title.textContent = "회의 상세 탐색";
+}
+
+document.addEventListener("click", (event) => {
+  const card = event.target.closest(".meeting-card[data-meeting-id]");
+  if (card) showMeetingDetail(card.dataset.meetingId);
+});

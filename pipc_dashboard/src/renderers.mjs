@@ -56,3 +56,39 @@ export function renderSituationBoard(model = {}) {
     </section>
   `;
 }
+
+export function renderMeetingDetail(detail) {
+  if (!detail?.meeting) {
+    return `<section class="section-band"><h2>회의 상세</h2><p class="section-caption">선택된 회의가 없습니다.</p></section>`;
+  }
+
+  const docs = (detail.relatedDocuments || []).map((doc) => `
+    <a class="small-button" href="${escapeHtml(doc.path)}" target="_blank" rel="noreferrer">${escapeHtml(doc.label)}</a>
+  `).join("");
+
+  return `
+    <section class="section-band meeting-detail">
+      <div class="section-header">
+        <div>
+          <h2>회의 상세</h2>
+          <p class="section-caption">${escapeHtml(detail.meeting.meetingLabel)} · ${escapeHtml(detail.meeting.date)}</p>
+        </div>
+        <button class="tool-button" type="button" data-animation-meeting-id="${escapeHtml(detail.meeting.id)}">애니메이션으로 보기</button>
+      </div>
+      <div class="meeting-detail-grid">
+        <aside class="meeting-detail-side">
+          <h3>관련 문서</h3>
+          <div class="button-stack">${docs}</div>
+        </aside>
+        <article class="transcript-panel">
+          <h3>속기록</h3>
+          <pre class="transcript-body">${escapeHtml(detail.transcriptText || "속기록을 불러오려면 원문 링크를 여세요.")}</pre>
+        </article>
+        <aside class="law-panel">
+          <h3>법조항 비교</h3>
+          <p class="section-caption">속기록 내 법조항을 선택하면 회의 당시 조문과 현재 조문을 비교합니다.</p>
+        </aside>
+      </div>
+    </section>
+  `;
+}

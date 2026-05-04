@@ -60,3 +60,17 @@ export function buildSituationBoardModel(data = {}) {
     },
   };
 }
+
+export function buildMeetingDetailModel(data = {}, transcriptId) {
+  const transcripts = (data.meetingTranscripts || []).map(normalizeTranscriptRecord);
+  const meeting = transcriptId == null
+    ? transcripts[0] || null
+    : transcripts.find((item) => item.id === transcriptId) || null;
+  return {
+    meeting,
+    transcriptText: meeting?.content || "",
+    agendas: [],
+    lawReferences: [],
+    relatedDocuments: meeting ? [{ label: "속기록 원문", path: meeting.path }] : [],
+  };
+}

@@ -1001,3 +1001,38 @@ tr:last-child td {
   font-size: 11px;
   font-weight: 800;
 }
+
+.meeting-detail-grid {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr) 280px;
+  gap: 14px;
+}
+
+.meeting-detail-side,
+.transcript-panel,
+.law-panel {
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.button-stack {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.meeting-detail .transcript-body {
+  max-height: 58vh;
+  overflow: auto;
+  white-space: pre-wrap;
+  line-height: 1.65;
+}
+
+@media (max-width: 960px) {
+  .meeting-detail-grid {
+    grid-template-columns: 1fr;
+  }
+}
