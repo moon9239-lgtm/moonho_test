@@ -8,12 +8,15 @@ import {
   renderAgendaPreparationResult,
   renderAnimationViewer,
   renderCommissionerAnalysis,
+  renderLawReferenceDetail,
   renderMeetingDetail,
   renderSituationBoard,
 } from "./renderers.mjs";
 
 const dashboardData = window.PIPC_DASHBOARD_DATA || {};
+const meetingDetailIndex = window.PIPC_MEETING_DETAIL_INDEX || {};
 let activeMeetingId = null;
+let activeMeetingDetail = null;
 
 const tabTitles = {
   stats: "전체회의 통계·동향 대시보드",
@@ -145,7 +148,8 @@ function transcriptToUtterances(text) {
 
 function showMeetingDetail(id) {
   activeMeetingId = id;
-  const detail = buildMeetingDetailModel(dashboardData, id);
+  const detail = buildMeetingDetailModel(dashboardData, id, { detailIndex: meetingDetailIndex });
+  activeMeetingDetail = detail;
   const meetingTab = $("#tab-meeting");
   if (!meetingTab) return;
   meetingTab.innerHTML = renderMeetingDetail(detail);
@@ -153,16 +157,48 @@ function showMeetingDetail(id) {
 }
 
 function showAnimationViewer(id) {
-  const detail = buildMeetingDetailModel(dashboardData, id);
+  const detail = buildMeetingDetailModel(dashboardData, id, { detailIndex: meetingDetailIndex });
   if (!detail.meeting) return;
   activeMeetingId = id;
+  activeMeetingDetail = detail;
   const meetingTab = $("#tab-meeting");
   if (!meetingTab) return;
-  const timeline = buildAnimationTimeline({
-    meeting: detail.meeting,
-    utterances: transcriptToUtterances(detail.transcriptText),
-  });
+  const timeline = detail.animationScenes?.length
+    ? { meetingId: detail.meeting.id, meetingLabel: detail.meeting.meetingLabel, scenes: detail.animationScenes }
+    : buildAnimationTimeline({
+      meeting: detail.meeting,
+      utterances: transcriptToUtterances(detail.transcriptText),
+    });
   meetingTab.innerHTML = renderAnimationViewer(timeline);
+}
+
+function scrollToUtterance(id) {
+  const target = id ? document.getElementById(id) : null;
+  if (!target) return;
+  target.scrollIntoView({ behavior: "smooth", block: "start" });
+  target.classList.add("focus-flash");
+  window.setTimeout(() => target.classList.remove("focus-flash"), 1000);
+}
+
+function updateLawDetail(index) {
+  const panel = $("#law-detail-panel");
+  const ref = activeMeetingDetail?.lawReferences?.[Number(index)];
+  if (!panel || !ref) return;
+  panel.innerHTML = renderLawReferenceDetail(ref);
+}
+
+function updateAnimationStage(button) {
+  const stage = $("[data-animation-stage]");
+  if (!stage || !button) return;
+  const label = $("[data-stage-label]", stage);
+  const speaker = $("[data-stage-speaker]", stage);
+  const text = $("[data-stage-text]", stage);
+  const scene = activeMeetingDetail?.animationScenes?.[Number(button.dataset.sceneIndex)];
+  document.querySelector(".animation-scene-item.active")?.classList.remove("active");
+  button.classList.add("active");
+  if (label) label.textContent = scene?.stageNote || button.querySelector("span")?.textContent || "";
+  if (speaker) speaker.textContent = scene?.speaker || button.querySelector("em")?.textContent || "";
+  if (text) text.textContent = scene?.text || button.querySelector("strong")?.textContent || "";
 }
 
 document.addEventListener("click", (event) => {
@@ -174,6 +210,15 @@ document.addEventListener("click", (event) => {
 
   const closeAnimationButton = event.target.closest("[data-close-animation]");
   if (closeAnimationButton && activeMeetingId) showMeetingDetail(activeMeetingId);
+
+  const agendaJump = event.target.closest("[data-utterance-target]");
+  if (agendaJump) scrollToUtterance(agendaJump.dataset.utteranceTarget);
+
+  const lawReference = event.target.closest("[data-law-ref-index]");
+  if (lawReference) updateLawDetail(lawReference.dataset.lawRefIndex);
+
+  const scene = event.target.closest(".animation-scene-item[data-scene-index]");
+  if (scene) updateAnimationStage(scene);
 });
 
 document.addEventListener("submit", (event) => {

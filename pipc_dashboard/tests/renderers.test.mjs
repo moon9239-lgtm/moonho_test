@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { buildSituationBoardModel } from "../src/data-model.mjs";
-import { renderAgendaPreparationResult, renderAnimationViewer, renderCommissionerAnalysis, renderSituationBoard } from "../src/renderers.mjs";
+import { renderAgendaPreparationResult, renderAnimationViewer, renderCommissionerAnalysis, renderLawReferenceDetail, renderSituationBoard } from "../src/renderers.mjs";
 import { dashboardFixture } from "./fixtures/dashboard-fixture.mjs";
 
 test("renderSituationBoard includes operational KPIs and meeting cards", () => {
@@ -12,6 +12,30 @@ test("renderSituationBoard includes operational KPIs and meeting cards", () => {
   assert.match(html, /총 안건 수/);
   assert.match(html, /2025년 제24회/);
   assert.match(html, /제재·처분 신호/);
+});
+
+test("renderSituationBoard includes expanded operations panels", () => {
+  const html = renderSituationBoard({
+    updatedAt: "2026-05-05",
+    kpis: {
+      totalMeetings: { label: "총 회의 수", value: 10 },
+    },
+    agendaSplit: [{ label: "심의·의결", value: 6, ratio: 0.6, tone: "blue" }],
+    visibilitySplit: [{ label: "공개", value: 8, ratio: 0.8, tone: "blue" }],
+    yearlyRows: [{ meeting_year: 2025, meetings: 20, agenda_items: 80, decision_agendas: 40, report_agendas: 30, utterances: 1000 }],
+    topicDistribution: [{ label: "위반·처분", agenda_count: 20 }],
+    dataQuality: [{ label: "안건 연결 발언", ratio: 0.9, notes: "테스트" }],
+    sanctions: [{ sanction_kind: "과징금", sanction_count: 3 }],
+    signals: { majorPenaltyCases: [] },
+    meetingCards: [],
+  });
+
+  assert.match(html, /안건 처리 비율/);
+  assert.match(html, /공개 여부/);
+  assert.match(html, /연도별 회의·안건 흐름/);
+  assert.match(html, /실무 쟁점 주제/);
+  assert.match(html, /데이터 검증 상태/);
+  assert.match(html, /과징금 3/);
 });
 
 test("renderSituationBoard escapes model text fields", () => {
@@ -115,4 +139,21 @@ test("renderAgendaPreparationResult renders structured assistant output", () => 
   assert.match(html, /예시위원/);
   assert.match(html, /사실관계를 어떻게 설명할 수 있습니까/);
   assert.match(html, /회의 당시 조문과 현재 조문을 비교합니다/);
+});
+
+test("renderLawReferenceDetail escapes law text and lookup payload", () => {
+  const html = renderLawReferenceDetail({
+    lawName: "개인정보 보호법<script>",
+    article: "제29조",
+    title: "안전조치</h3><script>",
+    meetingDate: "2025-01-08",
+    meetingVersion: "</section><script>alert(1)</script>",
+    currentVersion: "<img src=x onerror=alert(1)>",
+    lookupRequest: { lawName: "<script>", article: "제29조" },
+  });
+
+  assert.doesNotMatch(html, /<script>/);
+  assert.doesNotMatch(html, /<img/);
+  assert.match(html, /&lt;script&gt;/);
+  assert.match(html, /law-request/);
 });

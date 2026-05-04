@@ -15,6 +15,34 @@ test("buildSituationBoardModel derives operations KPIs and meeting cards", () =>
   assert.equal(model.signals.majorPenaltyCases.length, 1);
 });
 
+test("buildSituationBoardModel derives agenda and visibility splits from overview snapshot", () => {
+  const model = buildSituationBoardModel({
+    overviewKpis: [{
+      meetings_total: 10,
+      agenda_items_total: 30,
+      decision_agendas_total: 18,
+      report_agendas_total: 10,
+      public_agendas_total: 24,
+      private_agendas_total: 6,
+      utterances_total: 100,
+      utterances_with_agenda: 80,
+    }],
+    topicDistribution: [{ label: "위반·처분", agenda_count: 9 }],
+    dataQuality: [{ label: "안건 연결 발언", ratio: 0.8 }],
+    sanctionDistribution: [{ sanction_kind: "과징금", sanction_count: 3 }],
+  });
+
+  assert.equal(model.kpis.totalMeetings.value, 10);
+  assert.equal(model.kpis.totalAgendas.value, 30);
+  assert.equal(model.agendaSplit[0].value, 18);
+  assert.equal(model.agendaSplit[0].ratio, 0.6);
+  assert.equal(model.visibilitySplit[1].value, 6);
+  assert.equal(model.visibilitySplit[1].ratio, 0.2);
+  assert.equal(model.topicDistribution.length, 1);
+  assert.equal(model.dataQuality.length, 1);
+  assert.equal(model.sanctions.length, 1);
+});
+
 test("buildSituationBoardModel falls back to meetingYearly when yearlyStats is empty", () => {
   const model = buildSituationBoardModel({
     ...dashboardFixture,
