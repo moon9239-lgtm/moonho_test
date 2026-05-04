@@ -1099,3 +1099,39 @@ tr:last-child td {
     grid-template-columns: 1fr;
   }
 }
+.commissioner-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.commissioner-card {
+  padding: 14px;
+  border: 1px solid var(--ink-soft);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: 0 10px 24px rgba(38, 48, 68, 0.05);
+}
+
+.commissioner-card h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.commissioner-card p {
+  margin: 4px 0 0;
+  color: var(--olive);
+  font-weight: 800;
+}
+
+.commissioner-card .status-pill {
+  background: var(--olive-soft);
+  color: var(--olive);
+}
+
+.commissioner-card .tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}

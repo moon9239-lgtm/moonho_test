@@ -1,9 +1,19 @@
 import { buildMeetingDetailModel, buildSituationBoardModel } from "./data-model.mjs";
 import { buildAnimationTimeline } from "./animation-model.mjs";
-import { renderAnimationViewer, renderMeetingDetail, renderSituationBoard } from "./renderers.mjs";
+import { loadCommissionerCharacters } from "./character-assets.mjs";
+import { buildCommissionerAnalysisModel } from "./commissioner-model.mjs";
+import { renderAnimationViewer, renderCommissionerAnalysis, renderMeetingDetail, renderSituationBoard } from "./renderers.mjs";
 
 const dashboardData = window.PIPC_DASHBOARD_DATA || {};
 let activeMeetingId = null;
+
+const tabTitles = {
+  stats: "전체회의 통계·동향 대시보드",
+  search: "안건 통합검색",
+  meeting: "회의 상세 탐색",
+  commissioner: "위원별 분석",
+  assistant: "신규 안건 준비 도우미",
+};
 
 function $(selector, root = document) {
   return root.querySelector(selector);
@@ -27,9 +37,47 @@ function init() {
   setSnapshotTime(model.updatedAt);
   const stats = $("#tab-stats");
   if (stats) stats.innerHTML = renderSituationBoard(model);
+  initTabs();
 }
 
 init();
+
+function setActiveTab(tabId) {
+  const tab = $(`#tab-${tabId}`);
+  const navItem = $(`.nav-item[data-tab="${tabId}"]`);
+  if (!tab || !navItem) return;
+
+  document.querySelector(".tab-view.active")?.classList.remove("active");
+  tab.classList.add("active");
+  document.querySelector(".nav-item.active")?.classList.remove("active");
+  navItem.classList.add("active");
+  const title = $("#page-title");
+  if (title) title.textContent = tabTitles[tabId] || tabTitles.stats;
+  history.replaceState(null, "", `#${tabId}`);
+}
+
+function initTabs() {
+  document.querySelectorAll(".nav-item[data-tab]").forEach((button) => {
+    button.addEventListener("click", () => setActiveTab(button.dataset.tab));
+  });
+
+  const requestedTab = window.location.hash.replace("#", "");
+  if (tabTitles[requestedTab]) setActiveTab(requestedTab);
+}
+
+async function renderCommissionerTab(dashboardData) {
+  const commissionerTab = $("#tab-commissioner");
+  if (!commissionerTab) return;
+
+  const commissionerCharacters = await loadCommissionerCharacters();
+  const commissionerModel = buildCommissionerAnalysisModel({
+    commissionerActivity: dashboardData.commissionerActivity || [],
+    commissionerCharacters,
+  });
+  commissionerTab.innerHTML = renderCommissionerAnalysis(commissionerModel);
+}
+
+renderCommissionerTab(dashboardData);
 
 function transcriptToUtterances(text) {
   return String(text || "")
@@ -44,12 +92,7 @@ function showMeetingDetail(id) {
   const meetingTab = $("#tab-meeting");
   if (!meetingTab) return;
   meetingTab.innerHTML = renderMeetingDetail(detail);
-  document.querySelector(".tab-view.active")?.classList.remove("active");
-  meetingTab.classList.add("active");
-  document.querySelector(".nav-item.active")?.classList.remove("active");
-  document.querySelector('.nav-item[data-tab="meeting"]')?.classList.add("active");
-  const title = $("#page-title");
-  if (title) title.textContent = "회의 상세 탐색";
+  setActiveTab("meeting");
 }
 
 function showAnimationViewer(id) {

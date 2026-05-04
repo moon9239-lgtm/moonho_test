@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { buildSituationBoardModel } from "../src/data-model.mjs";
-import { renderAnimationViewer, renderSituationBoard } from "../src/renderers.mjs";
+import { renderAnimationViewer, renderCommissionerAnalysis, renderSituationBoard } from "../src/renderers.mjs";
 import { dashboardFixture } from "./fixtures/dashboard-fixture.mjs";
 
 test("renderSituationBoard includes operational KPIs and meeting cards", () => {
@@ -81,4 +81,16 @@ test("renderAnimationViewer tolerates null timeline and invalid scenes", () => {
   const html = renderAnimationViewer(null);
   assert.match(html, /animation-viewer/);
   assert.doesNotMatch(html, /animation-scene-item/);
+});
+
+test("renderCommissionerAnalysis tolerates partial rows and avoids missing question counts", () => {
+  assert.doesNotThrow(() => renderCommissionerAnalysis({ commissioners: [null, { name: "고학수", totalUtterances: 2026, agendaCount: 135 }] }));
+
+  const html = renderCommissionerAnalysis({
+    commissioners: [
+      { name: "고학수", characterType: "균형 조율형 의장", totalUtterances: 2026, agendaCount: 135, topTags: ["절차·법리"] },
+    ],
+  });
+  assert.match(html, /발언 2,026 · 안건 135/);
+  assert.doesNotMatch(html, /질문 0/);
 });

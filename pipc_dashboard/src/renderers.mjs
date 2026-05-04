@@ -17,6 +17,10 @@ export function formatNumber(value) {
   return new Intl.NumberFormat("ko-KR").format(Number.isFinite(number) ? number : 0);
 }
 
+function hasNumber(value) {
+  return value !== null && value !== undefined && Number.isFinite(Number(value));
+}
+
 function kpiCard(item) {
   return `
     <article class="kpi-card">
@@ -127,6 +131,37 @@ export function renderAnimationViewer(timeline = {}) {
         </div>
         <div class="animation-timeline">${sceneItems}</div>
       </div>
+    </section>
+  `;
+}
+
+export function renderCommissionerAnalysis(model = {}) {
+  const commissioners = Array.isArray(model?.commissioners) ? model.commissioners : [];
+  const rows = commissioners.filter((item) => item && typeof item === "object").map((item) => {
+    const topTags = Array.isArray(item.topTags) ? item.topTags : [];
+    const metrics = [`발언 ${formatNumber(item.totalUtterances)}`];
+    if (hasNumber(item.questionCount)) metrics.push(`질문 ${formatNumber(item.questionCount)}`);
+    if (hasNumber(item.agendaCount)) metrics.push(`안건 ${formatNumber(item.agendaCount)}`);
+    if (hasNumber(item.meetingCount)) metrics.push(`회의 ${formatNumber(item.meetingCount)}`);
+    return `
+    <article class="commissioner-card">
+      <h3>${escapeHtml(item.name)}</h3>
+      <p>${escapeHtml(item.characterType)}</p>
+      <div class="kpi-meta">${metrics.join(" · ")}</div>
+      <div class="tag-list">${topTags.map((tag) => `<span class="status-pill">${escapeHtml(tag)}</span>`).join("")}</div>
+    </article>
+  `;
+  }).join("");
+
+  return `
+    <section class="section-band">
+      <div class="section-header">
+        <div>
+          <h2>위원별 분석</h2>
+          <p class="section-caption">정량 지표와 캐릭터 프로필 기반의 초기 분석입니다.</p>
+        </div>
+      </div>
+      <div class="commissioner-grid">${rows}</div>
     </section>
   `;
 }
