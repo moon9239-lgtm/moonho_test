@@ -32,13 +32,13 @@ export function normalizeTranscriptRecord(item, index = 0) {
     meetingLabel: item.meetingLabel || item.meeting_label || (meetingNo ? `${year}년 제${meetingNo}회` : `${year}년`),
     title: item.title || item.transcript_title || item.meeting_title || path.split("/").pop() || "",
     path,
-    sizeKb: item.sizeKb || item.size_kb || (sizeBytes ? Math.round(sizeBytes / 1024) : null),
+    sizeKb: item.sizeKb ?? item.size_kb ?? (sizeBytes ? Math.round(sizeBytes / 1024) : null),
     content: item.content || "",
   };
 }
 
 export function buildSituationBoardModel(data = {}) {
-  const yearlyRows = data.yearlyStats || data.meetingYearly || [];
+  const yearlyRows = data.yearlyStats?.length ? data.yearlyStats : data.meetingYearly || [];
   const totalMeetings = yearlyRows.reduce((sum, row) => sum + toNumber(row.meetings ?? row.meeting_count), 0);
   const totalAgendas = yearlyRows.reduce((sum, row) => sum + toNumber(row.agenda_items ?? row.agenda_count), 0);
   const meetingCards = (data.meetingTranscripts || []).map(normalizeTranscriptRecord);

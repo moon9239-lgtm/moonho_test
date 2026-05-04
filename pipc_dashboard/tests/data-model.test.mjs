@@ -15,6 +15,22 @@ test("buildSituationBoardModel derives operations KPIs and meeting cards", () =>
   assert.equal(model.signals.majorPenaltyCases.length, 1);
 });
 
+test("buildSituationBoardModel falls back to meetingYearly when yearlyStats is empty", () => {
+  const model = buildSituationBoardModel({
+    ...dashboardFixture,
+    yearlyStats: [],
+    meetingYearly: [
+      { meeting_year: 2026, meeting_count: 3, agenda_count: 12 },
+    ],
+  });
+
+  assert.equal(model.kpis.totalMeetings.value, 3);
+  assert.equal(model.kpis.totalAgendas.value, 12);
+  assert.equal(model.kpis.averageAgendasPerMeeting.value, 4.0);
+  assert.equal(model.yearlyRows.length, 1);
+  assert.equal(model.yearlyRows[0].meeting_year, 2026);
+});
+
 test("normalizeTranscriptRecord creates browser-safe relative paths", () => {
   const record = normalizeTranscriptRecord({
     meeting_date: "2025-11-26",
@@ -28,4 +44,18 @@ test("normalizeTranscriptRecord creates browser-safe relative paths", () => {
   assert.equal(record.meetingLabel, "2025년 제24회");
   assert.equal(record.path, "../pipc_knowledge_base/99_raw/transcripts/2025/example.md");
   assert.equal(record.sizeKb, 2);
+});
+
+test("normalizeTranscriptRecord preserves explicit zero size and normalizes Windows paths", () => {
+  const record = normalizeTranscriptRecord({
+    meeting_date: "2025-11-26",
+    meeting_year: 2025,
+    meeting_number: 24,
+    raw_md_path: "pipc_knowledge_base\\99_raw\\transcripts\\2025\\example.md",
+    sizeKb: 0,
+    size_bytes: 2048,
+  }, 0);
+
+  assert.equal(record.path, "../pipc_knowledge_base/99_raw/transcripts/2025/example.md");
+  assert.equal(record.sizeKb, 0);
 });
