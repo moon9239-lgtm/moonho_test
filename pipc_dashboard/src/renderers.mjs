@@ -65,6 +65,14 @@ export function renderMeetingDetail(detail) {
   const docs = (detail.relatedDocuments || []).map((doc) => `
     <a class="small-button" href="${escapeHtml(doc.path)}" target="_blank" rel="noreferrer">${escapeHtml(doc.label)}</a>
   `).join("");
+  const lawReferences = Array.isArray(detail.lawReferences) ? detail.lawReferences : [];
+  const lawItems = lawReferences.length
+    ? lawReferences.map((ref, index) => `
+      <button class="law-reference-item" type="button" data-law-ref-index="${index}">
+        ${escapeHtml(ref.lawName)} ${escapeHtml(ref.article)}
+      </button>
+    `).join("")
+    : `<p class="section-caption">감지된 법조항이 없습니다.</p>`;
 
   return `
     <section class="section-band meeting-detail">
@@ -86,7 +94,7 @@ export function renderMeetingDetail(detail) {
         </article>
         <aside class="law-panel">
           <h3>법조항 비교</h3>
-          <p class="section-caption">속기록 내 법조항을 선택하면 회의 당시 조문과 현재 조문을 비교합니다.</p>
+          ${lawItems}
         </aside>
       </div>
     </section>

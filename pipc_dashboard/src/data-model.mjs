@@ -1,3 +1,5 @@
+import { extractLawReferences } from "./law-references.mjs";
+
 export function toNumber(value) {
   const number = Number(value);
   return Number.isFinite(number) ? number : 0;
@@ -66,11 +68,17 @@ export function buildMeetingDetailModel(data = {}, transcriptId) {
   const meeting = transcriptId == null
     ? transcripts[0] || null
     : transcripts.find((item) => item.id === transcriptId) || null;
+  const transcriptText = meeting?.content || "";
+  const lawReferences = extractLawReferences(transcriptText).map((ref) => ({
+    ...ref,
+    meetingDate: meeting?.date || "",
+  }));
+
   return {
     meeting,
-    transcriptText: meeting?.content || "",
+    transcriptText,
     agendas: [],
-    lawReferences: [],
+    lawReferences,
     relatedDocuments: meeting ? [{ label: "속기록 원문", path: meeting.path }] : [],
   };
 }
