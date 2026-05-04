@@ -1135,3 +1135,96 @@ tr:last-child td {
   gap: 6px;
   margin-top: 10px;
 }
+.assistant-form {
+  display: grid;
+  gap: 12px;
+  max-width: 860px;
+}
+
+.assistant-field {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.assistant-field input,
+.assistant-field textarea {
+  width: 100%;
+  padding: 10px 11px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.assistant-field input:focus,
+.assistant-field textarea:focus {
+  outline: 2px solid var(--teal-soft);
+  border-color: var(--teal);
+}
+
+.assistant-primary-action {
+  border-color: var(--teal);
+  background: var(--teal);
+  color: var(--surface);
+}
+
+.assistant-result-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.assistant-result-grid section {
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.assistant-result-grid h3 {
+  margin-top: 0;
+}
+
+.assistant-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-left: 18px;
+}
+
+.assistant-list span {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.assistant-list .assistant-danger {
+  color: var(--danger);
+}
+
+.assistant-tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.assistant-tag-list .status-pill {
+  background: var(--coral-soft);
+  color: var(--danger);
+}
+
+.provision-chip {
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: var(--teal-soft);
+  color: var(--teal);
+  font-size: 12px;
+  font-weight: 800;
+}

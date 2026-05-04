@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { buildSituationBoardModel } from "../src/data-model.mjs";
-import { renderAnimationViewer, renderCommissionerAnalysis, renderSituationBoard } from "../src/renderers.mjs";
+import { renderAgendaPreparationResult, renderAnimationViewer, renderCommissionerAnalysis, renderSituationBoard } from "../src/renderers.mjs";
 import { dashboardFixture } from "./fixtures/dashboard-fixture.mjs";
 
 test("renderSituationBoard includes operational KPIs and meeting cards", () => {
@@ -93,4 +93,26 @@ test("renderCommissionerAnalysis tolerates partial rows and avoids missing quest
   });
   assert.match(html, /발언 2,026 · 안건 135/);
   assert.doesNotMatch(html, /질문 0/);
+});
+
+test("renderAgendaPreparationResult renders structured assistant output", () => {
+  const html = renderAgendaPreparationResult({
+    similarAgendas: [null, { title: `<script>alert("agenda")</script>`, disposition: "과징금" }],
+    expectedIssues: [null, { label: "안전조치 의무 이행" }],
+    similarProvisions: [null, { label: "개인정보 보호법 제29조" }],
+    dispositionLevels: [null, { label: "과징금", amountText: "1,000만원" }],
+    commissionerQuestions: [null, { commissionerName: "예시위원", question: "사실관계를 어떻게 설명할 수 있습니까?" }],
+    checklist: [null, { label: "법 조항 확인", detail: "회의 당시 조문과 현재 조문을 비교합니다." }],
+  });
+
+  assert.doesNotThrow(() => renderAgendaPreparationResult(null));
+  assert.doesNotMatch(html, /<script>/);
+  assert.doesNotMatch(html, /\[object Object\]/);
+  assert.match(html, /안전조치 의무 이행/);
+  assert.match(html, /개인정보 보호법 제29조/);
+  assert.match(html, /과거 처분 수준/);
+  assert.match(html, /1,000만원/);
+  assert.match(html, /예시위원/);
+  assert.match(html, /사실관계를 어떻게 설명할 수 있습니까/);
+  assert.match(html, /회의 당시 조문과 현재 조문을 비교합니다/);
 });

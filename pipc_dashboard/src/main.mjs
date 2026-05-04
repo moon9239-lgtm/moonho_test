@@ -1,8 +1,16 @@
 import { buildMeetingDetailModel, buildSituationBoardModel } from "./data-model.mjs";
 import { buildAnimationTimeline } from "./animation-model.mjs";
+import { buildAgendaPreparationResult } from "./agenda-assistant-model.mjs";
 import { loadCommissionerCharacters } from "./character-assets.mjs";
 import { buildCommissionerAnalysisModel } from "./commissioner-model.mjs";
-import { renderAnimationViewer, renderCommissionerAnalysis, renderMeetingDetail, renderSituationBoard } from "./renderers.mjs";
+import {
+  renderAgendaAssistant,
+  renderAgendaPreparationResult,
+  renderAnimationViewer,
+  renderCommissionerAnalysis,
+  renderMeetingDetail,
+  renderSituationBoard,
+} from "./renderers.mjs";
 
 const dashboardData = window.PIPC_DASHBOARD_DATA || {};
 let activeMeetingId = null;
@@ -37,10 +45,59 @@ function init() {
   setSnapshotTime(model.updatedAt);
   const stats = $("#tab-stats");
   if (stats) stats.innerHTML = renderSituationBoard(model);
+  renderAssistantTab();
   initTabs();
 }
 
 init();
+
+function renderAssistantTab() {
+  const assistantTab = $("#tab-assistant");
+  if (assistantTab) assistantTab.innerHTML = renderAgendaAssistant();
+}
+
+function isRecord(value) {
+  return value && typeof value === "object";
+}
+
+function articleLabel(article) {
+  if (!isRecord(article)) return "";
+  return [article.law_name, article.article_no, article.article_title ? `(${article.article_title})` : ""].filter(Boolean).join(" ");
+}
+
+function penaltyLabel(item = {}) {
+  const breakdown = Array.isArray(item.penalty_breakdown) ? item.penalty_breakdown.filter(isRecord) : [];
+  if (breakdown.length) {
+    return breakdown.map((penalty) => [penalty.penalty_kind, penalty.amount_text].filter(Boolean).join(" ")).filter(Boolean).join(" · ");
+  }
+  return item.sanction_type || "";
+}
+
+function buildHistoricalAgendas(data = {}) {
+  const rows = Array.isArray(data.majorPenaltyCases) ? data.majorPenaltyCases : [];
+  return rows.filter(isRecord).map((item) => {
+    const amount = Number(item.amount_total_krw || item.monetary_penalty_amount_total_krw || 0);
+    const lawArticles = Array.isArray(item.articles) ? item.articles.map(articleLabel).filter(Boolean) : [];
+    const penaltyBreakdown = Array.isArray(item.penalty_breakdown) ? item.penalty_breakdown.filter(isRecord) : [];
+    return {
+      title: item.agenda_title || item.case_title || item.title || item.target_name || item.top_target_name || "과거 안건",
+      keywords: [
+        item.target_name,
+        item.top_target_name,
+        item.law_article,
+        item.primary_law_article,
+        ...lawArticles,
+        item.sanction_type,
+        item.decision_type,
+        ...penaltyBreakdown.map((penalty) => penalty.penalty_kind),
+      ].filter(Boolean),
+      lawArticles: lawArticles.length ? lawArticles : [item.law_article || item.primary_law_article].filter(Boolean),
+      disposition: penaltyLabel(item) || (amount > 0 ? "과징금·과태료" : ""),
+      amountTotalKrw: amount,
+      amountText: amount > 0 ? `${new Intl.NumberFormat("ko-KR").format(amount)}원` : "",
+    };
+  });
+}
 
 function setActiveTab(tabId) {
   const tab = $(`#tab-${tabId}`);
@@ -117,4 +174,20 @@ document.addEventListener("click", (event) => {
 
   const closeAnimationButton = event.target.closest("[data-close-animation]");
   if (closeAnimationButton && activeMeetingId) showMeetingDetail(activeMeetingId);
+});
+
+document.addEventListener("submit", (event) => {
+  const form = event.target.closest("[data-agenda-form]");
+  if (!form) return;
+  event.preventDefault();
+
+  const formData = new FormData(form);
+  const result = buildAgendaPreparationResult({
+    title: formData.get("title"),
+    summary: formData.get("summary"),
+    historicalAgendas: buildHistoricalAgendas(dashboardData),
+    commissionerActivity: dashboardData.commissionerActivity || [],
+  });
+  const resultNode = $("#assistant-result");
+  if (resultNode) resultNode.innerHTML = renderAgendaPreparationResult(result);
 });
