@@ -8,7 +8,13 @@ export function escapeHtml(value) {
 }
 
 export function formatNumber(value) {
-  return new Intl.NumberFormat("ko-KR").format(Number(value || 0));
+  let number = 0;
+  try {
+    number = Number(value);
+  } catch {
+    number = 0;
+  }
+  return new Intl.NumberFormat("ko-KR").format(Number.isFinite(number) ? number : 0);
 }
 
 function kpiCard(item) {
@@ -30,10 +36,10 @@ function meetingCard(item) {
   `;
 }
 
-export function renderSituationBoard(model) {
-  const kpis = Object.values(model.kpis).map(kpiCard).join("");
-  const cards = model.meetingCards.map(meetingCard).join("");
-  const signalCount = model.signals.majorPenaltyCases.length;
+export function renderSituationBoard(model = {}) {
+  const kpis = Object.values(model.kpis || {}).map(kpiCard).join("");
+  const cards = (model.meetingCards || []).map(meetingCard).join("");
+  const signalCount = (model.signals?.majorPenaltyCases || []).length;
 
   return `
     <section class="section-band situation-board">
