@@ -1,8 +1,14 @@
 (function () {
   const data = window.PIPC_DASHBOARD_DATA || {};
-  const detailIndex = window.PIPC_MEETING_DETAIL_INDEX || {};
+  const analysisIndex = window.PIPC_MEETING_ANALYSIS_INDEX || window.PIPC_MEETING_DETAIL_INDEX || {};
+  const detailIndex = analysisIndex;
+  const cssEscape = window.CSS?.escape || ((value) => String(value).replace(/["\\]/g, "\\$&"));
+
   let activeMeetingId = null;
   let activeMeetingDetail = null;
+  let activeAnimationTimeline = null;
+  let activeSceneIndex = 0;
+  let animationTimer = null;
 
   const tabTitles = {
     stats: "전체회의 통계·동향 대시보드",
@@ -10,19 +16,6 @@
     meeting: "회의 상세 탐색",
     commissioner: "위원별 분석",
     assistant: "신규 안건 준비 도우미",
-  };
-
-  const keyTokens = ["접속기록", "안전조치", "유출", "과징금", "공표", "AI", "국외이전", "처분", "동의"];
-  const issueByToken = {
-    접속기록: "접속기록 생성, 보관 기간, 위변조 방지 조치가 쟁점입니다.",
-    안전조치: "접근통제, 암호화, 접속기록 관리 등 보호조치 수준을 확인해야 합니다.",
-    유출: "유출 원인, 통지 여부, 추가 피해 방지 조치가 핵심입니다.",
-    과징금: "위반 기간, 매출 기준, 감경·가중 사유를 준비해야 합니다.",
-    공표: "공표 요건과 공익상 필요성을 별도로 검토해야 합니다.",
-    AI: "자동화 처리, 설명 가능성, 데이터 활용 범위를 확인해야 합니다.",
-    국외이전: "이전받는 자, 이전 국가, 보유 기간, 동의 절차가 쟁점입니다.",
-    처분: "시정명령, 과징금, 공표 등 처분 조합의 균형을 점검해야 합니다.",
-    동의: "고지 항목, 선택권, 철회 절차가 충분했는지 확인해야 합니다.",
   };
 
   function $(selector, root = document) {
@@ -48,7 +41,8 @@
   }
 
   function formatPercent(value) {
-    return `${Math.round(number(value) * 1000) / 10}%`;
+    const parsed = number(value);
+    return `${Math.round(parsed * 1000) / 10}%`;
   }
 
   function text(value) {
@@ -58,47 +52,24 @@
     return String(value);
   }
 
-  function firstText(...values) {
-    return values.map(text).find(Boolean) || "";
-  }
-
-  function compact(value) {
-    return text(value).toLowerCase().replace(/\s+/g, "");
-  }
-
-  function findKeyTokens(value) {
-    const source = compact(value);
-    return keyTokens.filter((token) => source.includes(token.toLowerCase()));
-  }
-
-  function tokenize(value) {
-    const tokens = new Set();
-    const words = text(value).toLowerCase().match(/[a-z0-9가-힣]+/g) || [];
-    for (const word of words) {
-      if (word.length >= 2) tokens.add(word);
-    }
-    for (const token of findKeyTokens(value)) tokens.add(token);
-    return tokens;
-  }
-
   function normalizePath(value) {
     const path = String(value || "").replace(/\\/g, "/");
     if (!path || /^(https?:|file:|\/|\.\/|\.\.\/)/.test(path)) return path;
     return `../${path}`;
   }
 
-  function normalizeTranscript(item, index) {
+  function normalizeTranscript(item, index = 0) {
     const date = item.date || item.meeting_date || "";
     const year = number(item.year || item.meeting_year || date.slice(0, 4));
     const meetingNo = item.meetingNo ?? item.meeting_number ?? "";
-    const fallbackId = `${date}-${meetingNo || index}`;
+    const meetingTitle = item.meetingTitle || item.meeting_title || "";
     return {
-      id: String(item.id || item.meeting_id || fallbackId),
+      id: String(item.id || item.meeting_id || `${date}-${meetingNo || index}`),
       year,
       date,
       meetingNo,
-      meetingLabel: item.meetingLabel || item.meeting_label || (meetingNo ? `${year}년 제${meetingNo}회` : `${year}년`),
-      title: item.title || item.transcript_title || item.meeting_title || "전체회의",
+      meetingLabel: item.meetingLabel || item.meeting_label || meetingTitle || (meetingNo ? `${year}년 제${meetingNo}회` : `${year}년`),
+      title: item.title || item.transcript_title || meetingTitle || "전체회의",
       path: normalizePath(item.path || item.transcript_path || item.raw_md_path || ""),
       content: item.content || "",
     };
@@ -108,40 +79,151 @@
     return Array.isArray(data.meetingTranscripts) ? data.meetingTranscripts.map(normalizeTranscript) : [];
   }
 
+  function embeddedMeetingDetail(meeting) {
+    const detail = meeting ? detailIndex.meetings?.[meeting.id] : null;
+    if (!detail) return null;
+    return { ...detail, meeting: { ...meeting, ...(detail.meeting || {}), id: meeting.id } };
+  }
+
+  function selectedMeeting(id) {
+    const items = transcripts();
+    return id ? items.find((item) => item.id === id) || items[0] : items[0];
+  }
+
   function setSnapshotTime() {
     const node = $("#snapshot-time");
     if (!node) return;
-    const generatedAt = data.generatedAt || "";
+    const generatedAt = analysisIndex.generatedAt || data.generatedAt || "";
     const date = new Date(generatedAt);
     node.textContent = Number.isNaN(date.getTime())
       ? "업데이트 기준 확인 필요"
       : new Intl.DateTimeFormat("ko-KR", { dateStyle: "medium", timeStyle: "short" }).format(date);
   }
 
-  function renderKpis() {
-    const yearlyRows = data.yearlyStats?.length ? data.yearlyStats : data.meetingYearly || [];
-    const overview = Array.isArray(data.overviewKpis) ? data.overviewKpis[0] || {} : {};
-    const totalMeetings = number(overview.meetings_total) || yearlyRows.reduce((sum, row) => sum + number(row.meetings ?? row.meeting_count), 0);
-    const totalAgendas = number(overview.agenda_items_total) || yearlyRows.reduce((sum, row) => sum + number(row.agenda_items ?? row.agenda_count), 0);
-    const decision = number(overview.decision_agendas_total) || yearlyRows.reduce((sum, row) => sum + number(row.decision_agendas), 0);
-    const report = number(overview.report_agendas_total) || yearlyRows.reduce((sum, row) => sum + number(row.report_agendas), 0);
-    const utterances = number(overview.utterances_total);
-    const linkedUtterances = number(overview.utterances_with_agenda);
-    const average = totalMeetings ? Math.round((totalAgendas / totalMeetings) * 10) / 10 : 0;
-    return [
+  function overviewRow() {
+    return Array.isArray(data.overviewKpis) ? data.overviewKpis[0] || {} : {};
+  }
+
+  function yearlyRows() {
+    return data.yearlyStats?.length ? data.yearlyStats : data.meetingYearly || [];
+  }
+
+  function kpiCards() {
+    const overview = overviewRow();
+    const years = yearlyRows();
+    const totalMeetings = number(overview.meetings_total) || years.reduce((sum, row) => sum + number(row.meetings ?? row.meeting_count), 0);
+    const totalAgendas = number(overview.agenda_items_total) || years.reduce((sum, row) => sum + number(row.agenda_items ?? row.agenda_count), 0);
+    const decision = number(overview.decision_agendas_total);
+    const report = number(overview.report_agendas_total);
+    const totals = analysisIndex.totals || {};
+    const compactMeetings = Array.isArray(analysisIndex.compactMeetings) ? analysisIndex.compactMeetings : [];
+    const utterances = compactMeetings.reduce((sum, item) => sum + number(item.utteranceCount), 0);
+    const lawRefs = compactMeetings.reduce((sum, item) => sum + number(item.lawReferenceCount), 0);
+    const latestQuarter = (analysisIndex.quarterlyStats || [])[0];
+    const items = [
       { label: "총 회의 수", value: totalMeetings },
       { label: "총 안건 수", value: totalAgendas },
-      { label: "회의당 평균 안건 수", value: average },
-      { label: "심의·의결 / 보고", value: `${decision} / ${report}`, meta: `${formatPercent(decision / totalAgendas)} / ${formatPercent(report / totalAgendas)}` },
-      { label: "안건 연결 발언", value: linkedUtterances || utterances, meta: formatPercent((linkedUtterances || utterances) / utterances) },
-      { label: "속기록 보유", value: transcripts().length },
-    ].map((item) => `
+      { label: "회의당 평균 안건 수", value: totalMeetings ? Math.round(totalAgendas / totalMeetings * 10) / 10 : 0 },
+      { label: "심의·의결 / 보고", value: `${decision} / ${report}`, meta: `${formatPercent(decision / Math.max(totalAgendas, 1))} / ${formatPercent(report / Math.max(totalAgendas, 1))}` },
+      { label: "속기록 발언", value: utterances, meta: `${number(totals.parsedMeetings)}개 회의 정제` },
+      { label: "검색 가능 안건 구간", value: totals.searchEntries || 0, meta: `법조항 참조 ${formatNumber(lawRefs)}개` },
+      { label: "최근 분기", value: latestQuarter?.label || "-", meta: latestQuarter ? `${latestQuarter.meetingCount}회 · ${latestQuarter.agendaCount}구간` : "" },
+    ];
+    return items.map((item) => `
       <article class="kpi-card">
         <div class="kpi-label">${escapeHtml(item.label)}</div>
         <div class="kpi-value">${typeof item.value === "string" ? escapeHtml(item.value) : formatNumber(item.value)}</div>
         ${item.meta ? `<div class="kpi-meta">${escapeHtml(item.meta)}</div>` : ""}
       </article>
     `).join("");
+  }
+
+  function rankList(rows = [], emptyText = "집계 없음") {
+    return `<ol class="rank-list">${rows.slice(0, 6).map((row) => `
+      <li><span>${escapeHtml(row.label || row.name || "")}</span><strong>${formatNumber(row.count || row.value || 0)}</strong></li>
+    `).join("") || `<li><span>${escapeHtml(emptyText)}</span><strong>0</strong></li>`}</ol>`;
+  }
+
+  function quarterlyStatsTable(rows = []) {
+    const safeRows = rows.slice(0, 10);
+    const maxAgenda = Math.max(...safeRows.map((row) => number(row.agendaCount)), 1);
+    return `
+      <div class="quarter-table">
+        ${safeRows.map((row) => `
+          <button class="quarter-row" type="button" data-quarter-key="${escapeHtml(row.key || "")}">
+            <span class="quarter-label">${escapeHtml(row.label || "")}</span>
+            <span class="quarter-meter"><b style="width:${Math.max(number(row.agendaCount) / maxAgenda * 100, 3)}%"></b></span>
+            <span>${formatNumber(row.meetingCount)}회</span>
+            <span>${formatNumber(row.agendaCount)}구간</span>
+            <span>${formatNumber(row.utteranceCount)}발언</span>
+            <span>${formatNumber(row.lawReferenceCount)}조항</span>
+          </button>
+        `).join("")}
+      </div>
+    `;
+  }
+
+  function shareRows(rows) {
+    const total = rows.reduce((sum, item) => sum + number(item.value), 0) || 1;
+    return rows.map((item) => ({ ...item, ratio: number(item.value) / total }));
+  }
+
+  function donutChart(rows = []) {
+    const items = shareRows(rows);
+    let offset = 25;
+    const circles = items.map((item) => {
+      const share = number(item.ratio) * 100;
+      const circle = `<circle class="donut-part donut-${escapeHtml(item.tone || "blue")}" cx="50" cy="50" r="36" pathLength="100" stroke-dasharray="${share} ${100 - share}" stroke-dashoffset="${offset}" />`;
+      offset -= share;
+      return circle;
+    }).join("");
+    return `
+      <div class="donut-card">
+        <svg class="donut-chart" viewBox="0 0 100 100" role="img" aria-label="비율 차트">
+          <circle class="donut-bg" cx="50" cy="50" r="36"></circle>${circles}
+        </svg>
+        <div class="donut-legend">
+          ${items.map((item) => `
+            <div class="donut-legend-row"><span class="legend-swatch ${escapeHtml(item.tone || "blue")}"></span><strong>${escapeHtml(item.label)}</strong><span>${formatNumber(item.value)}건 · ${formatPercent(item.ratio)}</span></div>
+          `).join("")}
+        </div>
+      </div>
+    `;
+  }
+
+  function yearlyFlowChart(rows = []) {
+    const safeRows = rows.filter((row) => row && typeof row === "object");
+    const max = Math.max(...safeRows.map((row) => Math.max(number(row.meetings), number(row.agenda_items))), 1);
+    return `
+      <div class="year-flow">
+        ${safeRows.map((row) => `
+          <div class="year-flow-row">
+            <div class="year-flow-year">${escapeHtml(row.meeting_year)}</div>
+            <div class="year-flow-bars">
+              <span class="year-flow-bar meeting" style="width:${Math.max(number(row.meetings) / max * 100, 2)}%"><b>${formatNumber(row.meetings)}</b></span>
+              <span class="year-flow-bar agenda" style="width:${Math.max(number(row.agenda_items) / max * 100, 2)}%"><b>${formatNumber(row.agenda_items)}</b></span>
+            </div>
+            <div class="year-flow-meta">의결 ${formatNumber(row.decision_agendas)} · 보고 ${formatNumber(row.report_agendas)} · 발언 ${formatNumber(row.utterances)}</div>
+          </div>
+        `).join("")}
+      </div>
+    `;
+  }
+
+  function topicBars(rows = []) {
+    const safeRows = rows.slice(0, 8);
+    const max = Math.max(...safeRows.map((row) => number(row.agenda_count)), 1);
+    return `
+      <div class="topic-bars">
+        ${safeRows.map((row, index) => `
+          <div class="topic-bar-row">
+            <div class="topic-label">${escapeHtml(row.label || row.topic_key || "주제")}</div>
+            <div class="topic-track"><span class="topic-fill tone-${index % 3}" style="width:${Math.max(number(row.agenda_count) / max * 100, 2)}%"></span></div>
+            <div class="topic-value">${formatNumber(row.agenda_count)}안건</div>
+          </div>
+        `).join("")}
+      </div>
+    `;
   }
 
   function meetingCard(item) {
@@ -155,120 +237,157 @@
   }
 
   function renderSituationBoard() {
-    const meetingCards = transcripts().slice(0, 24).map(meetingCard).join("");
-    const majorCount = Array.isArray(data.majorPenaltyCases) ? data.majorPenaltyCases.length : 0;
-    const overview = Array.isArray(data.overviewKpis) ? data.overviewKpis[0] || {} : {};
+    const overview = overviewRow();
     const totalAgendas = number(overview.agenda_items_total);
-    const split = [
-      { label: "심의·의결", value: number(overview.decision_agendas_total), tone: "blue" },
-      { label: "보고", value: number(overview.report_agendas_total), tone: "lavender" },
-      { label: "기타", value: number(overview.unspecified_agendas_total), tone: "slate" },
-      { label: "공개", value: number(overview.public_agendas_total), tone: "blue" },
-      { label: "비공개", value: number(overview.private_agendas_total), tone: "coral" },
-    ];
-    const topics = (Array.isArray(data.topicDistribution) ? data.topicDistribution : []).slice(0, 7);
-    const topicMax = Math.max(...topics.map((item) => number(item.agenda_count)), 1);
+    const globalStats = analysisIndex.globalStats || {};
     return `
       <section class="section-band situation-board redesigned-board">
         <div class="section-header">
           <div>
             <h2>회의 운영 상황판</h2>
-            <p class="section-caption">심의·의결, 보고, 공개 여부, 발언 연결, 제재 신호를 한 화면에서 확인합니다.</p>
+            <p class="section-caption">연도·분기별 회의 흐름, 안건 구간, 발언량, 조항 참조를 실무자가 바로 훑을 수 있게 정리했습니다.</p>
           </div>
-          <div class="update-note">업데이트 기준: ${escapeHtml(data.generatedAt || "확인 필요")}</div>
+          <div class="update-note">업데이트 기준: ${escapeHtml(analysisIndex.generatedAt || data.generatedAt || "확인 필요")}</div>
         </div>
-        <div class="kpi-grid">${renderKpis()}</div>
+        <div class="kpi-grid">${kpiCards()}</div>
         <div class="operations-grid">
-          <article class="ops-panel">
-            <h3>안건 처리·공개 비율</h3>
-            <div class="topic-bars">
-              ${split.map((item) => `
-                <div class="topic-bar-row">
-                  <div class="topic-label">${escapeHtml(item.label)}</div>
-                  <div class="topic-track"><span class="topic-fill tone-${item.tone === "coral" ? 2 : item.tone === "lavender" ? 1 : 0}" style="width:${Math.max(item.value / Math.max(totalAgendas, 1) * 100, 2)}%"></span></div>
-                  <div class="topic-value">${formatNumber(item.value)}건</div>
-                </div>
-              `).join("")}
-            </div>
-          </article>
-          <article class="ops-panel">
-            <h3>실무 쟁점 주제</h3>
-            <div class="topic-bars">
-              ${topics.map((item, index) => `
-                <div class="topic-bar-row">
-                  <div class="topic-label">${escapeHtml(item.label)}</div>
-                  <div class="topic-track"><span class="topic-fill tone-${index % 3}" style="width:${Math.max(number(item.agenda_count) / topicMax * 100, 2)}%"></span></div>
-                  <div class="topic-value">${formatNumber(item.agenda_count)}</div>
-                </div>
-              `).join("")}
-            </div>
-          </article>
+          <article class="ops-panel"><h3>안건 처리 비율</h3>${donutChart([
+            { label: "심의·의결", value: overview.decision_agendas_total, tone: "blue" },
+            { label: "보고", value: overview.report_agendas_total, tone: "lavender" },
+            { label: "기타·미분류", value: Math.max(totalAgendas - number(overview.decision_agendas_total) - number(overview.report_agendas_total), 0), tone: "slate" },
+          ])}</article>
+          <article class="ops-panel"><h3>공개 여부</h3>${donutChart([
+            { label: "공개", value: overview.public_agendas_total, tone: "blue" },
+            { label: "비공개", value: overview.private_agendas_total, tone: "coral" },
+          ])}</article>
+          <article class="ops-panel wide"><h3>연도별 회의·안건 흐름</h3>${yearlyFlowChart(yearlyRows())}</article>
+          <article class="ops-panel wide"><h3>최근 분기별 회의 운영 통계</h3>${quarterlyStatsTable(analysisIndex.quarterlyStats || [])}</article>
+          <article class="ops-panel"><h3>실무 쟁점 주제</h3>${topicBars(data.topicDistribution || [])}</article>
+          <article class="ops-panel"><h3>속기록 기반 주요 대상</h3>${rankList(globalStats.topTargets || [], "추출된 대상 없음")}</article>
+          <article class="ops-panel"><h3>자주 등장한 관련 조항</h3>${rankList(globalStats.topArticles || [], "감지된 조항 없음")}</article>
         </div>
-        <div class="signal-strip"><strong>제재·처분 신호 ${formatNumber(majorCount)}건</strong></div>
-        <div class="meeting-card-grid">${meetingCards}</div>
+        <div class="section-header compact"><div><h3>회의 바로가기</h3><p class="section-caption">속기록이 있는 회의를 눌러 상세 화면으로 이동합니다.</p></div></div>
+        <div class="meeting-card-grid">${transcripts().slice(0, 24).map(meetingCard).join("")}</div>
       </section>
     `;
   }
 
-  function renderSearch() {
-    const cases = Array.isArray(data.majorPenaltyCases) ? data.majorPenaltyCases.slice(0, 50) : [];
-    const rows = cases.map((item) => `
-      <article class="commissioner-card">
-        <h3>${escapeHtml(item.agenda_title || item.case_title || item.target_name || "안건")}</h3>
-        <p>${escapeHtml(item.sanction_type || item.decision_type || "처분 정보 확인 필요")}</p>
-        <div class="kpi-meta">${escapeHtml(item.amount_text || item.amount_total_krw || "")}</div>
+  function normalizeSearch(value) {
+    return String(value || "").toLowerCase().replace(/\s+/g, " ").trim();
+  }
+
+  function rowFacetText(row, facet) {
+    if (facet === "target") return (row.targets || []).join(" ");
+    if (facet === "law") return (row.lawArticles || []).join(" ");
+    if (facet === "speaker") return (row.speakers || []).join(" ");
+    if (facet === "keyword") return (row.keywords || []).join(" ");
+    return [row.title, row.meetingLabel, row.date, row.type, (row.targets || []).join(" "), (row.lawArticles || []).join(" "), (row.speakers || []).join(" "), (row.keywords || []).join(" "), row.snippet, row.searchText].join(" ");
+  }
+
+  function scoreSearchRow(row, query, facet) {
+    if (!query) return row.isProcedural ? 1 : 2;
+    const haystack = normalizeSearch(rowFacetText(row, facet));
+    const tokens = normalizeSearch(query).split(/\s+/).filter(Boolean);
+    let score = 0;
+    for (const token of tokens) {
+      if (haystack.includes(token)) score += 2;
+      if ((row.targets || []).some((item) => item.toLowerCase().includes(token))) score += 3;
+      if ((row.lawArticles || []).some((item) => item.toLowerCase().includes(token))) score += 3;
+      if ((row.speakers || []).some((item) => item.toLowerCase().includes(token))) score += 2;
+      if ((row.title || "").toLowerCase().includes(token)) score += 2;
+    }
+    return score;
+  }
+
+  function buildSearchModel(filters = {}) {
+    const query = String(filters.query || "").trim();
+    const facet = filters.facet || "all";
+    const includeProcedural = Boolean(filters.includeProcedural);
+    const allRows = Array.isArray(analysisIndex.searchIndex) ? analysisIndex.searchIndex : [];
+    const scored = allRows
+      .map((row, index) => ({ row, index, score: scoreSearchRow(row, query, facet) }))
+      .filter((item) => item.score > 0)
+      .filter((item) => includeProcedural || !item.row.isProcedural || query)
+      .sort((left, right) => right.score - left.score || String(right.row.date || "").localeCompare(String(left.row.date || "")) || left.index - right.index);
+    return {
+      rows: scored.slice(0, 80).map((item) => item.row),
+      totalCount: allRows.length,
+      visibleCount: scored.length,
+      filters: { query, facet, includeProcedural },
+    };
+  }
+
+  function chipList(items = [], className = "status-pill") {
+    return items.slice(0, 6).map((item) => `<span class="${className}">${escapeHtml(item)}</span>`).join("");
+  }
+
+  function renderSearch(filters = {}) {
+    const model = buildSearchModel(filters);
+    const globalStats = analysisIndex.globalStats || {};
+    const quickKeywords = [
+      ...(globalStats.topTargets || []).slice(0, 4).map((item) => item.label),
+      ...(globalStats.topArticles || []).slice(0, 4).map((item) => item.label),
+    ].filter(Boolean);
+    const rows = model.rows.map((row) => `
+      <article class="search-result-card">
+        <header>
+          <div><span class="search-result-meta">${escapeHtml(row.date)} · ${escapeHtml(row.meetingLabel)}</span><h3>${escapeHtml(row.title || "안건")}</h3></div>
+          <span class="status-pill">${escapeHtml(row.type || "안건")}</span>
+        </header>
+        <p>${escapeHtml(row.snippet || "")}</p>
+        <div class="search-facet-grid">
+          <div><strong>대상</strong><div>${chipList(row.targets || [], "data-pill") || "<span>추출 없음</span>"}</div></div>
+          <div><strong>관련 조항</strong><div>${chipList(row.lawArticles || [], "provision-chip") || "<span>감지 없음</span>"}</div></div>
+          <div><strong>발언자</strong><div>${chipList(row.speakers || [], "status-pill")}</div></div>
+          <div><strong>키워드</strong><div>${chipList(row.keywords || [], "data-pill")}</div></div>
+        </div>
+        <footer>
+          <button class="small-button" type="button" data-search-meeting-id="${escapeHtml(row.meetingId)}" data-search-utterance-id="${escapeHtml(row.startUtteranceId || "")}">회의 상세에서 보기</button>
+          ${row.isProcedural ? `<span class="search-procedure-note">절차성 구간</span>` : ""}
+        </footer>
       </article>
     `).join("");
     return `
-      <section class="section-band">
+      <section class="section-band integrated-search">
         <div class="section-header">
-          <div>
-            <h2>안건 통합검색</h2>
-            <p class="section-caption">현재 파일 기반 보기에서는 주요 처분 안건을 먼저 보여줍니다.</p>
-          </div>
+          <div><h2>안건 통합검색</h2><p class="section-caption">속기록을 대상, 조항, 발언자, 키워드 단위로 쪼개 검색합니다.</p></div>
+          <div class="update-note">${formatNumber(model.totalCount)}개 인덱스 · ${formatNumber(model.visibleCount)}개 표시</div>
         </div>
-        <div class="commissioner-grid">${rows}</div>
+        <form class="search-control-panel" data-integrated-search-form>
+          <label class="search-field"><span>검색어</span><input name="q" type="search" value="${escapeHtml(model.filters.query)}" placeholder="예: 카카오페이, 제29조, 안전조치, 송경희"></label>
+          <label class="search-field narrow"><span>검색 범위</span><select name="facet">
+            ${["all:전체", "target:처분대상", "law:관련 조항", "speaker:발언자", "keyword:키워드"].map((pair) => {
+              const [value, label] = pair.split(":");
+              return `<option value="${value}"${model.filters.facet === value ? " selected" : ""}>${label}</option>`;
+            }).join("")}
+          </select></label>
+          <label class="toggle-field"><input name="includeProcedural" type="checkbox"${model.filters.includeProcedural ? " checked" : ""}><span>회의록·공개여부 같은 절차 구간 포함</span></label>
+          <button class="tool-button assistant-primary-action" type="submit">검색</button>
+        </form>
+        <div class="quick-chip-row">${quickKeywords.map((keyword) => `<button class="quick-chip" type="button" data-search-chip="${escapeHtml(keyword)}">${escapeHtml(keyword)}</button>`).join("")}</div>
+        <div class="search-result-list">${rows || `<article class="search-result-card empty"><h3>검색 결과가 없습니다.</h3><p>대상명, 법조항, 발언자명, 쟁점 키워드를 바꿔 다시 검색해 보세요.</p></article>`}</div>
       </section>
     `;
   }
 
-  function extractLawReferences(transcriptText) {
-    const matches = transcriptText.match(/(?:개인정보\s*보호법|정보통신망법|신용정보법)?\s*제\s*\d+\s*조(?:의\s*\d+)?/g) || [];
-    return [...new Set(matches)].slice(0, 20).map((label) => ({ label: label.replace(/\s+/g, " ").trim() }));
-  }
-
-  function selectedMeeting(id) {
-    const items = transcripts();
-    return id ? items.find((item) => item.id === id) || items[0] : items[0];
-  }
-
-  function embeddedMeetingDetail(meeting) {
-    const detail = meeting ? detailIndex.meetings?.[meeting.id] : null;
-    return detail ? { ...detail, meeting } : null;
-  }
-
   function lawDetail(ref) {
-    if (!ref) return `<div class="law-detail-empty">법조항을 선택하면 구체적 내용이 표시됩니다.</div>`;
+    if (!ref) return `<div class="law-detail-empty">법조항을 선택하면 구체적인 확인 포인트가 표시됩니다.</div>`;
     return `
       <article class="law-detail-card">
-        <div class="law-detail-heading">
-          <span class="status-pill status-ready">로컬 검증</span>
-          <h3>${escapeHtml(ref.lawName)} ${escapeHtml(ref.article)} ${ref.title ? `(${escapeHtml(ref.title)})` : ""}</h3>
-        </div>
+        <div class="law-detail-heading"><span class="status-pill status-ready">로컬 검증</span><h3>${escapeHtml(ref.lawName)} ${escapeHtml(ref.article)} ${ref.title ? `(${escapeHtml(ref.title)})` : ""}</h3></div>
         <div class="law-version-grid">
-          <section><h4>회의 당시 기준</h4><p>${escapeHtml(ref.meetingVersion || "MCP 조회 연결 대기")}</p><small>${escapeHtml(ref.meetingDate || "")}</small></section>
-          <section><h4>현재 확인 포인트</h4><p>${escapeHtml(ref.currentVersion || "현재 조문 조회 연결 대기")}</p><small>korean-law-mcp get_law_text / get_article_history</small></section>
+          <section><h4>회의 당시 기준</h4><p>${escapeHtml(ref.meetingVersion || "korean-law-mcp 연혁 조회 연결 대기")}</p><small>기준일: ${escapeHtml(ref.meetingDate || "")}</small></section>
+          <section><h4>현재 확인 포인트</h4><p>${escapeHtml(ref.currentVersion || "현재 조문 조회 연결 대기")}</p><small>조회 도구: korean-law-mcp get_law_text / get_article_history</small></section>
         </div>
         <pre class="law-request">${escapeHtml(JSON.stringify(ref.lookupRequest || {}, null, 2))}</pre>
       </article>
     `;
   }
 
-  function renderAgendaList(agendas) {
-    return (agendas || []).map((agenda) => `
-      <button class="agenda-jump-item" type="button" data-utterance-target="${escapeHtml(agenda.startUtteranceId)}">
-        <span>${escapeHtml(agenda.type || "안건")}</span>
-        <strong>${escapeHtml(agenda.title)}</strong>
+  function renderAgendaList(agendas = []) {
+    return agendas.map((agenda) => `
+      <button class="agenda-jump-item" type="button" data-utterance-target="${escapeHtml(agenda.startUtteranceId || "")}">
+        <span>${escapeHtml(agenda.type || "안건")}</span><strong>${escapeHtml(agenda.title || "")}</strong>
       </button>
     `).join("") || `<p class="section-caption">감지된 안건 구간이 없습니다.</p>`;
   }
@@ -283,15 +402,16 @@
     return html;
   }
 
-  function renderUtterances(utterances) {
+  function renderUtterances(utterances = [], meetingId = "") {
     return `
       <div class="utterance-list">
-        ${(utterances || []).map((utterance) => `
+        ${utterances.map((utterance) => `
           <article class="utterance-card" id="${escapeHtml(utterance.id)}" data-utterance-id="${escapeHtml(utterance.id)}">
             <header>
               <span class="speaker-role">${escapeHtml(utterance.speakerRole || "발언")}</span>
               <strong>${escapeHtml(utterance.speakerName || utterance.speaker)}</strong>
               <em>${escapeHtml(utterance.sectionTitle || "")}</em>
+              <button class="utterance-animation-jump" type="button" data-animation-meeting-id="${escapeHtml(meetingId)}" data-animation-utterance-id="${escapeHtml(utterance.id)}">장면 이동</button>
             </header>
             <p>${renderUtteranceText(utterance)}</p>
           </article>
@@ -302,31 +422,16 @@
 
   function renderMeetingDetail(id) {
     const meeting = selectedMeeting(id);
-    if (!meeting) {
-      return `<section class="section-band"><h2>회의 상세</h2><p class="section-caption">선택된 회의가 없습니다.</p></section>`;
-    }
+    if (!meeting) return `<section class="section-band"><h2>회의 상세</h2><p class="section-caption">선택된 회의가 없습니다.</p></section>`;
     const detail = embeddedMeetingDetail(meeting);
     activeMeetingDetail = detail;
-    const lawRefs = detail?.lawReferences || extractLawReferences(meeting.content);
-    const lawItems = lawRefs.map((ref, index) => `
-      <button class="law-reference-item" type="button" data-law-ref-index="${index}">
-        <strong>${escapeHtml(ref.lawName ? `${ref.lawName} ${ref.article}` : ref.label)}</strong>
-        <span>${escapeHtml(ref.title || ref.meetingDate || "")}</span>
-      </button>
-    `).join("") || `<p class="section-caption">감지된 법조항이 없습니다.</p>`;
+    const lawRefs = detail?.lawReferences || [];
     const overview = detail?.overview || {};
     const attendees = Array.isArray(overview.attendees) ? overview.attendees : [];
-    const transcriptBody = detail?.utterances?.length
-      ? renderUtterances(detail.utterances)
-      : `<pre class="transcript-body">${escapeHtml(meeting.content || "이 회의는 현재 파일에 속기록 본문이 포함되어 있지 않습니다.")}</pre>`;
-
     return `
       <section class="section-band meeting-detail">
         <div class="section-header">
-          <div>
-            <h2>회의 상세</h2>
-            <p class="section-caption">${escapeHtml(meeting.meetingLabel)} · ${escapeHtml(meeting.date)}</p>
-          </div>
+          <div><h2>회의 상세</h2><p class="section-caption">${escapeHtml(meeting.meetingLabel)} · ${escapeHtml(meeting.date)}</p></div>
           <button class="tool-button" type="button" data-animation-meeting-id="${escapeHtml(meeting.id)}">애니메이션으로 보기</button>
         </div>
         ${detail ? `
@@ -338,24 +443,16 @@
           </div>` : ""}
         <div class="meeting-detail-grid redesigned-detail">
           <aside class="meeting-detail-side">
-            <h3>관련 문서</h3>
-            <div class="button-stack">
-              <a class="small-button" href="${escapeHtml(meeting.path)}" target="_blank" rel="noreferrer">속기록 원문</a>
-            </div>
-            <div class="side-divider"></div>
-            <h3>안건 목록</h3>
-            <div class="agenda-jump-list">${renderAgendaList(detail?.agendas || [])}</div>
+            <h3>관련 문서</h3><div class="button-stack"><a class="small-button" href="${escapeHtml(meeting.path)}" target="_blank" rel="noreferrer">속기록 원문</a></div>
+            <div class="side-divider"></div><h3>안건 목록</h3><div class="agenda-jump-list">${renderAgendaList(detail?.agendas || [])}</div>
           </aside>
           <article class="transcript-panel">
-            <div class="panel-heading">
-              <h3>발언자별 속기록</h3>
-              <span>${formatNumber(detail?.utterances?.length || 0)}개 발언</span>
-            </div>
-            ${transcriptBody}
+            <div class="panel-heading"><h3>발언자별 속기록</h3><span>${formatNumber(detail?.utterances?.length || 0)}개 발언</span></div>
+            ${detail?.utterances?.length ? renderUtterances(detail.utterances, meeting.id) : `<pre class="transcript-body">${escapeHtml(meeting.content || "속기록 본문을 찾지 못했습니다.")}</pre>`}
           </article>
           <aside class="law-panel">
             <h3>법조항 비교</h3>
-            ${lawItems}
+            ${lawRefs.map((ref, index) => `<button class="law-reference-item" type="button" data-law-ref-index="${index}"><strong>${escapeHtml(ref.lawName)} ${escapeHtml(ref.article)}</strong><span>${escapeHtml(ref.title || ref.meetingDate || "")}</span></button>`).join("") || `<p class="section-caption">감지된 법조항이 없습니다.</p>`}
             <div id="law-detail-panel" class="law-detail-panel">${lawDetail(lawRefs[0])}</div>
           </aside>
         </div>
@@ -363,62 +460,52 @@
     `;
   }
 
-  function transcriptToUtterances(value) {
-    return String(value || "")
-      .split(/\n+/)
-      .map((line, index) => ({ id: `u${index + 1}`, speaker: "속기록", text: line.trim() }))
-      .filter((item) => item.text)
-      .slice(0, 200);
-  }
-
   function renderAnimationViewer(id) {
     const meeting = selectedMeeting(id);
     if (!meeting) return renderMeetingDetail(id);
     const detail = embeddedMeetingDetail(meeting);
     activeMeetingDetail = detail;
-    const utterances = transcriptToUtterances(meeting.content);
-    const scenes = detail?.utterances?.length ? [
-      { speaker: "회의장", text: `${meeting.meetingLabel} 입장과 개회를 준비합니다.`, stageNote: "위원 입장 · 착석" },
-      ...detail.utterances.map((utterance, index) => ({ ...utterance, id: `scene-${index + 1}`, utteranceId: utterance.id, stageNote: utterance.sectionTitle })),
-      { speaker: "회의장", text: `${meeting.meetingLabel} 산회와 퇴장을 재현합니다.`, stageNote: "산회 · 퇴장" },
-    ] : [
-      { speaker: "system", text: `${meeting.meetingLabel} 회의를 시작합니다.` },
-      ...utterances,
-      { speaker: "system", text: `${meeting.meetingLabel} 회의를 마칩니다.` },
-    ];
+    const timeline = detail?.animationTimeline || { meetingId: meeting.id, meetingLabel: meeting.meetingLabel, scenes: [] };
+    activeAnimationTimeline = timeline;
+    const scenes = timeline.scenes || [];
+    const firstScene = scenes[0] || {};
+    const actors = [...(timeline.members || []), ...(timeline.staffActors || [{ id: "staff", name: "사무처", role: "보고자", seat: "staff-center" }])];
+    const actorItems = actors.map((actor) => `
+      <div class="animation-actor ${actor.id === firstScene.memberId ? "speaking" : ""}" data-member-id="${escapeHtml(actor.id || "")}" data-seat="${escapeHtml(actor.seat || "")}">
+        ${actor.asset ? `<img src="${escapeHtml(actor.asset)}" alt="${escapeHtml(actor.name)} 캐릭터">` : `<span class="staff-avatar">${escapeHtml((actor.name || "사").slice(0, 1))}</span>`}
+        <strong>${escapeHtml(actor.name || "참석자")}</strong><small>${escapeHtml(actor.role || "")}</small>
+      </div>
+    `).join("");
     const sceneItems = scenes.map((scene, index) => `
       <button class="animation-scene-item" type="button" data-scene-index="${index}">
-        <span>${escapeHtml(scene.stageNote || scene.speaker)}</span>
-        <strong>${escapeHtml(scene.text)}</strong>
-        <em>${escapeHtml(scene.speaker)}</em>
+        <span>${escapeHtml(scene.phase || scene.stageNote || scene.type || "장면")}</span>
+        <strong>${escapeHtml(scene.shortText || scene.text || "")}</strong>
+        <em>${escapeHtml(scene.speaker || "")}</em>
       </button>
     `).join("");
-    const firstScene = scenes[0] || {};
     return `
       <section class="section-band animation-viewer rich-animation">
         <div class="section-header">
-          <div>
-            <h2>회의 애니메이션 재현</h2>
-            <p class="section-caption">${escapeHtml(meeting.meetingLabel)} 개회부터 산회까지 발언 단위로 이동합니다.</p>
-          </div>
+          <div><h2>회의 애니메이션 재현</h2><p class="section-caption">${escapeHtml(timeline.meetingLabel || meeting.meetingLabel)} 개회부터 산회까지 발언 단위로 이동합니다.</p></div>
           <button class="tool-button" type="button" data-close-animation>속기록으로 돌아가기</button>
         </div>
         <div class="animation-layout">
           <div class="animation-stage" aria-label="회의장 재현 무대" data-animation-stage>
-            <div class="stage-screen">
-              <span data-stage-label>${escapeHtml(firstScene.stageNote || "위원 입장")}</span>
-              <strong data-stage-speaker>${escapeHtml(firstScene.speaker || "회의장")}</strong>
-            </div>
-            <div class="meeting-room-table">
-              <span class="seat seat-chair">위원장</span>
-              <span class="seat">위원</span>
-              <span class="seat">위원</span>
-              <span class="seat">사무처</span>
-              <span class="seat">안건 담당</span>
+            <div class="stage-screen"><span data-stage-label>${escapeHtml(firstScene.stageNote || "위원 입장")}</span><strong data-stage-speaker>${escapeHtml(firstScene.speaker || "회의장")}</strong></div>
+            <div class="meeting-room-table animation-actor-grid">${actorItems}</div>
+            <div class="animation-controls" data-animation-controls>
+              <button class="small-button" type="button" data-animation-action="prev">이전</button>
+              <button class="small-button primary-control" type="button" data-animation-action="play">재생</button>
+              <button class="small-button" type="button" data-animation-action="next">다음</button>
             </div>
             <p data-stage-text>${escapeHtml(firstScene.text || "")}</p>
           </div>
-          <div class="animation-timeline">${sceneItems}</div>
+          <aside class="animation-side-panel">
+            <h3>안건 흐름</h3>
+            <div class="animation-agenda-list">${renderAgendaList(timeline.agendas || [])}</div>
+            <h3>장면 타임라인</h3>
+            <div class="animation-timeline">${sceneItems}</div>
+          </aside>
         </div>
       </section>
     `;
@@ -437,37 +524,16 @@
         </article>
       `;
     }).join("");
-    return `
-      <section class="section-band">
-        <div class="section-header">
-          <div>
-            <h2>위원별 분석</h2>
-            <p class="section-caption">속기록 활동 지표를 기반으로 위원별 관심 주제를 확인합니다.</p>
-          </div>
-        </div>
-        <div class="commissioner-grid">${cards}</div>
-      </section>
-    `;
+    return `<section class="section-band"><div class="section-header"><div><h2>위원별 분석</h2><p class="section-caption">속기록 활동 지표를 기반으로 위원별 관심 주제를 확인합니다.</p></div></div><div class="commissioner-grid">${cards}</div></section>`;
   }
 
   function renderAgendaAssistant() {
     return `
       <section class="section-band">
-        <div class="section-header">
-          <div>
-            <h2>새 안건 준비 도우미</h2>
-            <p class="section-caption">안건명과 요약을 입력하면 유사 안건, 예상 쟁점, 준비 체크리스트를 확인합니다.</p>
-          </div>
-        </div>
+        <div class="section-header"><div><h2>새 안건 준비 도우미</h2><p class="section-caption">안건명과 요약을 입력하면 유사 안건, 예상 쟁점, 준비 체크리스트를 확인합니다.</p></div></div>
         <form class="assistant-form" data-agenda-form>
-          <label class="assistant-field">
-            <span>안건명</span>
-            <input name="title" type="text" placeholder="예: 안전조치의무 위반 검토">
-          </label>
-          <label class="assistant-field">
-            <span>안건 요약</span>
-            <textarea name="summary" rows="7" placeholder="사안 개요와 검토 포인트를 붙여 넣으세요."></textarea>
-          </label>
+          <label class="assistant-field"><span>안건명</span><input name="title" type="text" placeholder="예: 안전조치의무 위반 검토"></label>
+          <label class="assistant-field"><span>안건 요약</span><textarea name="summary" rows="7" placeholder="사안 개요와 검토 포인트를 붙여 넣으세요."></textarea></label>
           <button class="tool-button assistant-primary-action" type="submit">분석하기</button>
         </form>
         <div class="assistant-result" id="assistant-result"></div>
@@ -475,59 +541,22 @@
     `;
   }
 
-  function buildHistoricalAgendas() {
-    const rows = Array.isArray(data.majorPenaltyCases) ? data.majorPenaltyCases : [];
-    return rows.map((item) => ({
-      title: item.agenda_title || item.case_title || item.title || item.target_name || item.top_target_name || "과거 안건",
-      searchableText: text(item),
-      lawArticle: firstText(item.law_article, item.primary_law_article, item.law_article_text),
-      disposition: firstText(item.sanction_type, item.decision_type),
-      amountText: firstText(item.amount_text, item.amount_total_krw),
-    }));
-  }
-
-  function buildAgendaResult(title, summary) {
-    const requestText = `${title} ${summary}`;
-    const requestTokens = tokenize(requestText);
-    const similarAgendas = buildHistoricalAgendas()
-      .map((agenda, index) => {
-        const agendaTokens = tokenize(agenda.searchableText);
-        const matchedTokens = [...requestTokens].filter((token) => agendaTokens.has(token));
-        return { ...agenda, index, matchedTokens, score: matchedTokens.length };
-      })
-      .filter((agenda) => agenda.score > 0)
-      .sort((left, right) => right.score - left.score || left.index - right.index)
-      .slice(0, 5);
-
-    return {
-      similarAgendas,
-      issues: findKeyTokens(requestText),
-      questions: (Array.isArray(data.commissionerActivity) ? data.commissionerActivity : []).slice(0, 3).map((item) => {
-        const topTag = Array.isArray(item.top_tags) && item.top_tags[0] ? text(item.top_tags[0]) : "주요 쟁점";
-        const name = item.commissioner_name || item.name || "관련 위원";
-        return `${name}: "${topTag}" 관점에서 사실관계와 법적 근거를 어떻게 설명할 수 있습니까?`;
-      }),
-    };
-  }
-
-  function renderAgendaResult(result) {
-    const similar = result.similarAgendas.map((item) => `
-      <li><strong>${escapeHtml(item.title)}</strong><span>${escapeHtml(item.disposition || "처분 정보 확인 필요")} ${escapeHtml(item.amountText || "")}</span></li>
-    `).join("") || `<li>입력 내용과 직접 매칭되는 과거 안건이 아직 없습니다.</li>`;
-    const issues = result.issues.map((token) => `
-      <li><strong>${escapeHtml(token)}</strong><span>${escapeHtml(issueByToken[token] || "추가 검토가 필요합니다.")}</span></li>
-    `).join("") || `<li>안건 요약에 핵심 쟁점 단어를 더 넣으면 예상 쟁점이 보강됩니다.</li>`;
-    const questions = result.questions.map((question) => `<li>${escapeHtml(question)}</li>`).join("");
+  function renderAgendaResult(title, summary) {
+    const request = normalizeSearch(`${title} ${summary}`);
+    const rows = (analysisIndex.searchIndex || [])
+      .map((row) => ({ row, score: scoreSearchRow(row, request, "all") }))
+      .filter((item) => item.score > 0)
+      .sort((left, right) => right.score - left.score)
+      .slice(0, 6)
+      .map((item) => item.row);
+    const issues = [...new Set(rows.flatMap((row) => row.keywords || []))].slice(0, 12);
+    const provisions = [...new Set(rows.flatMap((row) => row.lawArticles || []))].slice(0, 12);
     return `
       <div class="assistant-result-grid">
-        <article><h3>유사 안건</h3><ul>${similar}</ul></article>
-        <article><h3>예상 쟁점</h3><ul>${issues}</ul></article>
-        <article><h3>위원별 예상 질문</h3><ul>${questions}</ul></article>
-        <article><h3>준비 체크리스트</h3><ul>
-          <li>사실관계와 증거 묶음을 타임라인으로 정리</li>
-          <li>법 조항과 처분 근거, 감경·가중 사유 확인</li>
-          <li>위원 질의 답변 초안과 보강 증거 위치 연결</li>
-        </ul></article>
+        <section><h3>유사 안건</h3><ul class="assistant-list">${rows.map((row) => `<li><strong>${escapeHtml(row.title)}</strong><span>${escapeHtml(row.meetingLabel)} · ${escapeHtml((row.targets || []).join(", "))}</span></li>`).join("") || "<li>유사 안건 후보 없음</li>"}</ul></section>
+        <section><h3>예상 쟁점</h3><div class="assistant-tag-list">${issues.map((item) => `<span class="status-pill">${escapeHtml(item)}</span>`).join("")}</div></section>
+        <section><h3>유사 조항</h3><div class="assistant-tag-list">${provisions.map((item) => `<span class="provision-chip">${escapeHtml(item)}</span>`).join("")}</div></section>
+        <section><h3>준비 체크리스트</h3><ul class="assistant-list"><li>대상, 처리 행위, 법적 근거를 안건 첫 장에 분리</li><li>동일 조항의 과거 의결·보고 사례 확인</li><li>위원 질의가 예상되는 사실관계와 증거 위치를 표시</li></ul></section>
       </div>
     `;
   }
@@ -552,11 +581,14 @@
     setActiveTab("meeting");
   }
 
-  function showAnimationViewer(id) {
+  function showAnimationViewer(id, initialUtteranceId = "") {
     activeMeetingId = id;
     const meetingTab = $("#tab-meeting");
     if (meetingTab) meetingTab.innerHTML = renderAnimationViewer(id);
     setActiveTab("meeting");
+    const scenes = activeAnimationTimeline?.scenes || [];
+    const initialIndex = initialUtteranceId ? scenes.findIndex((scene) => scene.utteranceId === initialUtteranceId) : 0;
+    setAnimationScene(Math.max(initialIndex || 0, 0));
   }
 
   function scrollToUtterance(id) {
@@ -570,22 +602,67 @@
   function updateLawDetail(index) {
     const panel = $("#law-detail-panel");
     const ref = activeMeetingDetail?.lawReferences?.[Number(index)];
-    if (!panel || !ref) return;
-    panel.innerHTML = lawDetail(ref);
+    if (panel && ref) panel.innerHTML = lawDetail(ref);
   }
 
-  function updateAnimationStage(button) {
+  function sceneText(scene = {}) {
+    const utterance = activeMeetingDetail?.utterances?.find((item) => item.id === scene.utteranceId);
+    return utterance?.text || scene.text || scene.shortText || "";
+  }
+
+  function setAnimationScene(index) {
+    const scenes = activeAnimationTimeline?.scenes || [];
+    if (!scenes.length) return;
+    activeSceneIndex = Math.max(0, Math.min(index, scenes.length - 1));
+    const scene = scenes[activeSceneIndex];
     const stage = $("[data-animation-stage]");
-    if (!stage || !button) return;
-    const label = $("[data-stage-label]", stage);
-    const speaker = $("[data-stage-speaker]", stage);
-    const textNode = $("[data-stage-text]", stage);
-    const scene = activeMeetingDetail?.utterances?.[Number(button.dataset.sceneIndex) - 1];
+    if (!stage) return;
+    const button = $(`.animation-scene-item[data-scene-index="${activeSceneIndex}"]`);
     document.querySelector(".animation-scene-item.active")?.classList.remove("active");
-    button.classList.add("active");
-    if (label) label.textContent = scene?.sectionTitle || button.querySelector("span")?.textContent || "";
-    if (speaker) speaker.textContent = scene?.speaker || button.querySelector("em")?.textContent || "";
-    if (textNode) textNode.textContent = scene?.text || button.querySelector("strong")?.textContent || "";
+    button?.classList.add("active");
+    $("[data-stage-label]", stage).textContent = scene.stageNote || scene.phase || "";
+    $("[data-stage-speaker]", stage).textContent = scene.speaker || scene.speakerName || "";
+    $("[data-stage-text]", stage).textContent = sceneText(scene);
+    document.querySelectorAll(".animation-actor.speaking").forEach((node) => node.classList.remove("speaking"));
+    if (scene.memberId) document.querySelector(`.animation-actor[data-member-id="${cssEscape(scene.memberId)}"]`)?.classList.add("speaking");
+    button?.scrollIntoView({ block: "nearest" });
+  }
+
+  function stopAnimationPlayback() {
+    if (!animationTimer) return;
+    window.clearInterval(animationTimer);
+    animationTimer = null;
+    const play = $('[data-animation-action="play"]');
+    if (play) play.textContent = "재생";
+  }
+
+  function startAnimationPlayback() {
+    stopAnimationPlayback();
+    const play = $('[data-animation-action="play"]');
+    if (play) play.textContent = "일시정지";
+    animationTimer = window.setInterval(() => {
+      const scenes = activeAnimationTimeline?.scenes || [];
+      if (activeSceneIndex >= scenes.length - 1) {
+        stopAnimationPlayback();
+        return;
+      }
+      setAnimationScene(activeSceneIndex + 1);
+    }, 1800);
+  }
+
+  function handleAnimationAction(action) {
+    if (action === "prev") {
+      stopAnimationPlayback();
+      setAnimationScene(activeSceneIndex - 1);
+    }
+    if (action === "next") {
+      stopAnimationPlayback();
+      setAnimationScene(activeSceneIndex + 1);
+    }
+    if (action === "play") {
+      if (animationTimer) stopAnimationPlayback();
+      else startAnimationPlayback();
+    }
   }
 
   function init() {
@@ -595,10 +672,7 @@
     $("#tab-meeting").innerHTML = renderMeetingDetail();
     $("#tab-commissioner").innerHTML = renderCommissionerAnalysis();
     $("#tab-assistant").innerHTML = renderAgendaAssistant();
-
-    document.querySelectorAll(".nav-item[data-tab]").forEach((button) => {
-      button.addEventListener("click", () => setActiveTab(button.dataset.tab));
-    });
+    document.querySelectorAll(".nav-item[data-tab]").forEach((button) => button.addEventListener("click", () => setActiveTab(button.dataset.tab)));
   }
 
   document.addEventListener("click", (event) => {
@@ -606,10 +680,13 @@
     if (meeting) showMeetingDetail(meeting.dataset.meetingId);
 
     const animation = event.target.closest("[data-animation-meeting-id]");
-    if (animation) showAnimationViewer(animation.dataset.animationMeetingId);
+    if (animation) showAnimationViewer(animation.dataset.animationMeetingId, animation.dataset.animationUtteranceId || "");
 
     const closeAnimation = event.target.closest("[data-close-animation]");
-    if (closeAnimation && activeMeetingId) showMeetingDetail(activeMeetingId);
+    if (closeAnimation && activeMeetingId) {
+      stopAnimationPlayback();
+      showMeetingDetail(activeMeetingId);
+    }
 
     const agendaJump = event.target.closest("[data-utterance-target]");
     if (agendaJump) scrollToUtterance(agendaJump.dataset.utteranceTarget);
@@ -618,20 +695,43 @@
     if (lawReference) updateLawDetail(lawReference.dataset.lawRefIndex);
 
     const scene = event.target.closest(".animation-scene-item[data-scene-index]");
-    if (scene) updateAnimationStage(scene);
+    if (scene) setAnimationScene(Number(scene.dataset.sceneIndex || 0));
+
+    const animationAction = event.target.closest("[data-animation-action]");
+    if (animationAction) handleAnimationAction(animationAction.dataset.animationAction);
+
+    const searchMeeting = event.target.closest("[data-search-meeting-id]");
+    if (searchMeeting) {
+      showMeetingDetail(searchMeeting.dataset.searchMeetingId);
+      window.setTimeout(() => scrollToUtterance(searchMeeting.dataset.searchUtteranceId), 80);
+    }
+
+    const searchChip = event.target.closest("[data-search-chip]");
+    if (searchChip) $("#tab-search").innerHTML = renderSearch({ query: searchChip.dataset.searchChip });
 
     const clearFilter = event.target.closest("#clear-filter");
     if (clearFilter) setActiveTab("stats");
   });
 
   document.addEventListener("submit", (event) => {
+    const searchForm = event.target.closest("[data-integrated-search-form]");
+    if (searchForm) {
+      event.preventDefault();
+      const formData = new FormData(searchForm);
+      $("#tab-search").innerHTML = renderSearch({
+        query: formData.get("q"),
+        facet: formData.get("facet") || "all",
+        includeProcedural: formData.get("includeProcedural") === "on",
+      });
+      return;
+    }
+
     const form = event.target.closest("[data-agenda-form]");
     if (!form) return;
     event.preventDefault();
     const formData = new FormData(form);
-    const result = buildAgendaResult(formData.get("title"), formData.get("summary"));
     const resultNode = $("#assistant-result");
-    if (resultNode) resultNode.innerHTML = renderAgendaResult(result);
+    if (resultNode) resultNode.innerHTML = renderAgendaResult(formData.get("title"), formData.get("summary"));
   });
 
   init();

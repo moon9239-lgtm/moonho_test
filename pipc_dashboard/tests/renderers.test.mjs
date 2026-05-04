@@ -11,7 +11,7 @@ test("renderSituationBoard includes operational KPIs and meeting cards", () => {
   assert.match(html, /44/);
   assert.match(html, /총 안건 수/);
   assert.match(html, /2025년 제24회/);
-  assert.match(html, /제재·처분 신호/);
+  assert.doesNotMatch(html, /제재·처분 신호/);
 });
 
 test("renderSituationBoard includes expanded operations panels", () => {
@@ -23,19 +23,26 @@ test("renderSituationBoard includes expanded operations panels", () => {
     agendaSplit: [{ label: "심의·의결", value: 6, ratio: 0.6, tone: "blue" }],
     visibilitySplit: [{ label: "공개", value: 8, ratio: 0.8, tone: "blue" }],
     yearlyRows: [{ meeting_year: 2025, meetings: 20, agenda_items: 80, decision_agendas: 40, report_agendas: 30, utterances: 1000 }],
+    quarterlyStats: [{ key: "2025-Q4", label: "2025년 4분기", meetingCount: 6, agendaCount: 22, utteranceCount: 400, lawReferenceCount: 12 }],
+    globalStats: {
+      topTargets: [{ label: "예시기관", count: 3 }],
+      topArticles: [{ label: "개인정보 보호법 제29조", count: 5 }],
+    },
     topicDistribution: [{ label: "위반·처분", agenda_count: 20 }],
     dataQuality: [{ label: "안건 연결 발언", ratio: 0.9, notes: "테스트" }],
-    sanctions: [{ sanction_kind: "과징금", sanction_count: 3 }],
-    signals: { majorPenaltyCases: [] },
     meetingCards: [],
   });
 
   assert.match(html, /안건 처리 비율/);
   assert.match(html, /공개 여부/);
   assert.match(html, /연도별 회의·안건 흐름/);
+  assert.match(html, /최근 분기별 회의 운영 통계/);
   assert.match(html, /실무 쟁점 주제/);
   assert.match(html, /데이터 검증 상태/);
-  assert.match(html, /과징금 3/);
+  assert.match(html, /속기록 기반 주요 대상/);
+  assert.match(html, /예시기관/);
+  assert.match(html, /개인정보 보호법 제29조/);
+  assert.doesNotMatch(html, /과징금 3/);
 });
 
 test("renderSituationBoard escapes model text fields", () => {

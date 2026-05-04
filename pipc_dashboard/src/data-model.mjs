@@ -25,6 +25,7 @@ export function normalizeTranscriptRecord(item, index = 0) {
   const date = item.date || item.meeting_date || "";
   const year = toNumber(item.year || item.meeting_year || date.slice(0, 4));
   const meetingNo = item.meetingNo ?? item.meeting_number ?? null;
+  const meetingTitle = item.meetingTitle || item.meeting_title || "";
   const path = normalizeDashboardPath(item.path || item.transcript_path || item.raw_md_path || "");
   const sizeBytes = toNumber(item.size_bytes);
   return {
@@ -32,8 +33,8 @@ export function normalizeTranscriptRecord(item, index = 0) {
     year,
     date,
     meetingNo,
-    meetingLabel: item.meetingLabel || item.meeting_label || (meetingNo ? `${year}년 제${meetingNo}회` : `${year}년`),
-    title: item.title || item.transcript_title || item.meeting_title || path.split("/").pop() || "",
+    meetingLabel: item.meetingLabel || item.meeting_label || meetingTitle || (meetingNo ? `${year}년 제${meetingNo}회` : `${year}년`),
+    title: item.title || item.transcript_title || meetingTitle || path.split("/").pop() || "",
     path,
     sizeKb: item.sizeKb ?? item.size_kb ?? (sizeBytes ? Math.round(sizeBytes / 1024) : null),
     content: item.content || "",
@@ -59,7 +60,7 @@ function makeShareRows(rows) {
   return rows.map((row) => ({ ...row, ratio: ratio(row.value, total) }));
 }
 
-export function buildSituationBoardModel(data = {}) {
+export function buildSituationBoardModel(data = {}, analysisIndex = {}) {
   const yearlyRows = data.yearlyStats?.length ? data.yearlyStats : data.meetingYearly || [];
   const overview = overviewRow(data);
   const totalMeetings = toNumber(overview.meetings_total) || yearlyRows.reduce((sum, row) => sum + toNumber(row.meetings ?? row.meeting_count), 0);
@@ -72,9 +73,18 @@ export function buildSituationBoardModel(data = {}) {
   const utterances = toNumber(overview.utterances_total) || yearlyRows.reduce((sum, row) => sum + toNumber(row.utterances), 0);
   const linkedUtterances = toNumber(overview.utterances_with_agenda);
   const latest = latestYearlyRow(yearlyRows);
+  const analysisTotals = analysisIndex.totals || {};
+  const compactMeetings = Array.isArray(analysisIndex.compactMeetings) ? analysisIndex.compactMeetings : [];
+  const quarterlyStats = Array.isArray(analysisIndex.quarterlyStats) ? analysisIndex.quarterlyStats : [];
+  const parsedMeetings = toNumber(analysisTotals.parsedMeetings) || compactMeetings.length;
+  const analyzedAgendas = toNumber(analysisTotals.searchEntries);
+  const transcriptMeetings = toNumber(analysisTotals.transcriptMeetings) || meetingCards.length;
+  const transcriptUtterances = compactMeetings.reduce((sum, item) => sum + toNumber(item.utteranceCount), 0);
+  const transcriptLawRefs = compactMeetings.reduce((sum, item) => sum + toNumber(item.lawReferenceCount), 0);
+  const latestQuarter = quarterlyStats[0] || null;
 
   return {
-    updatedAt: data.generatedAt || "",
+    updatedAt: analysisIndex.generatedAt || data.generatedAt || "",
     overview,
     kpis: {
       totalMeetings: { label: "총 회의 수", value: totalMeetings },
@@ -90,16 +100,24 @@ export function buildSituationBoardModel(data = {}) {
       },
       utteranceCoverage: {
         label: "안건 연결 발언",
-        value: linkedUtterances || utterances,
-        meta: `${round(ratio(linkedUtterances || utterances, utterances) * 100, 1)}%`,
+        value: transcriptUtterances || linkedUtterances || utterances,
+        meta: parsedMeetings ? `${parsedMeetings}/${transcriptMeetings}개 속기록 정제` : `${round(ratio(linkedUtterances || utterances, utterances) * 100, 1)}%`,
       },
-      latestYear: {
-        label: "최근 집계 연도",
-        value: latest.meeting_year || "-",
-        meta: latest.meeting_year ? `${toNumber(latest.meetings)}회 · ${toNumber(latest.agenda_items)}안건` : "",
+      analyzedAgendas: {
+        label: "검색 가능 안건 구간",
+        value: analyzedAgendas || totalAgendas,
+        meta: transcriptLawRefs ? `법조항 참조 ${transcriptLawRefs}개` : "",
+      },
+      latestQuarter: {
+        label: "최근 분기",
+        value: latestQuarter?.label || (latest.meeting_year ? String(latest.meeting_year) : "-"),
+        meta: latestQuarter ? `${latestQuarter.meetingCount}회 · ${latestQuarter.agendaCount}구간` : "",
       },
     },
     yearlyRows,
+    quarterlyStats,
+    globalStats: analysisIndex.globalStats || {},
+    analysisTotals,
     meetingCards,
     agendaSplit: makeShareRows([
       { label: "심의·의결", value: decisionAgendas, tone: "blue" },
@@ -113,12 +131,8 @@ export function buildSituationBoardModel(data = {}) {
     topicDistribution: Array.isArray(data.topicDistribution) ? data.topicDistribution.slice(0, 8) : [],
     issueTagYearly: Array.isArray(data.issueTagYearly) ? data.issueTagYearly : [],
     dataQuality: Array.isArray(data.dataQuality) ? data.dataQuality : [],
-    sanctions: Array.isArray(data.sanctionDistribution) ? data.sanctionDistribution.slice(0, 6) : [],
     lawCoverage: Array.isArray(data.lawVerificationCoverage) ? data.lawVerificationCoverage : [],
     monthlyRows: Array.isArray(data.meetingYearMonth) ? data.meetingYearMonth : [],
-    signals: {
-      majorPenaltyCases: data.majorPenaltyCases || [],
-    },
   };
 }
 
@@ -133,6 +147,7 @@ export function buildMeetingDetailModel(data = {}, transcriptId, options = {}) {
     ? transcripts[0] || null
     : transcripts.find((item) => item.id === transcriptId) || null;
   const embedded = meeting ? findEmbeddedDetail(options.detailIndex, meeting.id) : null;
+  const normalizedMeeting = embedded?.meeting ? { ...meeting, ...embedded.meeting, id: meeting.id } : meeting;
   const transcriptText = embedded?.transcriptText || meeting?.content || options.transcriptText || "";
   const lawReferences = embedded?.lawReferences || extractLawReferences(transcriptText).map((ref) => ({
     ...ref,
@@ -140,14 +155,16 @@ export function buildMeetingDetailModel(data = {}, transcriptId, options = {}) {
   }));
 
   return {
-    meeting,
+    meeting: normalizedMeeting,
     overview: embedded?.overview || null,
     transcriptText,
     utterances: embedded?.utterances || [],
     sections: embedded?.sections || [],
     agendas: embedded?.agendas || [],
     lawReferences,
-    animationScenes: embedded ? buildTranscriptAnimationScenes(embedded) : [],
+    analysis: embedded?.analysis || null,
+    animationTimeline: embedded?.animationTimeline || null,
+    animationScenes: embedded?.animationTimeline?.scenes || (embedded ? buildTranscriptAnimationScenes(embedded) : []),
     relatedDocuments: meeting ? [{ label: "속기록 원문", path: meeting.path }] : [],
   };
 }

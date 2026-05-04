@@ -152,20 +152,46 @@ function qualityRows(rows = []) {
   `;
 }
 
+function rankList(rows = [], emptyText = "집계된 항목이 없습니다.") {
+  const items = rows.slice(0, 6).map((row) => `
+    <li>
+      <span>${escapeHtml(row.label || row.name || "")}</span>
+      <strong>${formatNumber(row.count || row.value || 0)}</strong>
+    </li>
+  `).join("");
+  return `<ol class="rank-list">${items || `<li><span>${escapeHtml(emptyText)}</span><strong>0</strong></li>`}</ol>`;
+}
+
+function quarterlyStatsTable(rows = []) {
+  const safeRows = rows.slice(0, 10);
+  const maxAgenda = Math.max(...safeRows.map((row) => Number(row.agendaCount || 0)), 1);
+  return `
+    <div class="quarter-table">
+      ${safeRows.map((row) => `
+        <button class="quarter-row" type="button" data-quarter-key="${escapeHtml(row.key || "")}">
+          <span class="quarter-label">${escapeHtml(row.label || "")}</span>
+          <span class="quarter-meter"><b style="width:${Math.max(Number(row.agendaCount || 0) / maxAgenda * 100, 3)}%"></b></span>
+          <span>${formatNumber(row.meetingCount)}회</span>
+          <span>${formatNumber(row.agendaCount)}구간</span>
+          <span>${formatNumber(row.utteranceCount)}발언</span>
+          <span>${formatNumber(row.lawReferenceCount)}조항</span>
+        </button>
+      `).join("")}
+    </div>
+  `;
+}
+
 export function renderSituationBoard(model = {}) {
   const kpis = Object.values(model.kpis || {}).map(kpiCard).join("");
   const cards = (model.meetingCards || []).slice(0, 24).map(meetingCard).join("");
-  const signalCount = (model.signals?.majorPenaltyCases || []).length;
-  const sanctions = (model.sanctions || []).map((row) => `
-    <span class="signal-chip">${escapeHtml(row.sanction_kind || "처분")} ${formatNumber(row.sanction_count)}</span>
-  `).join("");
+  const globalStats = model.globalStats || {};
 
   return `
     <section class="section-band situation-board redesigned-board">
       <div class="section-header">
         <div>
           <h2>회의 운영 상황판</h2>
-          <p class="section-caption">심의·의결, 보고, 공개 여부, 발언 연결, 제재 신호를 한 화면에서 확인합니다.</p>
+          <p class="section-caption">연도·분기별 회의 흐름, 안건 구간, 발언량, 조항 참조를 실무자가 바로 훑을 수 있게 정리했습니다.</p>
         </div>
         <div class="update-note">업데이트 기준: ${escapeHtml(model.updatedAt || "확인 필요")}</div>
       </div>
@@ -183,6 +209,10 @@ export function renderSituationBoard(model = {}) {
           <h3>연도별 회의·안건 흐름</h3>
           ${yearlyFlowChart(model.yearlyRows || [])}
         </article>
+        <article class="ops-panel wide">
+          <h3>최근 분기별 회의 운영 통계</h3>
+          ${quarterlyStatsTable(model.quarterlyStats || [])}
+        </article>
         <article class="ops-panel">
           <h3>실무 쟁점 주제</h3>
           ${topicBars(model.topicDistribution || [])}
@@ -191,10 +221,14 @@ export function renderSituationBoard(model = {}) {
           <h3>데이터 검증 상태</h3>
           ${qualityRows(model.dataQuality || [])}
         </article>
-      </div>
-      <div class="signal-strip">
-        <strong>제재·처분 신호 ${formatNumber(signalCount)}건</strong>
-        <div class="signal-chip-row">${sanctions}</div>
+        <article class="ops-panel">
+          <h3>속기록 기반 주요 대상</h3>
+          ${rankList(globalStats.topTargets || [], "추출된 대상 없음")}
+        </article>
+        <article class="ops-panel">
+          <h3>자주 등장한 관련 조항</h3>
+          ${rankList(globalStats.topArticles || [], "감지된 조항 없음")}
+        </article>
       </div>
       <div class="section-header compact">
         <div>
@@ -203,6 +237,95 @@ export function renderSituationBoard(model = {}) {
         </div>
       </div>
       <div class="meeting-card-grid">${cards}</div>
+    </section>
+  `;
+}
+
+function filterOptions(options = [], selected = "") {
+  return options.map((option) => `
+    <option value="${escapeHtml(option.value)}"${option.value === selected ? " selected" : ""}>${escapeHtml(option.label)}</option>
+  `).join("");
+}
+
+function chips(items = [], className = "status-pill") {
+  return items.slice(0, 6).map((item) => `<span class="${className}">${escapeHtml(item)}</span>`).join("");
+}
+
+function searchResultCard(row) {
+  return `
+    <article class="search-result-card">
+      <header>
+        <div>
+          <span class="search-result-meta">${escapeHtml(row.date || "")} · ${escapeHtml(row.meetingLabel || "")}</span>
+          <h3>${escapeHtml(row.title || "안건")}</h3>
+        </div>
+        <span class="status-pill">${escapeHtml(row.type || "안건")}</span>
+      </header>
+      <p>${escapeHtml(row.snippet || "")}</p>
+      <div class="search-facet-grid">
+        <div><strong>대상</strong><div>${chips(row.targets || [], "data-pill") || "<span>추출 없음</span>"}</div></div>
+        <div><strong>관련 조항</strong><div>${chips(row.lawArticles || [], "provision-chip") || "<span>감지 없음</span>"}</div></div>
+        <div><strong>발언자</strong><div>${chips(row.speakers || [], "status-pill")}</div></div>
+        <div><strong>키워드</strong><div>${chips(row.keywords || [], "data-pill")}</div></div>
+      </div>
+      <footer>
+        <button class="small-button" type="button" data-search-meeting-id="${escapeHtml(row.meetingId)}" data-search-utterance-id="${escapeHtml(row.startUtteranceId || "")}">회의 상세에서 보기</button>
+        ${row.isProcedural ? `<span class="search-procedure-note">절차성 구간</span>` : ""}
+      </footer>
+    </article>
+  `;
+}
+
+export function renderIntegratedSearch(model = {}) {
+  const rows = Array.isArray(model.rows) ? model.rows : [];
+  const filters = model.filters || {};
+  const facet = filters.facet || "all";
+  const query = filters.query || "";
+  const includeProcedural = Boolean(filters.includeProcedural);
+  const globalStats = model.globalStats || {};
+  const quickKeywords = [
+    ...(globalStats.topTargets || []).slice(0, 4).map((item) => item.label),
+    ...(globalStats.topArticles || []).slice(0, 4).map((item) => item.label),
+  ].filter(Boolean);
+
+  return `
+    <section class="section-band integrated-search">
+      <div class="section-header">
+        <div>
+          <h2>안건 통합검색</h2>
+          <p class="section-caption">속기록을 대상, 조항, 발언자, 키워드 단위로 쪼개 검색합니다. 절차성 보고 구간은 기본 결과에서 낮춰 보입니다.</p>
+        </div>
+        <div class="update-note">${formatNumber(model.totalCount || 0)}개 인덱스 · ${formatNumber(model.visibleCount || rows.length)}개 표시</div>
+      </div>
+      <form class="search-control-panel" data-integrated-search-form>
+        <label class="search-field">
+          <span>검색어</span>
+          <input name="q" type="search" value="${escapeHtml(query)}" placeholder="예: 카카오페이, 제29조, 안전조치, 송경희">
+        </label>
+        <label class="search-field narrow">
+          <span>검색 범위</span>
+          <select name="facet">
+            ${filterOptions([
+              { value: "all", label: "전체" },
+              { value: "target", label: "처분대상" },
+              { value: "law", label: "관련 조항" },
+              { value: "speaker", label: "발언자" },
+              { value: "keyword", label: "키워드" },
+            ], facet)}
+          </select>
+        </label>
+        <label class="toggle-field">
+          <input name="includeProcedural" type="checkbox"${includeProcedural ? " checked" : ""}>
+          <span>회의록·공개여부 같은 절차 구간 포함</span>
+        </label>
+        <button class="tool-button assistant-primary-action" type="submit">검색</button>
+      </form>
+      <div class="quick-chip-row">
+        ${quickKeywords.map((keyword) => `<button class="quick-chip" type="button" data-search-chip="${escapeHtml(keyword)}">${escapeHtml(keyword)}</button>`).join("")}
+      </div>
+      <div class="search-result-list">
+        ${rows.map(searchResultCard).join("") || `<article class="search-result-card empty"><h3>검색 결과가 없습니다.</h3><p>대상명, 법조항, 발언자명, 쟁점 키워드를 바꿔 다시 검색해 보세요.</p></article>`}
+      </div>
     </section>
   `;
 }
@@ -254,7 +377,7 @@ function renderUtteranceText(utterance) {
   return html;
 }
 
-function renderUtterances(utterances = [], fallbackText = "") {
+function renderUtterances(utterances = [], fallbackText = "", meetingId = "") {
   if (!utterances.length) {
     return `<pre class="transcript-body">${escapeHtml(fallbackText || "속기록을 불러오려면 원문 링크를 여세요.")}</pre>`;
   }
@@ -266,6 +389,7 @@ function renderUtterances(utterances = [], fallbackText = "") {
             <span class="speaker-role">${escapeHtml(utterance.speakerRole || "발언")}</span>
             <strong>${escapeHtml(utterance.speakerName || utterance.speaker)}</strong>
             <em>${escapeHtml(utterance.sectionTitle || "")}</em>
+            <button class="utterance-animation-jump" type="button" data-animation-meeting-id="${escapeHtml(meetingId)}" data-animation-utterance-id="${escapeHtml(utterance.id)}">장면 이동</button>
           </header>
           <p>${renderUtteranceText(utterance)}</p>
         </article>
@@ -343,7 +467,7 @@ export function renderMeetingDetail(detail) {
             <h3>발언자별 속기록</h3>
             <span>${formatNumber((detail.utterances || []).length)}개 발언</span>
           </div>
-          ${renderUtterances(detail.utterances || [], detail.transcriptText)}
+          ${renderUtterances(detail.utterances || [], detail.transcriptText, detail.meeting.id)}
         </article>
         <aside class="law-panel">
           <h3>법조항 비교</h3>
@@ -357,14 +481,31 @@ export function renderMeetingDetail(detail) {
 
 export function renderAnimationViewer(timeline = {}) {
   const scenes = Array.isArray(timeline?.scenes) ? timeline.scenes : [];
+  const members = Array.isArray(timeline?.members) ? timeline.members : [];
+  const staffActors = Array.isArray(timeline?.staffActors) ? timeline.staffActors : [{ id: "staff", name: "사무처", role: "보고자", seat: "staff-center" }];
+  const actors = [...members, ...staffActors];
+  const agendas = Array.isArray(timeline?.agendas) ? timeline.agendas : [];
   const sceneItems = scenes.map((scene, index) => `
     <button class="animation-scene-item" type="button" data-scene-index="${index}">
-      <span>${escapeHtml(scene.stageNote || scene.type || "장면")}</span>
-      <strong>${escapeHtml(scene.text)}</strong>
+      <span>${escapeHtml(scene.phase || scene.stageNote || scene.type || "장면")}</span>
+      <strong>${escapeHtml(scene.shortText || scene.text)}</strong>
       <em>${escapeHtml(scene.speaker)}</em>
     </button>
   `).join("");
   const firstScene = scenes[0] || {};
+  const actorItems = actors.map((actor) => `
+    <div class="animation-actor ${actor.id === firstScene.memberId ? "speaking" : ""}" data-member-id="${escapeHtml(actor.id || "")}" data-seat="${escapeHtml(actor.seat || "")}">
+      ${actor.asset ? `<img src="${escapeHtml(actor.asset)}" alt="${escapeHtml(actor.name)} 캐릭터">` : `<span class="staff-avatar">${escapeHtml((actor.name || "사").slice(0, 1))}</span>`}
+      <strong>${escapeHtml(actor.name || "참석자")}</strong>
+      <small>${escapeHtml(actor.role || "")}</small>
+    </div>
+  `).join("");
+  const agendaItems = agendas.slice(0, 12).map((agenda) => `
+    <button class="animation-agenda-item" type="button" data-animation-agenda-id="${escapeHtml(agenda.id)}" data-utterance-target="${escapeHtml(agenda.startUtteranceId || "")}">
+      <span>${escapeHtml(agenda.type || "안건")}</span>
+      <strong>${escapeHtml(agenda.title || "")}</strong>
+    </button>
+  `).join("");
 
   return `
     <section class="section-band animation-viewer rich-animation">
@@ -381,16 +522,20 @@ export function renderAnimationViewer(timeline = {}) {
             <span data-stage-label>${escapeHtml(firstScene.stageNote || "위원 입장")}</span>
             <strong data-stage-speaker>${escapeHtml(firstScene.speaker || "회의장")}</strong>
           </div>
-          <div class="meeting-room-table">
-            <span class="seat seat-chair">위원장</span>
-            <span class="seat">위원</span>
-            <span class="seat">위원</span>
-            <span class="seat">사무처</span>
-            <span class="seat">안건 담당</span>
+          <div class="meeting-room-table animation-actor-grid">${actorItems}</div>
+          <div class="animation-controls" data-animation-controls>
+            <button class="small-button" type="button" data-animation-action="prev">이전</button>
+            <button class="small-button primary-control" type="button" data-animation-action="play">재생</button>
+            <button class="small-button" type="button" data-animation-action="next">다음</button>
           </div>
           <p data-stage-text>${escapeHtml(firstScene.text || "")}</p>
         </div>
-        <div class="animation-timeline">${sceneItems}</div>
+        <aside class="animation-side-panel">
+          <h3>안건 흐름</h3>
+          <div class="animation-agenda-list">${agendaItems || `<p class="section-caption">감지된 안건 구간이 없습니다.</p>`}</div>
+          <h3>장면 타임라인</h3>
+          <div class="animation-timeline">${sceneItems}</div>
+        </aside>
       </div>
     </section>
   `;

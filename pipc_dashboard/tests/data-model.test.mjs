@@ -11,8 +11,8 @@ test("buildSituationBoardModel derives operations KPIs and meeting cards", () =>
   assert.equal(model.kpis.totalAgendas.value, 178);
   assert.equal(model.kpis.averageAgendasPerMeeting.value, 4.0);
   assert.equal(model.meetingCards.length, 1);
-  assert.equal(model.meetingCards[0].meetingLabel, "2025년 제24회");
-  assert.equal(model.signals.majorPenaltyCases.length, 1);
+  assert.equal(model.meetingCards[0].meetingLabel, "2025년 제24회 전체회의");
+  assert.equal(model.signals, undefined);
 });
 
 test("buildSituationBoardModel derives agenda and visibility splits from overview snapshot", () => {
@@ -40,7 +40,7 @@ test("buildSituationBoardModel derives agenda and visibility splits from overvie
   assert.equal(model.visibilitySplit[1].ratio, 0.2);
   assert.equal(model.topicDistribution.length, 1);
   assert.equal(model.dataQuality.length, 1);
-  assert.equal(model.sanctions.length, 1);
+  assert.equal(model.sanctions, undefined);
 });
 
 test("buildSituationBoardModel falls back to meetingYearly when yearlyStats is empty", () => {

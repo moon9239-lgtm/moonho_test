@@ -8,7 +8,7 @@ test("buildMeetingDetailModel finds a meeting by transcript id", () => {
   const detail = buildMeetingDetailModel(dashboardFixture, "2025-24");
 
   assert.equal(detail.meeting.id, "2025-24");
-  assert.equal(detail.meeting.meetingLabel, "2025년 제24회");
+  assert.equal(detail.meeting.meetingLabel, "2025년 제24회 전체회의");
   assert.equal(detail.lawReferences.length, 0);
 });
 
