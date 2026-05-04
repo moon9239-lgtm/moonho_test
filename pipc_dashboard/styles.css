@@ -1,25 +1,25 @@
 :root {
   color-scheme: light;
-  --bg: #f6f7f4;
+  --bg: #f5f7fb;
   --surface: #ffffff;
-  --surface-soft: #eef4f1;
-  --line: #d8ddd6;
-  --line-strong: #b7c0b8;
-  --text: #24302b;
-  --muted: #68736d;
-  --teal: #177e7b;
-  --teal-soft: #d8ece9;
-  --coral: #c95f49;
-  --coral-soft: #f5dfd9;
-  --olive: #5f7c38;
-  --olive-soft: #e2ead6;
-  --gold: #b17b16;
-  --gold-soft: #f3e6c9;
-  --ink: #2f3a4a;
-  --ink-soft: #e1e6ee;
-  --danger: #9e3b35;
+  --surface-soft: #eef3fa;
+  --line: #dce5f0;
+  --line-strong: #b2c7dc;
+  --text: #263044;
+  --muted: #64708a;
+  --teal: #2c65d3;
+  --teal-soft: #e3ecff;
+  --coral: #f8b1a8;
+  --coral-soft: #fde7e3;
+  --olive: #736894;
+  --olive-soft: #eeeaf7;
+  --gold: #c28a2c;
+  --gold-soft: #f8e8c8;
+  --ink: #8f95b2;
+  --ink-soft: #eef1f7;
+  --danger: #603e43;
   --radius: 8px;
-  --shadow: 0 8px 22px rgba(38, 48, 43, 0.08);
+  --shadow: 0 10px 26px rgba(38, 48, 68, 0.08);
 }
 
 * {
