@@ -1,8 +1,10 @@
 import { buildMeetingDetailModel, buildSituationBoardModel } from "./data-model.mjs";
-import { buildAnimationTimeline } from "./animation-model.mjs";
+import { buildAnimationTimeline, findSceneIndexByUtteranceId } from "./animation-model.mjs";
 import { buildAgendaPreparationResult } from "./agenda-assistant-model.mjs";
 import { loadCommissionerCharacters } from "./character-assets.mjs";
 import { buildCommissionerAnalysisModel } from "./commissioner-model.mjs";
+import { disposeMeeting3DView, mountMeeting3DView, updateMeeting3DScene } from "./meeting-3d-view.mjs";
+import { buildSearchModel } from "./search-model.mjs";
 import {
   renderAgendaAssistant,
   renderAgendaPreparationResult,
@@ -26,8 +28,8 @@ let animationTimer = null;
 const tabTitles = {
   stats: "전체회의 통계·동향 대시보드",
   search: "안건 통합검색",
-  meeting: "회의 상세 탐색",
-  commissioner: "위원별 분석",
+  meeting: "회의별 속기록 조회",
+  commissioner: "위원별 대시보드",
   assistant: "신규 안건 준비 도우미",
 };
 
@@ -54,6 +56,7 @@ function init() {
   const stats = $("#tab-stats");
   if (stats) stats.innerHTML = renderSituationBoard(model);
   renderSearchTab();
+  renderMeetingTab();
   renderAssistantTab();
   initTabs();
 }
@@ -68,7 +71,22 @@ function renderAssistantTab() {
 function renderSearchTab(filters = {}) {
   const searchTab = $("#tab-search");
   if (!searchTab) return;
-  searchTab.innerHTML = renderIntegratedSearch(buildSearchModel(filters));
+  searchTab.innerHTML = renderIntegratedSearch(buildSearchModel(meetingAnalysisIndex, filters));
+}
+
+function defaultMeetingId() {
+  const transcripts = Array.isArray(dashboardData.meetingTranscripts) ? dashboardData.meetingTranscripts : [];
+  return transcripts[0]?.id || transcripts[0]?.meeting_id || null;
+}
+
+function renderMeetingTab(id = defaultMeetingId()) {
+  disposeMeeting3DView();
+  const meetingTab = $("#tab-meeting");
+  if (!meetingTab) return;
+  const detail = buildMeetingDetailModel(dashboardData, id, { detailIndex: meetingDetailIndex });
+  activeMeetingId = detail.meeting?.id || id || null;
+  activeMeetingDetail = detail;
+  meetingTab.innerHTML = renderMeetingDetail(detail);
 }
 
 function isRecord(value) {
@@ -114,65 +132,6 @@ function buildHistoricalAgendas(data = {}) {
   });
 }
 
-function normalizeSearch(value) {
-  return String(value || "").toLowerCase().replace(/\s+/g, " ").trim();
-}
-
-function rowFacetText(row, facet) {
-  if (facet === "target") return (row.targets || []).join(" ");
-  if (facet === "law") return (row.lawArticles || []).join(" ");
-  if (facet === "speaker") return (row.speakers || []).join(" ");
-  if (facet === "keyword") return (row.keywords || []).join(" ");
-  return [
-    row.title,
-    row.meetingLabel,
-    row.date,
-    row.type,
-    (row.targets || []).join(" "),
-    (row.lawArticles || []).join(" "),
-    (row.speakers || []).join(" "),
-    (row.keywords || []).join(" "),
-    row.snippet,
-    row.searchText,
-  ].join(" ");
-}
-
-function scoreSearchRow(row, query, facet) {
-  if (!query) return row.isProcedural ? 1 : 2;
-  const haystack = normalizeSearch(rowFacetText(row, facet));
-  const tokens = normalizeSearch(query).split(/\s+/).filter(Boolean);
-  if (!tokens.length) return row.isProcedural ? 1 : 2;
-  let score = 0;
-  for (const token of tokens) {
-    if (haystack.includes(token)) score += 2;
-    if ((row.title || "").toLowerCase().includes(token)) score += 2;
-    if ((row.targets || []).some((item) => item.toLowerCase().includes(token))) score += 3;
-    if ((row.lawArticles || []).some((item) => item.toLowerCase().includes(token))) score += 3;
-    if ((row.speakers || []).some((item) => item.toLowerCase().includes(token))) score += 2;
-  }
-  return score;
-}
-
-function buildSearchModel(filters = {}) {
-  const query = String(filters.query || "").trim();
-  const facet = filters.facet || "all";
-  const includeProcedural = Boolean(filters.includeProcedural);
-  const allRows = Array.isArray(meetingAnalysisIndex.searchIndex) ? meetingAnalysisIndex.searchIndex : [];
-  const scored = allRows
-    .map((row, index) => ({ row, index, score: scoreSearchRow(row, query, facet) }))
-    .filter((item) => item.score > 0)
-    .filter((item) => includeProcedural || !item.row.isProcedural || query)
-    .sort((left, right) => right.score - left.score || String(right.row.date || "").localeCompare(String(left.row.date || "")) || left.index - right.index);
-
-  return {
-    rows: scored.slice(0, 80).map((item) => item.row),
-    totalCount: allRows.length,
-    visibleCount: scored.length,
-    filters: { query, facet, includeProcedural },
-    globalStats: meetingAnalysisIndex.globalStats || {},
-  };
-}
-
 function setActiveTab(tabId) {
   const tab = $(`#tab-${tabId}`);
   const navItem = $(`.nav-item[data-tab="${tabId}"]`);
@@ -202,8 +161,10 @@ async function renderCommissionerTab(dashboardData) {
 
   const commissionerCharacters = await loadCommissionerCharacters();
   const commissionerModel = buildCommissionerAnalysisModel({
+    secondCommissioners: dashboardData.secondCommissioners || [],
     commissionerActivity: dashboardData.commissionerActivity || [],
     commissionerCharacters,
+    detailIndex: meetingAnalysisIndex,
   });
   commissionerTab.innerHTML = renderCommissionerAnalysis(commissionerModel);
 }
@@ -217,7 +178,26 @@ function transcriptToUtterances(text) {
     .filter((item) => item.text);
 }
 
+function buildAnimationTimelineFromDetail(detail = {}) {
+  const meeting = detail.meeting || {};
+  const utterances = Array.isArray(detail.utterances) && detail.utterances.length
+    ? detail.utterances
+    : transcriptToUtterances(detail.transcriptText);
+  const fallbackTimeline = buildAnimationTimeline({
+    meeting,
+    utterances,
+    characters: Array.isArray(meetingAnalysisIndex.characterAssets) ? meetingAnalysisIndex.characterAssets : [],
+  });
+
+  return {
+    ...fallbackTimeline,
+    agendas: Array.isArray(detail.agendas) ? detail.agendas : [],
+    scenes: fallbackTimeline.scenes,
+  };
+}
+
 function showMeetingDetail(id) {
+  disposeMeeting3DView();
   activeMeetingId = id;
   const detail = buildMeetingDetailModel(dashboardData, id, { detailIndex: meetingDetailIndex });
   activeMeetingDetail = detail;
@@ -234,19 +214,15 @@ function showAnimationViewer(id, initialUtteranceId = "") {
   activeMeetingDetail = detail;
   const meetingTab = $("#tab-meeting");
   if (!meetingTab) return;
-  const timeline = detail.animationTimeline || (detail.animationScenes?.length
-    ? { meetingId: detail.meeting.id, meetingLabel: detail.meeting.meetingLabel, scenes: detail.animationScenes }
-    : buildAnimationTimeline({
-      meeting: detail.meeting,
-      utterances: transcriptToUtterances(detail.transcriptText),
-    }));
+  const timeline = buildAnimationTimelineFromDetail(detail);
   activeAnimationTimeline = timeline;
   meetingTab.innerHTML = renderAnimationViewer(timeline);
+  mountMeeting3DView(timeline);
   setActiveTab("meeting");
   const initialIndex = initialUtteranceId
-    ? timeline.scenes?.findIndex((scene) => scene.utteranceId === initialUtteranceId)
+    ? findSceneIndexByUtteranceId(timeline, initialUtteranceId)
     : 0;
-  setAnimationScene(Math.max(initialIndex || 0, 0));
+  setAnimationScene(initialIndex >= 0 ? initialIndex : 0);
 }
 
 function scrollToUtterance(id) {
@@ -257,16 +233,74 @@ function scrollToUtterance(id) {
   window.setTimeout(() => target.classList.remove("focus-flash"), 1000);
 }
 
-function updateLawDetail(index) {
-  const panel = $("#law-detail-panel");
+function closeLawDrawer() {
+  const drawer = $("#law-drawer");
+  if (!drawer) return;
+  drawer.hidden = true;
+  drawer.classList.remove("open");
+  drawer.setAttribute("aria-hidden", "true");
+}
+
+async function lookupLawReference(ref) {
+  const params = new URLSearchParams({
+    lawName: ref.lawName || "",
+    article: ref.article || "",
+    meetingDate: ref.meetingDate || activeMeetingDetail?.meeting?.date || "",
+  });
+  const response = await fetch(`/api/law-lookup?${params.toString()}`, {
+    headers: { Accept: "application/json" },
+  });
+  if (!response.ok) throw new Error(`조문 조회 응답 오류: ${response.status}`);
+  return response.json();
+}
+
+async function updateLawDetail(index) {
+  const drawer = $("#law-drawer");
+  const panel = $("#law-drawer-content");
   const ref = activeMeetingDetail?.lawReferences?.[Number(index)];
-  if (!panel || !ref) return;
-  panel.innerHTML = renderLawReferenceDetail(ref);
+  if (!drawer || !panel || !ref) return;
+  drawer.hidden = false;
+  drawer.classList.add("open");
+  drawer.setAttribute("aria-hidden", "false");
+  panel.innerHTML = renderLawReferenceDetail({
+    ...ref,
+    lookupState: "loading",
+    contextHint: "속기록 문맥에서 감지한 법률명으로 회의 당시 기준과 현재 기준을 조회합니다.",
+  });
+
+  try {
+    const lookupResult = await lookupLawReference(ref);
+    panel.innerHTML = renderLawReferenceDetail({
+      ...ref,
+      lookupResult,
+      contextHint: lookupResult.resolvedLawName && lookupResult.resolvedLawName !== ref.lawName
+        ? `문맥상 ${lookupResult.resolvedLawName}으로 보정했습니다.`
+        : "속기록 문맥에서 감지한 법률명으로 조회했습니다.",
+    });
+  } catch (error) {
+    panel.innerHTML = renderLawReferenceDetail({
+      ...ref,
+      lookupError: error?.message || "조문 조회 중 오류가 발생했습니다.",
+      lookupResult: {
+        note: "현재 화면은 로컬 대시보드입니다. korean-law-mcp 또는 LAW_OC 기반 서버 브리지가 연결되면 회의 당시 조문과 현재 조문이 자동으로 채워집니다.",
+      },
+    });
+  }
 }
 
 function sceneText(scene = {}) {
   const utterance = activeMeetingDetail?.utterances?.find((item) => item.id === scene.utteranceId);
   return utterance?.text || scene.text || scene.shortText || "";
+}
+
+function escapeCssValue(value) {
+  if (window.CSS?.escape) return CSS.escape(value);
+  return String(value || "").replace(/["\\]/g, "\\$&");
+}
+
+function jumpAnimationToUtterance(utteranceId) {
+  const index = findSceneIndexByUtteranceId(activeAnimationTimeline, utteranceId);
+  if (index >= 0) setAnimationScene(index);
 }
 
 function setAnimationScene(index) {
@@ -280,14 +314,21 @@ function setAnimationScene(index) {
   const label = $("[data-stage-label]", stage);
   const speaker = $("[data-stage-speaker]", stage);
   const text = $("[data-stage-text]", stage);
+  const progress = $("[data-animation-progress]");
+  const progressBar = $("[data-animation-progress-bar]");
   document.querySelector(".animation-scene-item.active")?.classList.remove("active");
   button?.classList.add("active");
+  stage.dataset.sceneType = scene.type || "";
+  stage.dataset.sceneAction = scene.action || "";
   if (label) label.textContent = scene.stageNote || scene.phase || "";
   if (speaker) speaker.textContent = scene.speaker || scene.speakerName || "";
   if (text) text.textContent = sceneText(scene);
+  if (progress) progress.textContent = `${activeSceneIndex + 1} / ${scenes.length}`;
+  if (progressBar) progressBar.style.width = `${Math.round((activeSceneIndex + 1) / scenes.length * 100)}%`;
+  updateMeeting3DScene(scene);
   document.querySelectorAll(".animation-actor.speaking").forEach((node) => node.classList.remove("speaking"));
   if (scene.memberId) {
-    document.querySelector(`.animation-actor[data-member-id="${CSS.escape(scene.memberId)}"]`)?.classList.add("speaking");
+    document.querySelector(`.animation-actor[data-member-id="${escapeCssValue(scene.memberId)}"]`)?.classList.add("speaking");
   }
   button?.scrollIntoView({ block: "nearest" });
 }
@@ -299,7 +340,7 @@ function updateAnimationStage(button) {
 
 function stopAnimationPlayback() {
   if (!animationTimer) return;
-  window.clearInterval(animationTimer);
+  window.clearTimeout(animationTimer);
   animationTimer = null;
   const playButton = $('[data-animation-action="play"]');
   if (playButton) playButton.textContent = "재생";
@@ -307,16 +348,23 @@ function stopAnimationPlayback() {
 
 function startAnimationPlayback() {
   stopAnimationPlayback();
+  const scenes = activeAnimationTimeline?.scenes || [];
+  if (!scenes.length) return;
+  if (activeSceneIndex >= scenes.length - 1) setAnimationScene(0);
   const playButton = $('[data-animation-action="play"]');
   if (playButton) playButton.textContent = "일시정지";
-  animationTimer = window.setInterval(() => {
-    const scenes = activeAnimationTimeline?.scenes || [];
-    if (activeSceneIndex >= scenes.length - 1) {
+  const scheduleNext = () => {
+    const currentScenes = activeAnimationTimeline?.scenes || [];
+    if (activeSceneIndex >= currentScenes.length - 1) {
       stopAnimationPlayback();
       return;
     }
     setAnimationScene(activeSceneIndex + 1);
-  }, 1800);
+    const duration = Number(currentScenes[activeSceneIndex]?.durationMs) || 1800;
+    animationTimer = window.setTimeout(scheduleNext, duration);
+  };
+  const firstDuration = Number(scenes[activeSceneIndex]?.durationMs) || 1800;
+  animationTimer = window.setTimeout(scheduleNext, firstDuration);
 }
 
 function handleAnimationAction(action) {
@@ -348,10 +396,16 @@ document.addEventListener("click", (event) => {
   }
 
   const agendaJump = event.target.closest("[data-utterance-target]");
-  if (agendaJump) scrollToUtterance(agendaJump.dataset.utteranceTarget);
+  if (agendaJump) {
+    if (agendaJump.closest(".animation-viewer")) jumpAnimationToUtterance(agendaJump.dataset.utteranceTarget);
+    else scrollToUtterance(agendaJump.dataset.utteranceTarget);
+  }
 
   const lawReference = event.target.closest("[data-law-ref-index]");
   if (lawReference) updateLawDetail(lawReference.dataset.lawRefIndex);
+
+  const closeLawButton = event.target.closest("[data-close-law-drawer]");
+  if (closeLawButton) closeLawDrawer();
 
   const scene = event.target.closest(".animation-scene-item[data-scene-index]");
   if (scene) updateAnimationStage(scene);
@@ -371,6 +425,11 @@ document.addEventListener("click", (event) => {
   }
 });
 
+document.addEventListener("change", (event) => {
+  const meetingSelect = event.target.closest("[data-meeting-select]");
+  if (meetingSelect?.value) showMeetingDetail(meetingSelect.value);
+});
+
 document.addEventListener("submit", (event) => {
   const searchForm = event.target.closest("[data-integrated-search-form]");
   if (searchForm) {
@@ -379,7 +438,8 @@ document.addEventListener("submit", (event) => {
     renderSearchTab({
       query: formData.get("q"),
       facet: formData.get("facet") || "all",
-      includeProcedural: formData.get("includeProcedural") === "on",
+      issue: formData.get("issue") || "",
+      disposition: formData.get("disposition") || "",
     });
     return;
   }

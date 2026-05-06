@@ -1,0 +1,6 @@
+node_modules/
+.env
+.env.local
+data/law-cache/
+server.err.log
+server.out.log

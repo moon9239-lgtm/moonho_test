@@ -3,7 +3,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test tests/*.test.mjs",
-    "serve": "node tools/static-server.mjs"
+    "test": "node --test --test-isolation=none tests/*.test.mjs",
+    "serve": "node tools/static-server.mjs",
+    "sync:supabase": "node tools/sync-dashboard-artifacts.mjs"
+  },
+  "dependencies": {
+    "korean-law-mcp": "^3.5.5"
   }
 }

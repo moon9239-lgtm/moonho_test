@@ -19,7 +19,7 @@ function isSpeakerLine(value) {
 
 function isSectionLine(value) {
   const line = stripHeadingSyntax(value);
-  return /^(?:\d+\.\s*)?(회의개요|회의내용|성원보고|국민의례|개회선언|심의[․·ㆍ]?의결안건|보고안건|안건현황|산회|폐회|의결안건)/.test(line)
+  return /^(?:\d+\.\s*)?(회의개요|회의내용|성원보고|국민의례|개회선언|심의[․·ㆍ]?의결안건|보고안건|안건현황|차기\s*회의\s*일정|산회|폐회|회의록\s*및?\s*속기록\s*보고|안건현황\s*설명.*회의\s*공개여부\s*결정)$/.test(line)
     || /^#{1,6}\s*/.test(value);
 }
 
@@ -28,6 +28,17 @@ function cleanSectionTitle(value) {
     .replace(/^\d+\.\s*/, "")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+function isAgendaItemHeader(value) {
+  return /^[가-힣]{1,2}\.\s*/.test(compactSpaces(value));
+}
+
+function isAgendaSection(value) {
+  const line = cleanSectionTitle(value);
+  if (!line) return false;
+  if (isAgendaItemHeader(line)) return true;
+  return /^(?:의결안건|보고안건)\s*[1-9]\d*\s*번/.test(line);
 }
 
 function normalizeSpeaker(rawSpeaker) {
@@ -92,7 +103,43 @@ function cleanAgendaTitle(value) {
     .slice(0, 120);
 }
 
-function deriveAgendaSegments(utterances, sections) {
+function agendaTypeFromCategory(value) {
+  const line = cleanSectionTitle(value);
+  if (line.includes("보고")) return "보고";
+  if (line.includes("심의") || line.includes("의결")) return "심의ㆍ의결";
+  return "";
+}
+
+function isAgendaCategorySection(value) {
+  const line = cleanSectionTitle(value);
+  if (!line || isAgendaSection(line)) return false;
+  return Boolean(agendaTypeFromCategory(line) && /(안건|덇굔)/.test(line));
+}
+
+function isAgendaContinuationSection(value) {
+  const line = cleanSectionTitle(value);
+  if (!line || isAgendaSection(line) || isAgendaCategorySection(line)) return false;
+  if (/^(회의개요|회의내용|성원보고|개회|폐회|안건현황|차기\s*회의|공개\s*여부)/.test(line)) return false;
+  return /^(제\s*)?\d{4}-\d+/.test(line)
+    || /^및\s+/.test(line)
+    || /^조[가-힣A-Za-z0-9]+/.test(line)
+    || /호\)?$/.test(line);
+}
+
+function joinAgendaTitleParts(parts) {
+  return compactSpaces(parts.join(" "))
+    .replace(/\(\s+/g, "(")
+    .replace(/\s+\)/g, ")")
+    .replace(/제\s+(\d{4}-)/g, "제$1")
+    .replace(/\((\d{4})\s+(조[가-힣A-Za-z0-9]+)/g, "($1$2");
+}
+
+function firstUtteranceIdForSections(utterances = [], sectionIds = []) {
+  const ids = new Set(sectionIds.filter(Boolean));
+  return utterances.find((utterance) => ids.has(utterance.sectionId))?.id || "";
+}
+
+export function deriveAgendaSegments(utterances, sections) {
   const segments = [];
   const add = (title, startUtteranceId, type = agendaTypeFromText(title)) => {
     const normalizedTitle = cleanAgendaTitle(title);
@@ -105,36 +152,67 @@ function deriveAgendaSegments(utterances, sections) {
     });
   };
 
-  for (const section of sections) {
-    if (/안건|회의록|속기록|공개여부/.test(section.title)) {
-      add(section.title, section.startUtteranceId, agendaTypeFromText(section.title));
+  let currentAgendaType = "";
+  for (let index = 0; index < sections.length; index += 1) {
+    const section = sections[index];
+    if (isAgendaCategorySection(section.title)) {
+      currentAgendaType = agendaTypeFromCategory(section.title);
+      continue;
+    }
+    if (isAgendaSection(section.title)) {
+      const parts = [section.title];
+      const sectionIds = [section.id];
+      let startUtteranceId = section.startUtteranceId || "";
+      let cursor = index + 1;
+
+      while (cursor < sections.length && isAgendaContinuationSection(sections[cursor].title)) {
+        parts.push(sections[cursor].title);
+        sectionIds.push(sections[cursor].id);
+        if (!startUtteranceId) startUtteranceId = sections[cursor].startUtteranceId || "";
+        cursor += 1;
+      }
+
+      if (!startUtteranceId) startUtteranceId = firstUtteranceIdForSections(utterances, sectionIds);
+      add(joinAgendaTitleParts(parts), startUtteranceId, currentAgendaType || agendaTypeFromText(section.title));
+      index = cursor - 1;
     }
   }
 
-  for (const utterance of utterances) {
-    const text = utterance.text;
-    const agendaMatch = text.match(/(?:의결안건|보고안건|공개 안건|비공개 안건)\s*\d*번?[^.。]*?(?:건|결정|상정|논의|심의)/);
-    if (agendaMatch) add(agendaMatch[0], utterance.id, agendaTypeFromText(agendaMatch[0]));
+  if (!segments.length) {
+    for (const utterance of utterances) {
+      const text = utterance.text;
+      const agendaMatch = text.match(/(?:^|[.\n])\s*(의결안건|보고안건)\s*\d+\s*번?\s*(?:[,：:]\s*|\s+)(.{1,90}?)(?:(?:에 대한|에 관한|건|심의|상정|의결|결정))/);
+      if (agendaMatch) add(agendaMatch[0], utterance.id, agendaTypeFromText(agendaMatch[0]));
+    }
   }
 
-  if (!segments.some((item) => /법원행정처/.test(item.title))) {
-    const lawCourt = utterances.find((item) => /법원행정처/.test(item.text));
-    if (lawCourt) add("의결안건 1: 법원행정처의 법규 위반행위에 대한 시정조치", lawCourt.id, "심의·의결");
-  }
-  if (!segments.some((item) => /카카오페이|애플|알리페이/.test(item.title))) {
-    const kakao = utterances.find((item) => /카카오페이|애플|알리페이/.test(item.text));
-    if (kakao) add("의결안건 2: 카카오페이·애플·알리페이 관련 법규 위반행위", kakao.id, "심의·의결");
+  if (!segments.length) {
+    if (!segments.some((item) => /법원행정처/.test(item.title))) {
+      const lawCourt = utterances.find((item) => /법원행정처/.test(item.text));
+      if (lawCourt) add("의결안건 1: 법원행정처의 법규 위반행위에 대한 시정조치", lawCourt.id, "심의·의결");
+    }
+    if (!segments.some((item) => /카카오페이|애플|알리페이/.test(item.title))) {
+      const kakao = utterances.find((item) => /카카오페이|애플|알리페이/.test(item.text));
+      if (kakao) add("의결안건 2: 카카오페이·애플·알리페이 관련 법규 위반행위", kakao.id, "심의·의결");
+    }
   }
 
   return segments.slice(0, 12);
 }
 
-function attachAgendaIds(utterances, agendas) {
-  let currentAgendaId = agendas[0]?.id || "";
-  const startByUtterance = new Map(agendas.map((agenda) => [agenda.startUtteranceId, agenda.id]));
+export function attachAgendaIds(utterances, agendas) {
+  let currentAgenda = null;
+  const agendaById = new Map(agendas.map((agenda) => [agenda.id, agenda]));
+  const startByUtterance = new Map(agendas
+    .filter((agenda) => agenda.startUtteranceId)
+    .map((agenda) => [agenda.startUtteranceId, agenda.id]));
+
   return utterances.map((utterance) => {
-    if (startByUtterance.has(utterance.id)) currentAgendaId = startByUtterance.get(utterance.id);
-    return { ...utterance, agendaId: currentAgendaId };
+    if (startByUtterance.has(utterance.id)) {
+      currentAgenda = agendaById.get(startByUtterance.get(utterance.id)) || null;
+    }
+    if (!currentAgenda) return { ...utterance, agendaId: "" };
+    return { ...utterance, agendaId: currentAgenda.id, sectionTitle: currentAgenda.title };
   });
 }
 

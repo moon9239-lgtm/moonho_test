@@ -10,6 +10,9 @@ test("buildSituationBoardModel derives operations KPIs and meeting cards", () =>
   assert.equal(model.kpis.totalMeetings.value, 44);
   assert.equal(model.kpis.totalAgendas.value, 178);
   assert.equal(model.kpis.averageAgendasPerMeeting.value, 4.0);
+  assert.equal(model.kpis.utteranceCoverage, undefined);
+  assert.equal(model.kpis.analyzedAgendas, undefined);
+  assert.equal(model.kpis.latestQuarter, undefined);
   assert.equal(model.meetingCards.length, 1);
   assert.equal(model.meetingCards[0].meetingLabel, "2025년 제24회 전체회의");
   assert.equal(model.signals, undefined);

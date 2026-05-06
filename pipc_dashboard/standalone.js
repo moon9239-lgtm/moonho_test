@@ -13,8 +13,8 @@
   const tabTitles = {
     stats: "전체회의 통계·동향 대시보드",
     search: "안건 통합검색",
-    meeting: "회의 상세 탐색",
-    commissioner: "위원별 분석",
+    meeting: "회의별 속기록 조회",
+    commissioner: "위원별 대시보드",
     assistant: "신규 안건 준비 도우미",
   };
 
@@ -115,19 +115,11 @@
     const totalAgendas = number(overview.agenda_items_total) || years.reduce((sum, row) => sum + number(row.agenda_items ?? row.agenda_count), 0);
     const decision = number(overview.decision_agendas_total);
     const report = number(overview.report_agendas_total);
-    const totals = analysisIndex.totals || {};
-    const compactMeetings = Array.isArray(analysisIndex.compactMeetings) ? analysisIndex.compactMeetings : [];
-    const utterances = compactMeetings.reduce((sum, item) => sum + number(item.utteranceCount), 0);
-    const lawRefs = compactMeetings.reduce((sum, item) => sum + number(item.lawReferenceCount), 0);
-    const latestQuarter = (analysisIndex.quarterlyStats || [])[0];
     const items = [
       { label: "총 회의 수", value: totalMeetings },
       { label: "총 안건 수", value: totalAgendas },
       { label: "회의당 평균 안건 수", value: totalMeetings ? Math.round(totalAgendas / totalMeetings * 10) / 10 : 0 },
       { label: "심의·의결 / 보고", value: `${decision} / ${report}`, meta: `${formatPercent(decision / Math.max(totalAgendas, 1))} / ${formatPercent(report / Math.max(totalAgendas, 1))}` },
-      { label: "속기록 발언", value: utterances, meta: `${number(totals.parsedMeetings)}개 회의 정제` },
-      { label: "검색 가능 안건 구간", value: totals.searchEntries || 0, meta: `법조항 참조 ${formatNumber(lawRefs)}개` },
-      { label: "최근 분기", value: latestQuarter?.label || "-", meta: latestQuarter ? `${latestQuarter.meetingCount}회 · ${latestQuarter.agendaCount}구간` : "" },
     ];
     return items.map((item) => `
       <article class="kpi-card">
@@ -142,25 +134,6 @@
     return `<ol class="rank-list">${rows.slice(0, 6).map((row) => `
       <li><span>${escapeHtml(row.label || row.name || "")}</span><strong>${formatNumber(row.count || row.value || 0)}</strong></li>
     `).join("") || `<li><span>${escapeHtml(emptyText)}</span><strong>0</strong></li>`}</ol>`;
-  }
-
-  function quarterlyStatsTable(rows = []) {
-    const safeRows = rows.slice(0, 10);
-    const maxAgenda = Math.max(...safeRows.map((row) => number(row.agendaCount)), 1);
-    return `
-      <div class="quarter-table">
-        ${safeRows.map((row) => `
-          <button class="quarter-row" type="button" data-quarter-key="${escapeHtml(row.key || "")}">
-            <span class="quarter-label">${escapeHtml(row.label || "")}</span>
-            <span class="quarter-meter"><b style="width:${Math.max(number(row.agendaCount) / maxAgenda * 100, 3)}%"></b></span>
-            <span>${formatNumber(row.meetingCount)}회</span>
-            <span>${formatNumber(row.agendaCount)}구간</span>
-            <span>${formatNumber(row.utteranceCount)}발언</span>
-            <span>${formatNumber(row.lawReferenceCount)}조항</span>
-          </button>
-        `).join("")}
-      </div>
-    `;
   }
 
   function shareRows(rows) {
@@ -203,7 +176,7 @@
               <span class="year-flow-bar meeting" style="width:${Math.max(number(row.meetings) / max * 100, 2)}%"><b>${formatNumber(row.meetings)}</b></span>
               <span class="year-flow-bar agenda" style="width:${Math.max(number(row.agenda_items) / max * 100, 2)}%"><b>${formatNumber(row.agenda_items)}</b></span>
             </div>
-            <div class="year-flow-meta">의결 ${formatNumber(row.decision_agendas)} · 보고 ${formatNumber(row.report_agendas)} · 발언 ${formatNumber(row.utterances)}</div>
+            <div class="year-flow-meta">의결 ${formatNumber(row.decision_agendas)} · 보고 ${formatNumber(row.report_agendas)}</div>
           </div>
         `).join("")}
       </div>
@@ -226,16 +199,6 @@
     `;
   }
 
-  function meetingCard(item) {
-    return `
-      <button class="meeting-card" type="button" data-meeting-id="${escapeHtml(item.id)}">
-        <span class="meeting-card-title">${escapeHtml(item.meetingLabel)}</span>
-        <span class="meeting-card-meta">${escapeHtml(item.date || "날짜 없음")}</span>
-        <span class="meeting-card-badge">속기록</span>
-      </button>
-    `;
-  }
-
   function renderSituationBoard() {
     const overview = overviewRow();
     const totalAgendas = number(overview.agenda_items_total);
@@ -245,7 +208,7 @@
         <div class="section-header">
           <div>
             <h2>회의 운영 상황판</h2>
-            <p class="section-caption">연도·분기별 회의 흐름, 안건 구간, 발언량, 조항 참조를 실무자가 바로 훑을 수 있게 정리했습니다.</p>
+            <p class="section-caption">회의 흐름, 안건 처리 비율, 공개 여부, 주요 대상과 조항을 간결하게 정리했습니다.</p>
           </div>
           <div class="update-note">업데이트 기준: ${escapeHtml(analysisIndex.generatedAt || data.generatedAt || "확인 필요")}</div>
         </div>
@@ -261,13 +224,9 @@
             { label: "비공개", value: overview.private_agendas_total, tone: "coral" },
           ])}</article>
           <article class="ops-panel wide"><h3>연도별 회의·안건 흐름</h3>${yearlyFlowChart(yearlyRows())}</article>
-          <article class="ops-panel wide"><h3>최근 분기별 회의 운영 통계</h3>${quarterlyStatsTable(analysisIndex.quarterlyStats || [])}</article>
           <article class="ops-panel"><h3>실무 쟁점 주제</h3>${topicBars(data.topicDistribution || [])}</article>
-          <article class="ops-panel"><h3>속기록 기반 주요 대상</h3>${rankList(globalStats.topTargets || [], "추출된 대상 없음")}</article>
           <article class="ops-panel"><h3>자주 등장한 관련 조항</h3>${rankList(globalStats.topArticles || [], "감지된 조항 없음")}</article>
         </div>
-        <div class="section-header compact"><div><h3>회의 바로가기</h3><p class="section-caption">속기록이 있는 회의를 눌러 상세 화면으로 이동합니다.</p></div></div>
-        <div class="meeting-card-grid">${transcripts().slice(0, 24).map(meetingCard).join("")}</div>
       </section>
     `;
   }
@@ -342,7 +301,7 @@
           <div><strong>키워드</strong><div>${chipList(row.keywords || [], "data-pill")}</div></div>
         </div>
         <footer>
-          <button class="small-button" type="button" data-search-meeting-id="${escapeHtml(row.meetingId)}" data-search-utterance-id="${escapeHtml(row.startUtteranceId || "")}">회의 상세에서 보기</button>
+          <button class="small-button" type="button" data-search-meeting-id="${escapeHtml(row.meetingId)}" data-search-utterance-id="${escapeHtml(row.startUtteranceId || "")}">속기록에서 보기</button>
           ${row.isProcedural ? `<span class="search-procedure-note">절차성 구간</span>` : ""}
         </footer>
       </article>
@@ -422,7 +381,7 @@
 
   function renderMeetingDetail(id) {
     const meeting = selectedMeeting(id);
-    if (!meeting) return `<section class="section-band"><h2>회의 상세</h2><p class="section-caption">선택된 회의가 없습니다.</p></section>`;
+    if (!meeting) return `<section class="section-band"><h2>회의별 속기록 조회</h2><p class="section-caption">선택된 회의가 없습니다.</p></section>`;
     const detail = embeddedMeetingDetail(meeting);
     activeMeetingDetail = detail;
     const lawRefs = detail?.lawReferences || [];
@@ -431,7 +390,7 @@
     return `
       <section class="section-band meeting-detail">
         <div class="section-header">
-          <div><h2>회의 상세</h2><p class="section-caption">${escapeHtml(meeting.meetingLabel)} · ${escapeHtml(meeting.date)}</p></div>
+          <div><h2>회의별 속기록 조회</h2><p class="section-caption">${escapeHtml(meeting.meetingLabel)} · ${escapeHtml(meeting.date)}</p></div>
           <button class="tool-button" type="button" data-animation-meeting-id="${escapeHtml(meeting.id)}">애니메이션으로 보기</button>
         </div>
         ${detail ? `
@@ -511,20 +470,408 @@
     `;
   }
 
+  function commissionerRoleTone(role = "", route = "") {
+    if (/부위원장/.test(role)) return "vice";
+    if (/위원장/.test(role)) return "chair";
+    if (/상임|당연/.test(route)) return "executive";
+    return "member";
+  }
+
+  function commissionerRoleRank(item = {}) {
+    if (item.roleTone === "chair") return 0;
+    if (item.roleTone === "vice") return 1;
+    if (item.roleTone === "executive") return 2;
+    return 3;
+  }
+
+  function sortCommissionerCards(left, right) {
+    return commissionerRoleRank(left) - commissionerRoleRank(right) || String(left.name || "").localeCompare(String(right.name || ""), "ko");
+  }
+
+  function commissionerTags(activity = {}, character = {}) {
+    const characterTags = Array.isArray(character.top_tags) ? character.top_tags : [];
+    const activityTags = Array.isArray(activity.top_tags) ? activity.top_tags.map((tag) => text(tag.tag_label || tag.label || tag.name || tag)) : [];
+    return (characterTags.length ? characterTags : activityTags).filter(Boolean).slice(0, 4);
+  }
+
+  function commissionerTagDetails(activity = {}, character = {}) {
+    const characterTags = Array.isArray(character.top_tags)
+      ? character.top_tags.map((tag) => ({ label: text(tag.tag_label || tag.label || tag.name || tag), count: Number.isFinite(Number(tag.utterance_count)) ? Number(tag.utterance_count) : null }))
+      : [];
+    const activityTags = Array.isArray(activity.top_tags)
+      ? activity.top_tags.map((tag) => ({ label: text(tag.tag_label || tag.label || tag.name || tag), count: Number.isFinite(Number(tag.utterance_count)) ? Number(tag.utterance_count) : null }))
+      : [];
+    const activityCountByLabel = new Map(activityTags.map((tag) => [tag.label, tag.count]));
+    const source = characterTags.length ? characterTags : activityTags;
+    return source.filter((tag) => tag.label).slice(0, 4).map((tag) => ({
+      label: tag.label,
+      count: tag.count ?? activityCountByLabel.get(tag.label) ?? null,
+    }));
+  }
+
+  const GENERIC_COMMISSIONER_QUESTION_TAGS = new Set(["절차·법리·근거 검토", "사실관계·증거 확인"]);
+  const COMMISSIONER_TAG_KEYWORDS = {
+    "AI·데이터 활용 거버넌스": ["AI", "인공지능", "데이터", "가명", "모델", "활용", "자동화"],
+    "공공부문 책임성 강조": ["공공", "기관", "행정", "책임", "이행", "담당"],
+    "기술·보안 통제 점검": ["보안", "안전", "접속", "접근", "권한", "암호", "암호화", "유출", "공격", "취약", "통제", "로그"],
+    "사업자 부담·산업 맥락 고려": ["사업자", "기업", "부담", "산업", "시장", "서비스", "영업", "비용"],
+    "정보주체 권리·피해 관점": ["정보주체", "이용자", "소비자", "피해", "권리", "구제", "손해배상"],
+    "재발방지·개선·예방 지향": ["개선", "재발", "예방", "조치", "이행", "점검", "계획", "사후"],
+    "처분 실효성·제재수준 점검": ["처분", "제재", "과징금", "과태료", "시정", "수준", "실효"],
+    "절차·법리·근거 검토": ["법", "법적", "법리", "근거", "조항", "해석", "절차", "원칙", "기준"],
+    "사실관계·증거 확인": ["사실", "증거", "자료", "확인", "기록", "경위"],
+  };
+  const COMMISSIONER_TERM_STOPWORDS = new Set(["위원", "위원장", "비상임위원", "상임위원", "관점", "문체", "역할", "회의", "안건", "정책", "확인", "질문", "검토", "정리", "중심", "유형", "분석", "흐름", "실제", "가능", "어떤", "어떻게", "있는지", "없는지"]);
+
+  function commissionerQuestionTags(topTagDetails = [], activity = {}, character = {}) {
+    const characterTags = Array.isArray(character.top_tags) ? character.top_tags.map((tag) => text(tag.tag_label || tag.label || tag.name || tag)) : [];
+    const activityTags = Array.isArray(activity.top_tags) ? activity.top_tags.map((tag) => text(tag.tag_label || tag.label || tag.name || tag)) : [];
+    const labels = [...topTagDetails.map((tag) => tag.label), ...characterTags, ...activityTags].filter(Boolean);
+    const unique = [...new Set(labels)];
+    const specific = unique.filter((label) => !GENERIC_COMMISSIONER_QUESTION_TAGS.has(label));
+    return (specific.length ? specific : unique).slice(0, 2);
+  }
+
+  function commissionerKeywordTerms(activity = {}, character = {}, topTagDetails = [], meetingRole = "") {
+    const characterTags = Array.isArray(character.top_tags) ? character.top_tags.map((tag) => text(tag.tag_label || tag.label || tag.name || tag)) : [];
+    const activityTags = Array.isArray(activity.top_tags) ? activity.top_tags.map((tag) => text(tag.tag_label || tag.label || tag.name || tag)) : [];
+    const tagLabels = [...topTagDetails.map((tag) => tag.label), ...characterTags, ...activityTags].filter(Boolean);
+    const sources = [
+      meetingRole,
+      character.meeting_function,
+      activity.meeting_function,
+      character.characterType,
+      character.character_type,
+      activity.character_type,
+      character.core_motif,
+      activity.core_motif,
+      ...tagLabels,
+      ...tagLabels.flatMap((label) => COMMISSIONER_TAG_KEYWORDS[label] || []),
+    ];
+    const terms = new Set();
+    for (const source of sources) {
+      for (const token of String(source || "").match(/[가-힣A-Za-z0-9]{2,}/g) || []) {
+        if (!COMMISSIONER_TERM_STOPWORDS.has(token)) terms.add(token);
+      }
+    }
+    return [...terms];
+  }
+
+  function commissionerQuestionPerspective(value = "") {
+    const raw = text(value).replace(/[.。!?！？]+$/, "");
+    if (!raw) return "";
+    if (raw.includes("관점에서")) {
+      return raw
+        .replace(/관점에서\s*/, "관점으로 ")
+        .replace(/을 정리한다$/, "을 정리하는 흐름")
+        .replace(/를 정리한다$/, "를 정리하는 흐름")
+        .replace(/을 확인한다$/, "을 확인하는 흐름")
+        .replace(/를 확인한다$/, "를 확인하는 흐름")
+        .replace(/한다$/, "하는 흐름")
+        .replace(/는다$/, "는 흐름")
+        .replace(/다$/, "는 흐름");
+    }
+    return raw
+      .replace(/을 동시에 묻는다$/, "을 동시에 묻는 관점")
+      .replace(/를 동시에 묻는다$/, "를 동시에 묻는 관점")
+      .replace(/을 정리한다$/, "을 정리하는 관점")
+      .replace(/를 정리한다$/, "를 정리하는 관점")
+      .replace(/을 연결한다$/, "을 연결하는 관점")
+      .replace(/를 연결한다$/, "를 연결하는 관점")
+      .replace(/을 선명하게 잡는다$/, "을 선명하게 잡는 관점")
+      .replace(/를 선명하게 잡는다$/, "를 선명하게 잡는 관점")
+      .replace(/을 회의 안으로 가져온다$/, "을 회의 안으로 가져오는 관점")
+      .replace(/를 회의 안으로 가져온다$/, "를 회의 안으로 가져오는 관점")
+      .replace(/의 현실성을 찌른다$/, "의 현실성을 검증하는 관점")
+      .replace(/의 단단함을 검토한다$/, "의 단단함을 검토하는 관점")
+      .replace(/을 밀도 있게 묻는다$/, "을 밀도 있게 묻는 관점")
+      .replace(/를 밀도 있게 묻는다$/, "를 밀도 있게 묻는 관점")
+      .replace(/한다$/, "하는 관점")
+      .replace(/는다$/, "는 관점")
+      .replace(/다$/, "는 관점");
+  }
+
+  function commissionerIsQuestionLike(value = "") {
+    return commissionerIsDirectQuestionLike(value) || /질문|문의/.test(value);
+  }
+
+  function commissionerIsDirectQuestionLike(value = "") {
+    return /[?？]|습니까|입니까|됩니까|합니까|아닙니까|맞습니까|있습니까|없습니까|겠습니까|주십니까|하십니까|나요|지요|죠|여쭤봅니다|궁금합니다|확인해 주시기 바랍니다|설명해 주시기 바랍니다|답변해 주시기 바랍니다|말씀해 주시기 바랍니다|인지 확인|는지 확인|인지 설명|는지 설명|인지 답변|는지 답변|맞는지/.test(value);
+  }
+
+  function commissionerSentenceChunks(value = "") {
+    const normalized = text(value).replace(/\s+/g, " ");
+    if (!normalized) return [];
+    return (normalized.match(/[^.!?？。]+[.!?？。]?/g) || [normalized])
+      .map((chunk) => chunk.trim())
+      .filter(Boolean);
+  }
+
+  function commissionerQuestionExcerpt(value = "") {
+    const normalized = text(value).replace(/\s+/g, " ");
+    if (!normalized) return "";
+    const chunks = commissionerSentenceChunks(normalized);
+    const directMatches = chunks.filter((chunk) => commissionerIsDirectQuestionLike(chunk));
+    if (directMatches.length) return directMatches.slice(0, 2).join(" ");
+    const matches = chunks.map((chunk) => chunk.trim()).filter((chunk) => chunk && commissionerIsQuestionLike(chunk));
+    if (!matches.length) return commissionerIsQuestionLike(normalized) ? normalized : "";
+    return matches.slice(0, 2).join(" ");
+  }
+
+  function commissionerShortQuestionText(value = "", limit = 150) {
+    const normalized = text(value).replace(/\s+/g, " ");
+    if (normalized.length <= limit) return normalized;
+    const slice = normalized.slice(0, Math.max(limit - 1, 0));
+    const cut = Math.max(slice.lastIndexOf(" "), slice.lastIndexOf(","), slice.lastIndexOf("，"));
+    return `${slice.slice(0, cut > 50 ? cut : limit - 1).trim()}…`;
+  }
+
+  function commissionerTrimQuestionLead(value = "", terms = []) {
+    let normalized = text(value).replace(/\s+/g, " ");
+    normalized = normalized.replace(/^(그런데|그리고|그래서|다만|또한|한편)\s*/, "");
+    let bestIndex = -1;
+    for (const term of terms) {
+      const needle = text(term);
+      if (needle.length < 2) continue;
+      const index = normalized.indexOf(needle);
+      if (index > 8 && (bestIndex === -1 || index < bestIndex)) bestIndex = index;
+    }
+    if (bestIndex > 8 && bestIndex < normalized.length * 0.45) normalized = normalized.slice(bestIndex);
+    return normalized.trim();
+  }
+
+  function commissionerSummarizeQuestion(value = "", terms = []) {
+    const chunks = commissionerSentenceChunks(value);
+    const pool = chunks.filter(commissionerIsDirectQuestionLike);
+    const candidates = pool.length ? pool : chunks.filter(commissionerIsQuestionLike);
+    if (!candidates.length) return commissionerShortQuestionText(value);
+    const ranked = candidates
+      .map((chunk, order) => {
+        const haystack = chunk.toLowerCase();
+        const matched = terms.filter((term) => haystack.includes(String(term).toLowerCase())).length;
+        const score = matched * 12 + (/[?？]/.test(chunk) ? 8 : 0) + (chunk.length >= 35 ? 4 : 0) - Math.max(chunk.length - 170, 0) / 12;
+        return { chunk, order, score };
+      })
+      .sort((left, right) => right.score - left.score || left.order - right.order)
+      .slice(0, 2)
+      .sort((left, right) => left.order - right.order)
+      .map((item) => commissionerTrimQuestionLead(item.chunk, terms));
+    return commissionerShortQuestionText(ranked.join(" "), 150);
+  }
+
+  function commissionerUtterancesBySpeaker() {
+    const rows = analysisIndex.meetings && typeof analysisIndex.meetings === "object" ? Object.values(analysisIndex.meetings) : [];
+    const bySpeaker = new Map();
+    for (const detail of rows) {
+      const utterances = Array.isArray(detail?.utterances) ? detail.utterances : [];
+      const meeting = detail?.meeting || {};
+      const agendaById = new Map((Array.isArray(detail?.agendas) ? detail.agendas : []).map((agenda) => [agenda.id, agenda]));
+      for (const utterance of utterances) {
+        const speakerName = text(utterance?.speakerName || utterance?.speaker_name || "");
+        if (!speakerName) continue;
+        const agenda = agendaById.get(utterance.agendaId) || {};
+        const enriched = {
+          ...utterance,
+          meetingId: text(detail?.meetingId || meeting.id || detail?.id || ""),
+          meetingLabel: text(meeting.meetingLabel || meeting.label || detail?.meetingLabel || detail?.title || meeting.title || ""),
+          date: text(meeting.date || detail?.date || ""),
+          agendaTitle: text(agenda.title || utterance.sectionTitle || ""),
+        };
+        if (!bySpeaker.has(speakerName)) bySpeaker.set(speakerName, []);
+        bySpeaker.get(speakerName).push(enriched);
+      }
+    }
+    return bySpeaker;
+  }
+
+  function commissionerScoreQuestionCandidate(candidate = {}, terms = []) {
+    const value = candidate.text || "";
+    if (!value || !commissionerIsQuestionLike(value)) return -Infinity;
+    let score = 100;
+    if (/[?？]/.test(value)) score += 18;
+    if (/확인|설명|답변|말씀|질문|문의/.test(value)) score += 12;
+    if (/위원/.test(`${candidate.speakerRole || ""} ${candidate.speaker || ""}`)) score += 8;
+    if (/개회선언|폐회|공개여부|성원보고/.test(candidate.sectionTitle || "")) score -= 50;
+    const haystack = value.toLowerCase();
+    const matchedTerms = new Set(terms.filter((term) => haystack.includes(String(term).toLowerCase())));
+    score += Math.min(matchedTerms.size * 12, 84);
+    if (value.length >= 35 && value.length <= 420) score += 18;
+    if (value.length < 20) score -= 28;
+    if (value.length > 650) score -= Math.min(Math.floor((value.length - 650) / 30), 40);
+    return score;
+  }
+
+  function commissionerTranscriptRepresentativeQuestion(activity = {}, character = {}, topTagDetails = [], meetingRole = "", utterances = []) {
+    const terms = commissionerKeywordTerms(activity, character, topTagDetails, meetingRole);
+    const best = utterances
+      .map((utterance, index) => {
+        const originalText = text(utterance.text);
+        const candidate = { ...utterance, text: commissionerQuestionExcerpt(originalText), originalText, order: index };
+        return { candidate, score: commissionerScoreQuestionCandidate(candidate, terms) };
+      })
+      .filter((item) => Number.isFinite(item.score))
+      .sort((left, right) => right.score - left.score || left.candidate.order - right.candidate.order)[0]?.candidate;
+    if (!best) return { text: "", originalText: "", source: null };
+    return {
+      text: commissionerSummarizeQuestion(best.text, terms) || best.text,
+      originalText: best.originalText || best.text,
+      source: {
+        meetingId: best.meetingId || "",
+        utteranceId: best.id || "",
+        agendaId: best.agendaId || "",
+        meetingLabel: best.meetingLabel || "",
+        date: best.date || "",
+        agendaTitle: best.agendaTitle || "",
+      },
+    };
+  }
+
+  function commissionerRepresentativeQuestion(activity = {}, character = {}, topTagDetails = [], meetingRole = "", utterances = []) {
+    const transcriptQuestion = commissionerTranscriptRepresentativeQuestion(activity, character, topTagDetails, meetingRole, utterances);
+    if (transcriptQuestion.text) return transcriptQuestion;
+    const explicitQuestion = text(activity?.representative_question || character?.representative_question || "");
+    if (explicitQuestion) return { text: explicitQuestion, originalText: "", source: null };
+
+    const tags = commissionerQuestionTags(topTagDetails, activity, character);
+    const tagText = tags.length ? tags.map((tag) => `"${tag}"`).join(", ") : "핵심";
+    const perspective = commissionerQuestionPerspective(meetingRole)
+      || text(character?.characterType || character?.character_type || activity?.character_type || character?.core_motif || activity?.core_motif || "");
+    if (perspective) return { text: `${perspective}에서 이 안건의 ${tagText} 쟁점을 어떤 사실과 근거로 확인해야 합니까?`, originalText: "", source: null };
+    return { text: tags.length ? `${tagText} 쟁점을 어떤 사실과 근거로 확인해야 합니까?` : "", originalText: "", source: null };
+  }
+
+  function commissionerCardModel(member = {}, activity = {}, character = {}, representativeUtterances = []) {
+    const name = text(member.name || activity?.commissioner_name || activity?.name || character?.name || "위원");
+    const role = text(member.role_current || member.term_role || character?.role || activity?.role_current || "위원");
+    const route = text(member.recommendation_route || member.appointment_route || activity?.recommendation_route || "");
+    const roleTone = commissionerRoleTone(role, route);
+    const topTagDetails = commissionerTagDetails(activity, character);
+    const meetingRole = text(character?.meetingFunction || character?.meeting_function || activity?.meeting_function || "");
+    const representativeQuestion = commissionerRepresentativeQuestion(activity, character, topTagDetails, meetingRole, representativeUtterances);
+    return {
+      name,
+      role,
+      roleTone,
+      isExecutive: roleTone === "chair" || roleTone === "vice" || roleTone === "executive",
+      generation: text(member.generation || character?.generation || ""),
+      characterType: text(character?.characterType || character?.character_type || activity?.character_type || "분석 대기"),
+      meetingRole,
+      questionStyle: text(character?.voiceDirection || character?.voice_direction || activity?.voice_direction || ""),
+      representativeQuestion: representativeQuestion.text,
+      representativeQuestionOriginal: representativeQuestion.originalText || null,
+      representativeQuestionSource: representativeQuestion.source,
+      asset: text(character?.asset || ""),
+      termText: text(member.official_term_text || ""),
+      affiliation: route,
+      recommendationRoute: route,
+      appearances: member.appearances,
+      totalUtterances: activity?.total_utterances,
+      questionCount: activity?.question_count,
+      agendaCount: activity?.agenda_count,
+      meetingCount: activity?.meeting_count,
+      topTags: commissionerTags(activity, character),
+      topTagDetails,
+    };
+  }
+
+  function commissionerMetrics(item = {}) {
+    const metrics = [];
+    if (Number.isFinite(Number(item.totalUtterances))) metrics.push(`발언 ${formatNumber(item.totalUtterances)}`);
+    if (Number.isFinite(Number(item.questionCount))) metrics.push(`질문 ${formatNumber(item.questionCount)}`);
+    if (Number.isFinite(Number(item.agendaCount))) metrics.push(`안건 ${formatNumber(item.agendaCount)}`);
+    if (Number.isFinite(Number(item.meetingCount))) metrics.push(`회의 ${formatNumber(item.meetingCount)}`);
+    if (Number.isFinite(Number(item.appearances))) metrics.push(`출석 ${formatNumber(item.appearances)}`);
+    return metrics;
+  }
+
+  function commissionerQuestionSourceLabel(source = {}) {
+    if (!source || typeof source !== "object") return "";
+    return [source.date, source.meetingLabel, source.agendaTitle].filter(Boolean).map(text).join(" · ");
+  }
+
+  function commissionerCard(item = {}) {
+    const classes = ["commissioner-card", `commissioner-card-${item.roleTone || "member"}`, item.isExecutive ? "commissioner-card-executive" : ""].filter(Boolean).join(" ");
+    const portrait = item.asset
+      ? `<div class="commissioner-portrait"><img src="${escapeHtml(item.asset)}" alt="${escapeHtml(item.name)} 캐릭터"></div>`
+      : `<div class="commissioner-portrait commissioner-portrait-empty">${escapeHtml(item.name.slice(0, 1))}</div>`;
+    const badges = [item.role, item.isExecutive ? "상임·당연직" : "", item.generation].filter(Boolean);
+    const affiliation = text(item.affiliation || item.organization || item.recommendationRoute || item.appointmentRoute || "");
+    const facts = [item.termText ? `임기 ${item.termText}` : ""].filter(Boolean);
+    const metrics = commissionerMetrics(item);
+    const insights = [
+      item.meetingRole ? { label: "회의 내 역할", value: item.meetingRole } : null,
+      item.questionStyle ? { label: "질문 스타일", value: item.questionStyle } : null,
+      item.representativeQuestion ? { label: "대표 질문", value: item.representativeQuestion, wide: true } : null,
+    ].filter(Boolean);
+    return `
+      <article class="${classes}">
+        ${portrait}
+        <div class="commissioner-card-body">
+          <div class="commissioner-card-topline">${badges.map((badge) => `<span>${escapeHtml(badge)}</span>`).join("")}</div>
+          <h3>${escapeHtml(item.name)}${affiliation ? `<span class="commissioner-affiliation">${escapeHtml(affiliation)}</span>` : ""}</h3>
+          <p>${escapeHtml(item.characterType)}</p>
+          ${facts.length ? `<div class="commissioner-facts">${facts.map((fact) => `<span>${escapeHtml(fact)}</span>`).join("")}</div>` : ""}
+          ${metrics.length ? `<div class="kpi-meta">${metrics.join(" · ")}</div>` : ""}
+          ${item.topTagDetails.length ? `
+            <div class="commissioner-tag-section">
+              <strong>발언 성향</strong>
+              <div class="tag-list">${item.topTagDetails.map((tag) => `<span class="status-pill">${escapeHtml(tag.label)}${Number.isFinite(Number(tag.count)) ? ` ${formatNumber(tag.count)}건` : ""}</span>`).join("")}</div>
+            </div>
+          ` : ""}
+          ${insights.length ? `
+            <div class="commissioner-insight-grid">
+              ${insights.map((insight) => `
+                <div class="${insight.wide ? "wide" : ""}">
+                  <strong>${escapeHtml(insight.label)}</strong>
+                  <span>${escapeHtml(insight.value)}</span>
+                </div>
+              `).join("")}
+            </div>
+          ` : ""}
+        </div>
+      </article>
+    `;
+  }
+
+  function commissionerGroup(title, caption, rows = []) {
+    const cards = rows.map(commissionerCard).join("");
+    if (!cards) return "";
+    return `
+      <div class="commissioner-group">
+        <div class="section-header compact"><div><h3>${escapeHtml(title)}</h3><p class="section-caption">${escapeHtml(caption)}</p></div></div>
+        <div class="commissioner-grid">${cards}</div>
+      </div>
+    `;
+  }
+
   function renderCommissionerAnalysis() {
-    const rows = Array.isArray(data.commissionerActivity) ? data.commissionerActivity : [];
-    const cards = rows.map((item) => {
-      const topTags = Array.isArray(item.top_tags) ? item.top_tags.map((tag) => text(tag.tag_label || tag.label || tag.name || tag)).filter(Boolean).slice(0, 4) : [];
-      return `
-        <article class="commissioner-card">
-          <h3>${escapeHtml(item.commissioner_name || item.name || "위원")}</h3>
-          <p>${escapeHtml(item.character_type || "분석 대기")}</p>
-          <div class="kpi-meta">발언 ${formatNumber(item.total_utterances)} · 질문 ${formatNumber(item.question_count)} · 안건 ${formatNumber(item.agenda_count)}</div>
-          <div class="tag-list">${topTags.map((tag) => `<span class="status-pill">${escapeHtml(tag)}</span>`).join("")}</div>
-        </article>
-      `;
-    }).join("");
-    return `<section class="section-band"><div class="section-header"><div><h2>위원별 분석</h2><p class="section-caption">속기록 활동 지표를 기반으로 위원별 관심 주제를 확인합니다.</p></div></div><div class="commissioner-grid">${cards}</div></section>`;
+    const characters = Array.isArray(analysisIndex.characterAssets) ? analysisIndex.characterAssets : [];
+    const characterByName = new Map(characters.map((item) => [item.name, item]));
+    const activityByName = new Map((Array.isArray(data.commissionerActivity) ? data.commissionerActivity : [])
+      .map((item) => [item.commissioner_name || item.name, item]));
+    const utterancesBySpeaker = commissionerUtterancesBySpeaker();
+    const secondRows = Array.isArray(data.secondCommissioners) ? data.secondCommissioners : [];
+    const secondNames = new Set(secondRows.map((item) => item.name));
+    const currentSecond = secondRows
+      .filter((item) => item.generation === "2기" && /current|현직/.test(`${item.term_status || ""} ${item.commissioner_status || ""} ${item.display_status || ""}`) && !/former|전직|교체/.test(`${item.term_status || ""} ${item.commissioner_status || ""} ${item.display_status || ""}`))
+      .map((item) => commissionerCardModel(item, activityByName.get(item.name), characterByName.get(item.name), utterancesBySpeaker.get(item.name) || []))
+      .sort(sortCommissionerCards);
+    const formerSecond = secondRows
+      .filter((item) => item.generation === "2기" && /former|전직|교체/.test(`${item.term_status || ""} ${item.commissioner_status || ""} ${item.display_status || ""}`))
+      .map((item) => commissionerCardModel(item, activityByName.get(item.name), characterByName.get(item.name), utterancesBySpeaker.get(item.name) || []))
+      .sort(sortCommissionerCards);
+    const firstGeneration = characters
+      .filter((item) => item.status === "former" && !secondNames.has(item.name))
+      .map((item) => commissionerCardModel({}, activityByName.get(item.name), item, utterancesBySpeaker.get(item.name) || []))
+      .sort(sortCommissionerCards);
+    return `
+      <section class="section-band commissioner-dashboard">
+        <div class="section-header"><div><h2>위원별 대시보드</h2><p class="section-caption">현재 2기 위원을 먼저 확인하고, 캐릭터 프로필과 회의 활동 지표를 함께 봅니다.</p></div></div>
+        ${commissionerGroup("현재 2기 위원 명단", "위원장과 부위원장은 상임·당연직 카드 톤으로 구분했습니다.", currentSecond)}
+        ${commissionerGroup("2기 교체·전직 위원", "2기 중 교체되었거나 전직 상태인 위원입니다.", formerSecond)}
+        ${commissionerGroup("1기 위원", "출범기와 1기 활동 위원 캐릭터를 모았습니다.", firstGeneration)}
+      </section>
+    `;
   }
 
   function renderAgendaAssistant() {
@@ -709,8 +1056,6 @@
     const searchChip = event.target.closest("[data-search-chip]");
     if (searchChip) $("#tab-search").innerHTML = renderSearch({ query: searchChip.dataset.searchChip });
 
-    const clearFilter = event.target.closest("#clear-filter");
-    if (clearFilter) setActiveTab("stats");
   });
 
   document.addEventListener("submit", (event) => {

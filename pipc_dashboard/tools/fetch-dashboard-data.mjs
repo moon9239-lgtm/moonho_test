@@ -32,6 +32,7 @@ select jsonb_build_object(
   ,'meetingYearMonth', (select coalesce(jsonb_agg(t order by meeting_year, meeting_month), '[]'::jsonb) from public.dashboard_tab1_meeting_year_month t)
   ,'meetingYearly', (select coalesce(jsonb_agg(t order by meeting_year), '[]'::jsonb) from public.dashboard_tab1_meeting_yearly t)
   ,'secondCommissioners', (select coalesce(jsonb_agg(t order by case when display_status = '현직' then 0 else 1 end, start_date nulls last, name), '[]'::jsonb) from public.dashboard_tab1_second_commissioners t)
+  ,'meetingTranscripts', (select coalesce(jsonb_agg(t order by meeting_date desc, meeting_number desc nulls last), '[]'::jsonb) from public.dashboard_meeting_transcripts t)
 ) as dashboard_data;
 `;
 
