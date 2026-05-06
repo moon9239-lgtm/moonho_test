@@ -1,14 +1,20 @@
 const dashboardData = window.PIPC_DASHBOARD_DATA || {};
+const transcriptIndex = (dashboardData.meetingTranscripts || window.PIPC_TRANSCRIPTS || [])
+  .map(normalizeTranscriptRecord);
 
 const state = {
   activeTab: "stats",
-  activeFilter: null,
+  meetingSearch: "",
+  meetingYear: "all",
+  activeTranscriptId: null,
+  loadedTranscriptId: null,
+  transcriptCache: {},
 };
 
 const tabTitles = {
   stats: "전체회의 통계·동향 대시보드",
   search: "안건 통합검색",
-  meeting: "회의별 확인",
+  meeting: "회의별 속기록 조회",
   commissioner: "위원 대시보드",
   assistant: "신규 안건 준비 도우미",
 };
@@ -76,23 +82,36 @@ function badge(label, status = "ready") {
   return `<span class="status-pill ${statusClass(status)}">${escapeHtml(label)}</span>`;
 }
 
-function setFilter(label, payload) {
-  state.activeFilter = { label, payload };
-  $("#filter-preview").textContent = `${label}: ${Object.entries(payload).map(([key, value]) => `${key}=${value}`).join(", ")}`;
+function normalizePath(value) {
+  return String(value || "").replace(/\\/g, "/");
 }
 
-function clearFilter() {
-  state.activeFilter = null;
-  $("#filter-preview").textContent = "필터 없음";
+function normalizeTranscriptPath(value) {
+  const path = normalizePath(value);
+  if (!path || /^(https?:|file:|\/|\.\/|\.\.\/)/.test(path)) return path;
+  return `../${path}`;
 }
 
-function bindFilterTargets(root = document) {
-  $all("[data-filter]", root).forEach((element) => {
-    element.addEventListener("click", () => {
-      const payload = JSON.parse(element.dataset.filter || "{}");
-      setFilter(element.dataset.filterLabel || "필터", payload);
-    });
-  });
+function normalizeTranscriptRecord(item, index) {
+  const date = item.date || item.meeting_date || "";
+  const year = toNumber(item.year || item.meeting_year || date.slice(0, 4));
+  const meetingNo = item.meetingNo ?? item.meeting_number ?? null;
+  const path = normalizeTranscriptPath(item.path || item.transcript_path || item.raw_md_path || "");
+  const fileName = item.fileName || item.file_name || path.split("/").pop() || "";
+  const sizeBytes = toNumber(item.size_bytes);
+  return {
+    id: String(item.id || item.meeting_id || `${date}-${meetingNo || index}`),
+    year,
+    date,
+    meetingNo,
+    meetingLabel: item.meetingLabel || item.meeting_label || (meetingNo ? `${year}년 제${meetingNo}회` : `${year}년`),
+    title: item.title || item.transcript_title || item.meeting_title || fileName,
+    fileName,
+    attachmentName: item.attachmentName || item.attachment_name || "",
+    path,
+    sizeKb: item.sizeKb || item.size_kb || (sizeBytes ? Math.round(sizeBytes / 1024) : null),
+    content: item.content || "",
+  };
 }
 
 function section(title, caption, body, extra = "") {
@@ -1330,7 +1349,185 @@ function renderStatsTab() {
     ),
   ].join("");
 
-  bindFilterTargets($("#tab-stats"));
+}
+
+function transcriptYears() {
+  return [...new Set(transcriptIndex.map((item) => item.year).filter(Boolean))]
+    .sort((a, b) => b - a);
+}
+
+function filteredTranscripts() {
+  const query = state.meetingSearch.trim().toLowerCase();
+  return transcriptIndex.filter((item) => {
+    const yearMatches = state.meetingYear === "all" || String(item.year) === state.meetingYear;
+    if (!yearMatches) return false;
+    if (!query) return true;
+    const haystack = [
+      item.date,
+      item.title,
+      item.meetingLabel,
+      item.fileName,
+      item.attachmentName,
+    ].join(" ").toLowerCase();
+    return haystack.includes(query);
+  });
+}
+
+function transcriptSummary(item) {
+  const pieces = [
+    item.date,
+    item.meetingLabel,
+    item.sizeKb ? `${fmtNumber(item.sizeKb)}KB` : "",
+  ].filter(Boolean);
+  return pieces.join(" · ");
+}
+
+function renderTranscriptList(rows) {
+  if (!rows.length) {
+    return `<div class="transcript-empty">조건에 맞는 속기록이 없습니다.</div>`;
+  }
+
+  return rows.map((item) => `
+    <button class="transcript-item ${item.id === state.activeTranscriptId ? "active" : ""}" type="button" data-transcript-id="${escapeHtml(item.id)}">
+      <span class="transcript-item-title">${escapeHtml(item.title || item.fileName)}</span>
+      <span class="transcript-item-meta">${escapeHtml(transcriptSummary(item))}</span>
+    </button>
+  `).join("");
+}
+
+function renderTranscriptBody(text) {
+  return `<pre class="transcript-body">${escapeHtml(text || "")}</pre>`;
+}
+
+function transcriptViewerShell(item, body) {
+  if (!item) {
+    return `
+      <div class="transcript-empty transcript-empty-large">
+        왼쪽 목록에서 속기록을 선택하세요.
+      </div>
+    `;
+  }
+
+  return `
+    <div class="transcript-viewer-header">
+      <div>
+        <h3>${escapeHtml(item.title || item.fileName)}</h3>
+        <p>${escapeHtml(transcriptSummary(item))}</p>
+      </div>
+      <a class="small-button transcript-link" href="${escapeHtml(encodeURI(item.path))}" target="_blank" rel="noreferrer">원문 열기</a>
+    </div>
+    ${body}
+  `;
+}
+
+async function loadTranscript(id) {
+  const item = transcriptIndex.find((entry) => entry.id === id);
+  const viewer = $("#transcript-viewer");
+  if (!viewer || !item) return;
+
+  state.activeTranscriptId = id;
+  viewer.innerHTML = transcriptViewerShell(item, `<div class="transcript-loading">속기록을 불러오는 중입니다.</div>`);
+
+  if (item.content) {
+    state.transcriptCache[id] = item.content;
+    state.loadedTranscriptId = id;
+    viewer.innerHTML = transcriptViewerShell(item, renderTranscriptBody(item.content));
+    return;
+  }
+
+  if (state.transcriptCache[id]) {
+    state.loadedTranscriptId = id;
+    viewer.innerHTML = transcriptViewerShell(item, renderTranscriptBody(state.transcriptCache[id]));
+    return;
+  }
+
+  try {
+    const response = await fetch(encodeURI(item.path), { cache: "no-store" });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const text = await response.text();
+    state.transcriptCache[id] = text;
+    if (state.activeTranscriptId !== id) return;
+    state.loadedTranscriptId = id;
+    viewer.innerHTML = transcriptViewerShell(item, renderTranscriptBody(text));
+  } catch (error) {
+    viewer.innerHTML = transcriptViewerShell(item, `
+      <div class="transcript-empty transcript-empty-large">
+        브라우저 보안 설정 때문에 파일을 직접 불러오지 못했습니다. 위의 원문 열기를 사용하거나 로컬 서버로 대시보드를 열어주세요.
+      </div>
+    `);
+  }
+}
+
+function bindTranscriptItems() {
+  $all("[data-transcript-id]", $("#tab-meeting")).forEach((button) => {
+    button.addEventListener("click", () => {
+      const id = button.dataset.transcriptId;
+      state.activeTranscriptId = id;
+      $("#transcript-list").innerHTML = renderTranscriptList(filteredTranscripts());
+      bindTranscriptItems();
+      loadTranscript(id);
+    });
+  });
+}
+
+function updateMeetingTranscriptResults() {
+  const rows = filteredTranscripts();
+  if (!rows.some((item) => item.id === state.activeTranscriptId)) {
+    state.activeTranscriptId = rows[0]?.id || null;
+    state.loadedTranscriptId = null;
+  }
+
+  $("#transcript-count").textContent = `${fmtNumber(rows.length)}개 속기록`;
+  $("#transcript-list").innerHTML = renderTranscriptList(rows);
+  bindTranscriptItems();
+
+  if (state.activeTranscriptId && state.loadedTranscriptId !== state.activeTranscriptId) {
+    loadTranscript(state.activeTranscriptId);
+  } else if (!state.activeTranscriptId) {
+    $("#transcript-viewer").innerHTML = transcriptViewerShell(null, "");
+  }
+}
+
+function renderMeetingTab() {
+  const years = transcriptYears();
+  const yearOptions = [
+    `<option value="all">전체 연도</option>`,
+    ...years.map((year) => `<option value="${year}">${year}년</option>`),
+  ].join("");
+
+  $("#tab-meeting").innerHTML = section(
+    "회의별 속기록 조회",
+    "연도나 검색어로 회의를 좁힌 뒤 속기록을 눌러 원문 Markdown을 바로 확인합니다.",
+    `<div class="meeting-workspace">
+      <div class="transcript-browser">
+        <div class="transcript-controls">
+          <label class="field-label">
+            <span>검색</span>
+            <input id="meeting-search" type="search" placeholder="회의일, 회차, 속기록명" value="${escapeHtml(state.meetingSearch)}">
+          </label>
+          <label class="field-label">
+            <span>연도</span>
+            <select id="meeting-year">${yearOptions}</select>
+          </label>
+          <div class="transcript-count" id="transcript-count">0개 속기록</div>
+        </div>
+        <div class="transcript-list" id="transcript-list"></div>
+      </div>
+      <article class="transcript-viewer" id="transcript-viewer"></article>
+    </div>`
+  );
+
+  $("#meeting-year").value = state.meetingYear;
+  $("#meeting-search").addEventListener("input", (event) => {
+    state.meetingSearch = event.target.value;
+    updateMeetingTranscriptResults();
+  });
+  $("#meeting-year").addEventListener("change", (event) => {
+    state.meetingYear = event.target.value;
+    updateMeetingTranscriptResults();
+  });
+
+  updateMeetingTranscriptResults();
 }
 
 function renderPlaceholderTab(tabId) {
@@ -1342,7 +1539,7 @@ function renderPlaceholderTab(tabId) {
       right: ["dashboard_agenda_search_index 생성", "처분대상명 정규화", "조항 MCP 검증 계속", "임베딩 적재 후 유사사건 검색"],
     },
     meeting: {
-      title: "회의별 확인",
+      title: "회의별 속기록 조회",
       lead: "통합검색 결과에서 특정 회의를 열었을 때 들어오는 상세 작업면입니다.",
       left: ["회의 기본정보", "참석위원", "안건 목록", "회의록·속기록 원문", "발언 타임라인"],
       right: ["meeting_attendance", "agenda_segments", "agenda_outcomes", "meeting_timeline_events"],
@@ -1398,9 +1595,9 @@ function initTabs() {
 
 function init() {
   $("#snapshot-time").textContent = fmtDateTime(dashboardData.generatedAt);
-  $("#clear-filter").addEventListener("click", clearFilter);
   renderStatsTab();
-  ["search", "meeting", "commissioner", "assistant"].forEach(renderPlaceholderTab);
+  renderMeetingTab();
+  ["search", "commissioner", "assistant"].forEach(renderPlaceholderTab);
   initTabs();
 }
 

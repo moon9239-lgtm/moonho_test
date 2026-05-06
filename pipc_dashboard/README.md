@@ -1,22 +1,35 @@
 # PIPC Dashboard
 
-개인정보보호위원회 전체회의 분석 대시보드 프로토타입입니다.
+개인정보보호위원회 전체회의 내부 업무도구 MVP입니다.
 
-## 현재 구현
+## 실행
 
-- 1번 탭: 전체회의 핵심 현황 대시보드
-- 2~5번 탭: 다음 구현을 위한 작업면 스켈레톤
-- 데이터: Supabase 대시보드 뷰를 로컬 스냅샷으로 저장해 브라우저에서 읽음
+```powershell
+node pipc_dashboard\tools\static-server.mjs
+```
 
-## 파일 구조
+브라우저에서 `http://127.0.0.1:5174/pipc_dashboard/`를 엽니다.
 
-| 경로 | 역할 |
-| --- | --- |
-| `index.html` | 앱 진입점 |
-| `styles.css` | 레이아웃과 시각 스타일 |
-| `app.js` | 탭 전환, 차트/표 렌더링, 필터 프리뷰 |
-| `data/dashboard-data.js` | Supabase에서 생성한 화면용 데이터 스냅샷 |
-| `tools/fetch-dashboard-data.mjs` | Supabase 뷰를 읽어 스냅샷을 갱신하는 스크립트 |
+`npm`이 설치된 환경에서는 다음 명령도 사용할 수 있습니다.
+
+```powershell
+cd pipc_dashboard
+npm run serve
+```
+
+## 테스트
+
+현재 작업 환경에서는 `npm`이 PATH에 없을 수 있으므로 Node로 테스트 파일을 직접 실행합니다.
+
+```powershell
+node pipc_dashboard\tests\data-model.test.mjs
+node pipc_dashboard\tests\renderers.test.mjs
+node pipc_dashboard\tests\meeting-detail.test.mjs
+node pipc_dashboard\tests\law-references.test.mjs
+node pipc_dashboard\tests\animation-model.test.mjs
+node pipc_dashboard\tests\commissioner-model.test.mjs
+node pipc_dashboard\tests\agenda-assistant-model.test.mjs
+```
 
 ## 데이터 갱신
 
@@ -26,6 +39,18 @@ node pipc_dashboard\tools\fetch-dashboard-data.mjs
 
 `SUPABASE_ACCESS_TOKEN`이 현재 셸에 있어야 합니다. 생성된 `data/dashboard-data.js`에는 비밀키가 포함되지 않습니다.
 
-## 열기
+## 현재 MVP 범위
 
-`index.html`을 브라우저에서 열면 됩니다. 별도 빌드나 패키지 설치는 필요하지 않습니다.
+- 회의 운영 상황판
+- 회의 상세 탐색
+- 속기록 내 법조항 참조 감지와 비교 패널 구조
+- 선택형 회의 애니메이션 프로토타입
+- 위원별 분석 초기 화면
+- 텍스트 입력 기반 새 안건 준비 도우미
+
+## 주요 데이터
+
+- `data/dashboard-data.js`: 브라우저에서 읽는 로컬 스냅샷
+- `src/*`: 테스트 가능한 ES 모듈
+- `tools/static-server.mjs`: 대시보드와 지식베이스 Markdown을 함께 제공하는 로컬 서버
+- `tools/fetch-dashboard-data.mjs`: Supabase 뷰 기반 스냅샷 갱신 스크립트

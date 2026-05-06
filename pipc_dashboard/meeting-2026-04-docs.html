@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>2026년 제4회 보호위원회 문서 대조</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #172033;
+        --muted: #667085;
+        --line: #dde3ee;
+        --panel: #ffffff;
+        --wash: #f5f7fb;
+        --blue: #2663eb;
+        --lavender: #7b61ff;
+        --slate: #2f3a4f;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background:
+          linear-gradient(135deg, rgba(38, 99, 235, 0.08), transparent 34%),
+          linear-gradient(315deg, rgba(123, 97, 255, 0.1), transparent 38%),
+          var(--wash);
+        color: var(--ink);
+        font-family:
+          "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", system-ui,
+          sans-serif;
+      }
+
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 14px 18px;
+        border-bottom: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.92);
+        backdrop-filter: blur(14px);
+      }
+
+      h1 {
+        margin: 0;
+        color: var(--slate);
+        font-size: 17px;
+        font-weight: 800;
+        letter-spacing: 0;
+      }
+
+      .meta {
+        color: var(--muted);
+        font-size: 12px;
+        white-space: nowrap;
+      }
+
+      main {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(360px, 0.72fr);
+        gap: 12px;
+        height: calc(100vh - 57px);
+        padding: 12px;
+      }
+
+      section {
+        display: flex;
+        min-width: 0;
+        min-height: 0;
+        flex-direction: column;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel);
+        box-shadow: 0 18px 55px rgba(15, 23, 42, 0.08);
+      }
+
+      .panel-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .panel-title {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        min-width: 0;
+        font-weight: 800;
+      }
+
+      .mark {
+        width: 10px;
+        height: 10px;
+        flex: 0 0 auto;
+        border-radius: 999px;
+        background: var(--blue);
+      }
+
+      section:nth-child(2) .mark {
+        background: var(--lavender);
+      }
+
+      .file {
+        overflow: hidden;
+        color: var(--muted);
+        font-family: "Cascadia Mono", Consolas, monospace;
+        font-size: 11px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .tools {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex: 0 0 auto;
+      }
+
+      .count {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .copy {
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        background: #fff;
+        color: var(--slate);
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 700;
+        padding: 7px 9px;
+      }
+
+      iframe {
+        flex: 1 1 auto;
+        width: 100%;
+        min-height: 0;
+        border: 0;
+        background: #fff;
+      }
+
+      @media (max-width: 960px) {
+        header {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        .meta {
+          white-space: normal;
+        }
+
+        main {
+          grid-template-columns: 1fr;
+          height: auto;
+        }
+
+        section {
+          min-height: 70vh;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>2026년 제4회 보호위원회 문서 대조</h1>
+      <div class="meta">왼쪽: 속기록 전체 | 오른쪽: 회의록 추출본</div>
+    </header>
+    <main>
+      <section>
+        <div class="panel-head">
+          <div class="panel-title">
+            <span class="mark" aria-hidden="true"></span>
+            <div>
+              <div>속기록 원문</div>
+              <div class="file" id="transcriptPath"></div>
+            </div>
+          </div>
+          <div class="tools">
+            <span class="count">원문 전체</span>
+            <a class="copy" href="../pipc_knowledge_base/99_raw/transcripts/2026/2026-03-11_2026년_제4회_보호위원회_1_제4회_전체회의_속기록.md" target="_blank">새 창</a>
+          </div>
+        </div>
+        <iframe src="../pipc_knowledge_base/99_raw/transcripts/2026/2026-03-11_2026년_제4회_보호위원회_1_제4회_전체회의_속기록.md" title="2026년 제4회 보호위원회 속기록"></iframe>
+      </section>
+      <section>
+        <div class="panel-head">
+          <div class="panel-title">
+            <span class="mark" aria-hidden="true"></span>
+            <div>
+              <div>회의록</div>
+              <div class="file" id="minutesPath"></div>
+            </div>
+          </div>
+          <div class="tools">
+            <span class="count">회의록 추출본</span>
+            <a class="copy" href="../analysis_members/minutes_page1_md/2026-03-11_2026년_제4회_보호위원회_0_제4회_전체회의_회의록.md" target="_blank">새 창</a>
+          </div>
+        </div>
+        <iframe src="../analysis_members/minutes_page1_md/2026-03-11_2026년_제4회_보호위원회_0_제4회_전체회의_회의록.md" title="2026년 제4회 보호위원회 회의록"></iframe>
+      </section>
+    </main>
+  </body>
+</html>
