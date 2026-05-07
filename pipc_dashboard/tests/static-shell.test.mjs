@@ -20,6 +20,15 @@ test("standalone situation board does not restore removed status widgets", async
   assert.doesNotMatch(script, /회의 바로가기/);
 });
 
+test("commissioner character assets are deployable from the dashboard root", async () => {
+  const loader = await readFile("src/character-assets.mjs", "utf8");
+  const model = await readFile("src/commissioner-model.mjs", "utf8");
+
+  assert.match(loader, /data\/commissioners\/characters\.json/);
+  assert.match(model, /assets\/commissioners\/\$\{character\.id\}_sd3d_character\.png/);
+  assert.doesNotMatch(loader, /\.\.\/pipc_knowledge_base/);
+});
+
 test("commissioner cards use a single-column layout with large portraits", async () => {
   const css = await readFile("styles.css", "utf8");
   assert.match(css, /\.commissioner-grid\s*\{[^}]*grid-template-columns:\s*1fr;/s);

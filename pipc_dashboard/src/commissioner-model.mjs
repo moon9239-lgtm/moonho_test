@@ -316,11 +316,10 @@ function resolveRepresentativeQuestion(options = {}) {
 }
 
 function characterAssetPath(character = {}) {
-  if (character.asset) return character.asset;
-  if (character.image) return character.image;
-  if (character.image_path) return character.image_path;
+  const explicitPath = character.asset || character.image || character.image_path || "";
+  if (explicitPath && !String(explicitPath).includes("../pipc_knowledge_base/")) return explicitPath;
   if (!character.id) return "";
-  return `../pipc_knowledge_base/04_members/character_profiles/character_assets/sd3d_members/${character.id}_sd3d_character.png`;
+  return `./assets/commissioners/${character.id}_sd3d_character.png`;
 }
 
 function normalizeGeneration(value) {

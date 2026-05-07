@@ -71,6 +71,19 @@ test("normalizeCommissionerCharacters accepts existing characters.json array", (
   assert.equal(characters.length, 1);
   assert.equal(characters[0].id, "go_haksu");
   assert.equal(characters[0].name, "고학수");
+  assert.equal(characters[0].asset, "./assets/commissioners/go_haksu_sd3d_character.png");
+});
+
+test("normalizeCommissionerCharacters rewrites legacy external character asset paths for deployment", () => {
+  const characters = normalizeCommissionerCharacters([
+    {
+      id: "song_kyunghee",
+      name: "송경희",
+      asset: "../pipc_knowledge_base/04_members/character_profiles/character_assets/sd3d_members/song_kyunghee_sd3d_character.png",
+    },
+  ]);
+
+  assert.equal(characters[0].asset, "./assets/commissioners/song_kyunghee_sd3d_character.png");
 });
 
 test("buildCommissionerAnalysisModel falls back to activity tag labels", () => {

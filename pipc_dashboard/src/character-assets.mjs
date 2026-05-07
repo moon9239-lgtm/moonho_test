@@ -1,6 +1,6 @@
 import { normalizeCommissionerCharacters } from "./commissioner-model.mjs";
 
-export async function loadCommissionerCharacters(url = "../pipc_knowledge_base/04_members/character_profiles/characters.json") {
+export async function loadCommissionerCharacters(url = "./data/commissioners/characters.json") {
   if (typeof fetch !== "function") return [];
 
   try {
