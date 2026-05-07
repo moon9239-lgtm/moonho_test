@@ -4,3 +4,4 @@ node_modules/
 data/law-cache/
 server.err.log
 server.out.log
+.vercel
