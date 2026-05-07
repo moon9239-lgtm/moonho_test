@@ -2,12 +2,15 @@ import http from "node:http";
 import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { DOMParser } from "@xmldom/xmldom";
 import { LawApiClient } from "korean-law-mcp/lib/api-client";
 import { executeTool } from "korean-law-mcp/lib/cli-executor";
 import { formatHistoricalLawArticle, lawVersionsDiffer, selectEffectiveLawIdentityFromXml } from "../src/law-version-history.mjs";
 
-const dashboardRoot = path.resolve(import.meta.dirname, "..");
+const modulePath = fileURLToPath(import.meta.url);
+const moduleDir = path.dirname(modulePath);
+const dashboardRoot = path.resolve(moduleDir, "..");
 const root = path.resolve(dashboardRoot, "..");
 const lawCacheDir = path.join(dashboardRoot, "data", "law-cache");
 const lawCacheVersion = 6;
@@ -107,9 +110,13 @@ async function readLawLookupCache(cacheKey) {
 
 async function writeLawLookupCache(cacheKey, payload) {
   if (!payload?.ok || hasLookupError(payload)) return;
-  await fs.promises.mkdir(lawCacheDir, { recursive: true });
-  const cachePath = path.join(lawCacheDir, `${cacheKey}.json`);
-  await fs.promises.writeFile(cachePath, JSON.stringify(payload, null, 2), "utf8");
+  try {
+    await fs.promises.mkdir(lawCacheDir, { recursive: true });
+    const cachePath = path.join(lawCacheDir, `${cacheKey}.json`);
+    await fs.promises.writeFile(cachePath, JSON.stringify(payload, null, 2), "utf8");
+  } catch {
+    // Vercel functions can read bundled cache files but cannot persist new cache entries.
+  }
 }
 
 function normalizeLawQuery(value) {
@@ -497,47 +504,59 @@ function resolveRequestPath(urlPath) {
   return filePath;
 }
 
-const server = http.createServer((req, res) => {
-  if ((req.url || "/").split("?")[0] === "/api/law-lookup") {
-    handleLawLookup(req, res).catch((error) => {
-      res.writeHead(500, { "Content-Type": "application/json; charset=utf-8" });
-      res.end(JSON.stringify({
-        ok: false,
-        status: "server_error",
-        note: error?.message || "Law lookup failed",
-      }));
-    });
-    return;
-  }
-
-  if ((req.url || "/").split("?")[0] === "/") {
-    res.writeHead(302, { Location: "/pipc_dashboard/" });
-    res.end();
-    return;
-  }
-
-  const filePath = resolveRequestPath(req.url || "/");
-  if (!filePath) {
-    res.writeHead(403);
-    res.end("Forbidden");
-    return;
-  }
-
-  fs.readFile(filePath, (error, body) => {
-    if (error) {
-      res.writeHead(404);
-      res.end("Not found");
+function createRequestHandler() {
+  return (req, res) => {
+    if ((req.url || "/").split("?")[0] === "/api/law-lookup") {
+      handleLawLookup(req, res).catch((error) => {
+        res.writeHead(500, { "Content-Type": "application/json; charset=utf-8" });
+        res.end(JSON.stringify({
+          ok: false,
+          status: "server_error",
+          note: error?.message || "Law lookup failed",
+        }));
+      });
       return;
     }
 
-    res.writeHead(200, {
-      "Content-Type": mimeTypes[path.extname(filePath)] || "application/octet-stream",
-      "Cache-Control": "no-store",
-    });
-    res.end(body);
-  });
-});
+    if ((req.url || "/").split("?")[0] === "/") {
+      res.writeHead(302, { Location: "/pipc_dashboard/" });
+      res.end();
+      return;
+    }
 
-server.listen(port, host, () => {
-  console.log(`PIPC dashboard: http://${host}:${port}/`);
-});
+    const filePath = resolveRequestPath(req.url || "/");
+    if (!filePath) {
+      res.writeHead(403);
+      res.end("Forbidden");
+      return;
+    }
+
+    fs.readFile(filePath, (error, body) => {
+      if (error) {
+        res.writeHead(404);
+        res.end("Not found");
+        return;
+      }
+
+      res.writeHead(200, {
+        "Content-Type": mimeTypes[path.extname(filePath)] || "application/octet-stream",
+        "Cache-Control": "no-store",
+      });
+      res.end(body);
+    });
+  };
+}
+
+function startStaticServer() {
+  const server = http.createServer(createRequestHandler());
+  server.listen(port, host, () => {
+    console.log(`PIPC dashboard: http://${host}:${port}/`);
+  });
+  return server;
+}
+
+if (process.argv[1] && path.resolve(process.argv[1]) === modulePath) {
+  startStaticServer();
+}
+
+export { handleLawLookup, startStaticServer };

@@ -1,0 +1,18 @@
+{
+  "functions": {
+    "api/law-lookup.js": {
+      "includeFiles": "data/law-cache/**"
+    }
+  },
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        }
+      ]
+    }
+  ]
+}
