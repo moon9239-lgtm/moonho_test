@@ -270,7 +270,18 @@ test("renderAgendaPreparationResult renders structured assistant output", () => 
     expectedIssues: [null, { label: "안전조치 의무 이행" }],
     similarProvisions: [null, { label: "개인정보 보호법 제29조" }],
     dispositionLevels: [null, { label: "과징금", amountText: "1,000만원" }],
-    commissionerQuestions: [null, { commissionerName: "예시위원", question: "사실관계를 어떻게 설명할 수 있습니까?" }],
+    amountEstimate: {
+      amountText: "1,000만원",
+      basis: "유사 안건 1건의 금액을 참고했습니다.",
+      evidence: [{ title: "유사 처분", amountText: "1,000만원" }],
+    },
+    commissionerQuestions: [null, {
+      commissionerName: "예시위원",
+      characterType: "원칙 중심 제도 설계자",
+      question: "사실관계를 어떻게 설명할 수 있습니까?",
+      responseStrategy: "증거와 법적 근거를 분리하는 성향에 맞춰 답변합니다.",
+      rationale: "성향: 렌더링하면 안 됩니다.",
+    }],
     checklist: [null, { label: "법 조항 확인", detail: "회의 당시 조문과 현재 조문을 비교합니다." }],
   });
 
@@ -279,10 +290,17 @@ test("renderAgendaPreparationResult renders structured assistant output", () => 
   assert.doesNotMatch(html, /\[object Object\]/);
   assert.match(html, /안전조치 의무 이행/);
   assert.match(html, /개인정보 보호법 제29조/);
-  assert.match(html, /과거 처분 수준/);
+  assert.match(html, /추정 금액/);
+  assert.match(html, /유사 안건 1건의 금액/);
+  assert.match(html, /유사 처분/);
   assert.match(html, /1,000만원/);
   assert.match(html, /예시위원/);
-  assert.match(html, /사실관계를 어떻게 설명할 수 있습니까/);
+  assert.doesNotMatch(html, /원칙 중심 제도 설계자/);
+  assert.doesNotMatch(html, /렌더링하면 안 됩니다/);
+  assert.match(html, /"사실관계를 어떻게 설명할 수 있습니까\?"/);
+  assert.match(html, /대응 전략/);
+  assert.match(html, /증거와 법적 근거를 분리하는 패턴을 반영해 답변합니다/);
+  assert.doesNotMatch(html, /성향/);
   assert.match(html, /회의 당시 조문과 현재 조문을 비교합니다/);
 });
 

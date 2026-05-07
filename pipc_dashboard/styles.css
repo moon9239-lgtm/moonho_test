@@ -4056,6 +4056,275 @@ tbody tr:hover {
   align-items: stretch;
 }
 
+.agenda-assistant-workbench {
+  display: grid;
+  gap: 16px;
+}
+
+.agenda-assistant-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-areas:
+    "draft extract"
+    "questions checklist";
+  gap: 14px;
+  align-items: stretch;
+}
+
+.agenda-generated-panels {
+  display: contents;
+}
+
+.agenda-draft-panel.assistant-form,
+.assistant-panel {
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: #ffffff;
+  box-shadow: var(--shadow-card);
+}
+
+.agenda-draft-panel {
+  grid-area: draft;
+  align-content: start;
+}
+
+.assistant-panel {
+  padding: 18px;
+  min-width: 0;
+}
+
+.assistant-auto-panel {
+  grid-area: extract;
+}
+
+.assistant-questions-panel {
+  grid-area: questions;
+}
+
+.assistant-checklist-panel {
+  grid-area: checklist;
+}
+
+.assistant-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.assistant-panel-title h3 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.assistant-panel-title > span {
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: var(--surface-muted);
+  color: var(--ink-soft);
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.agenda-draft-panel .assistant-field textarea {
+  min-height: 220px;
+  resize: vertical;
+}
+
+.assistant-action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.assistant-save-status,
+.assistant-auto-note {
+  margin: 0;
+  color: var(--orange-strong);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.assistant-saved-library {
+  display: grid;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.assistant-saved-list {
+  display: grid;
+  gap: 7px;
+}
+
+.assistant-saved-memo {
+  display: grid;
+  gap: 3px;
+  width: 100%;
+  padding: 9px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface-strong);
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+
+.assistant-saved-memo:hover {
+  border-color: var(--green);
+  background: var(--green-soft);
+}
+
+.assistant-saved-memo strong {
+  font-size: 0.84rem;
+  font-weight: 900;
+}
+
+.assistant-saved-memo span {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.assistant-extract-stack {
+  display: grid;
+  gap: 14px;
+}
+
+.assistant-kicker {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 900;
+}
+
+.assistant-empty-chip {
+  border-radius: var(--radius-sm);
+  color: var(--muted);
+}
+
+.assistant-amount {
+  display: inline-block;
+  color: var(--ink);
+  font-size: 1.1rem;
+  font-weight: 900;
+}
+
+.assistant-amount-basis {
+  margin: 7px 0 0;
+  color: var(--ink-soft);
+  font-size: 0.78rem;
+  font-weight: 800;
+  line-height: 1.55;
+}
+
+.assistant-amount-evidence {
+  display: grid;
+  gap: 6px;
+  margin: 9px 0 0;
+  padding-left: 18px;
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+
+.assistant-amount-evidence strong {
+  color: var(--ink-soft);
+}
+
+.assistant-amount-evidence span {
+  display: block;
+  margin-top: 2px;
+}
+
+.assistant-auto-note {
+  padding: 10px 12px;
+  border: 1px dashed rgba(242, 159, 69, 0.55);
+  border-radius: var(--radius-sm);
+  background: var(--orange-soft);
+}
+
+.assistant-similar-strip {
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+}
+
+.assistant-question-list,
+.assistant-check-list {
+  display: grid;
+  gap: 10px;
+}
+
+.assistant-question-card {
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface-strong);
+}
+
+.assistant-question-card p {
+  margin: 0;
+  color: var(--ink);
+  font-size: 0.92rem;
+  font-weight: 800;
+  line-height: 1.55;
+}
+
+.assistant-question-card p strong {
+  font-weight: 900;
+}
+
+.assistant-question-card blockquote {
+  margin: 9px 0 0;
+  padding: 9px 10px;
+  border-left: 3px solid var(--green);
+  border-radius: var(--radius-sm);
+  background: var(--green-soft);
+  color: var(--green-strong);
+  font-size: 0.82rem;
+  font-weight: 900;
+  line-height: 1.55;
+}
+
+.assistant-question-card small {
+  display: block;
+  margin-top: 7px;
+  color: var(--muted);
+  font-size: 0.76rem;
+  line-height: 1.55;
+}
+
+.assistant-check-item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 9px;
+  align-items: start;
+  color: var(--ink);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.assistant-check-item input {
+  width: 14px;
+  height: 14px;
+  margin-top: 3px;
+  accent-color: var(--green);
+}
+
+.assistant-check-item strong,
+.assistant-check-item em {
+  display: block;
+}
+
+.assistant-check-item em {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-style: normal;
+}
+
 .assistant-list span,
 .law-field span,
 .law-article-body span,
@@ -4081,6 +4350,15 @@ tbody tr:hover {
 
   .search-control-panel {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .agenda-assistant-layout {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "draft"
+      "extract"
+      "questions"
+      "checklist";
   }
 }
 

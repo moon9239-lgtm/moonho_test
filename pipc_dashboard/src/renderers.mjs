@@ -32,6 +32,12 @@ function pickText(value, keys = []) {
   return "";
 }
 
+function cleanAssistantStrategy(value = "") {
+  return String(value || "")
+    .replace(/성향에 맞춰/g, "패턴을 반영해")
+    .replace(/성향/g, "패턴");
+}
+
 function representativeQuestionSourceLabel(source = {}) {
   if (!source || typeof source !== "object") return "";
   return [
@@ -39,6 +45,15 @@ function representativeQuestionSourceLabel(source = {}) {
     pickText(source, ["meetingLabel"]),
     pickText(source, ["agendaTitle"]),
   ].filter(Boolean).join(" · ");
+}
+
+
+const PIPC_2026_FIFTH_MEETING_ID = "a47c6ac8-3acb-4644-8048-0f5333cc3102";
+
+function webtoonHrefForMeeting(meeting = {}) {
+  if (!meeting || typeof meeting !== "object") return "";
+  const isFifthMeeting = meeting.id === PIPC_2026_FIFTH_MEETING_ID || meeting.date === "2026-03-25";
+  return isFifthMeeting ? "./assets/animation/pipc_2026_5_webtoon.html" : "";
 }
 
 const DEFAULT_RENDERED_ANIMATION = {
@@ -673,13 +688,19 @@ function renderMeetingSelector(options = [], selectedId = "") {
 
 export function renderMeetingDetail(detail) {
   if (!detail?.meeting) {
-    return `<section class="section-band"><h2>회의별 속기록 조회</h2><p class="section-caption">선택된 회의가 없습니다.</p></section>`;
+  return `<section class="section-band"><h2>회의별 속기록 조회</h2><p class="section-caption">선택된 회의가 없습니다.</p></section>`;
   }
 
   const meetingOptions = Array.isArray(detail.meetingOptions) && detail.meetingOptions.length
     ? detail.meetingOptions
     : [{ ...detail.meeting, selected: true }];
 
+  const meetingViewActions = `
+    <div class="meeting-view-actions">
+      <button class="tool-button" type="button" data-animation-meeting-id="${escapeHtml(detail.meeting.id)}">애니메이션으로 보기</button>
+      ${webtoonHrefForMeeting(detail.meeting) ? `<a class="tool-button" href="${escapeHtml(webtoonHrefForMeeting(detail.meeting))}" target="_blank" rel="noopener">웹툰으로 보기</a>` : ""}
+    </div>
+  `;
   return `
     <section class="section-band meeting-detail">
       <div class="section-header">
@@ -687,7 +708,7 @@ export function renderMeetingDetail(detail) {
           <h2>회의별 속기록 조회</h2>
           <p class="section-caption">${escapeHtml(detail.meeting.meetingLabel)} · ${escapeHtml(detail.meeting.date)}</p>
         </div>
-        <button class="tool-button" type="button" data-animation-meeting-id="${escapeHtml(detail.meeting.id)}">애니메이션으로 보기</button>
+        ${meetingViewActions}
       </div>
       ${renderOverview(detail.overview || detail.meeting, detail.agendas || [])}
       <div class="meeting-detail-grid redesigned-detail">
@@ -902,25 +923,46 @@ export function renderCommissionerAnalysis(model = {}) {
 
 export function renderAgendaAssistant() {
   return `
-    <section class="section-band">
+    <section class="section-band agenda-assistant-workbench">
       <div class="section-header">
         <div>
-          <h2>새 안건 준비 도우미</h2>
-          <p class="section-caption">안건명과 요약을 입력하면 유사 안건, 예상 쟁점, 준비 체크리스트를 확인합니다.</p>
+          <h2>신규안건 준비 도우미</h2>
+          <p class="section-caption">안건 초안을 넣으면 쟁점 태그, 조문 후보, 예상 질의, 상정 전 체크리스트를 한 화면에서 정리합니다.</p>
         </div>
       </div>
-      <form class="assistant-form" data-agenda-form>
-        <label class="assistant-field">
-          <span>안건명</span>
-          <input name="title" type="text" placeholder="예: 안전조치의무 위반 검토">
-        </label>
-        <label class="assistant-field">
-          <span>안건 요약</span>
-          <textarea name="summary" rows="7" placeholder="사안 개요와 검토 포인트를 붙여 넣으세요."></textarea>
-        </label>
-        <button class="tool-button assistant-primary-action" type="submit">분석하기</button>
-      </form>
-      <div class="assistant-result" id="assistant-result"></div>
+      <div class="agenda-assistant-layout">
+        <form class="assistant-form agenda-draft-panel" data-agenda-form>
+          <div class="assistant-panel-title">
+            <h3>안건 초안</h3>
+            <span>기준 분석 편집 중</span>
+          </div>
+          <label class="assistant-field">
+            <span>안건명</span>
+            <input name="title" type="text" placeholder="AI 채용평가 플랫폼 사업자의 개인정보 국외이전 및 안전조치 의무 위반행위에 관한 건">
+          </label>
+          <label class="assistant-field">
+            <span>대상 기관/피심인</span>
+            <input name="target" type="text" placeholder="사업자명, 서비스명, 이용자 규모, 주요 사실을 한 줄로 정리">
+          </label>
+          <label class="assistant-field">
+            <span>사건 개요 / 초안 본문</span>
+            <textarea name="summary" rows="12" placeholder="회의 상정안, 조사보고서 초안, 사실관계 메모를 붙여 넣으세요."></textarea>
+          </label>
+          <div class="assistant-action-row">
+            <button class="tool-button assistant-primary-action" type="submit">유사 안건 분석</button>
+            <button class="tool-button assistant-primary-action" type="submit">예상 질의 생성</button>
+            <button class="tool-button" type="button" data-save-agenda-draft>수동 저장</button>
+          </div>
+          <p class="assistant-save-status" data-agenda-save-status>수동 저장하면 초안, 유사 안건 분석, 예상 질의가 함께 저장됩니다.</p>
+          <div class="assistant-saved-library">
+            <div class="assistant-panel-title">
+              <h3>저장된 준비안</h3>
+            </div>
+            <div class="assistant-saved-list" data-agenda-saved-memos></div>
+          </div>
+        </form>
+        <div class="assistant-result agenda-generated-panels" id="assistant-result">${renderAgendaPreparationResult()}</div>
+      </div>
     </section>
   `;
 }
@@ -933,8 +975,9 @@ export function renderAgendaPreparationResult(result = {}) {
   const dispositionLevels = Array.isArray(result.dispositionLevels) ? result.dispositionLevels : [];
   const commissionerQuestions = Array.isArray(result.commissionerQuestions) ? result.commissionerQuestions : [];
   const checklist = Array.isArray(result.checklist) ? result.checklist : [];
+  const amountEstimate = result.amountEstimate && typeof result.amountEstimate === "object" ? result.amountEstimate : {};
 
-  const similar = similarAgendas.map((item) => {
+  const similar = similarAgendas.slice(0, 5).map((item) => {
     const title = pickText(item, ["title", "label"]);
     if (!title) return "";
     const disposition = pickText(item, ["disposition"]) || "처분 정보 확인 필요";
@@ -970,11 +1013,14 @@ export function renderAgendaPreparationResult(result = {}) {
   const questions = commissionerQuestions.map((item) => {
     const question = pickText(item, ["question"]);
     if (!question) return "";
+    const commissionerName = pickText(item, ["commissionerName"]) || "관련 위원";
+    const commissionerLabel = /위원$/.test(commissionerName) ? commissionerName : `${commissionerName} 위원`;
+    const responseStrategy = cleanAssistantStrategy(pickText(item, ["responseStrategy"]));
     return `
-    <li>
-      <strong>${escapeHtml(pickText(item, ["commissionerName"]) || "관련 위원")}</strong>
-      <span>${escapeHtml(question)}</span>
-    </li>
+    <article class="assistant-question-card">
+      <p><strong>${escapeHtml(commissionerLabel)}</strong> : "${escapeHtml(question)}"</p>
+      ${responseStrategy ? `<blockquote>대응 전략 : "${escapeHtml(responseStrategy)}"</blockquote>` : ""}
+    </article>
   `;
   }).filter(Boolean).join("");
   const checklistItems = checklist.map((item) => {
@@ -982,39 +1028,60 @@ export function renderAgendaPreparationResult(result = {}) {
     if (!label) return "";
     const detail = pickText(item, ["detail"]);
     return `
-    <li>
-      <strong>${escapeHtml(label)}</strong>
-      ${detail ? `<span>${escapeHtml(detail)}</span>` : ""}
-    </li>
+    <label class="assistant-check-item">
+      <input type="checkbox">
+      <span>
+        <strong>${escapeHtml(label)}</strong>
+        ${detail ? `<em>${escapeHtml(detail)}</em>` : ""}
+      </span>
+    </label>
   `;
+  }).filter(Boolean).join("");
+  const amountText = pickText(amountEstimate, ["amountText"]) || "—";
+  const amountBasis = pickText(amountEstimate, ["basis"]);
+  const amountEvidence = Array.isArray(amountEstimate.evidence) ? amountEstimate.evidence : [];
+  const amountEvidenceItems = amountEvidence.map((item) => {
+    const title = pickText(item, ["title"]);
+    const amount = pickText(item, ["amountText"]) || (hasNumber(item?.amountTotalKrw) && Number(item.amountTotalKrw) > 0 ? `${formatNumber(item.amountTotalKrw)}원` : "");
+    if (!title && !amount) return "";
+    return `<li><strong>${escapeHtml(title || "유사 안건")}</strong>${amount ? `<span>${escapeHtml(amount)}</span>` : ""}</li>`;
   }).filter(Boolean).join("");
 
   return `
-    <div class="assistant-result-grid">
-      <section>
-        <h3>유사 안건</h3>
-        <ul class="assistant-list">${similar || "<li>유사 안건 후보 없음</li>"}</ul>
-      </section>
-      <section>
-        <h3>예상 쟁점</h3>
-        <div class="assistant-tag-list">${issues || "<span>감지된 핵심 쟁점 없음</span>"}</div>
-      </section>
-      <section>
-        <h3>유사 법조항</h3>
-        <div class="assistant-tag-list">${provisions}</div>
-      </section>
-      <section>
-        <h3>과거 처분 수준</h3>
-        <ul class="assistant-list">${dispositions || "<li>처분 수준 후보 없음</li>"}</ul>
-      </section>
-      <section>
-        <h3>위원별 예상 질문</h3>
-        <ul class="assistant-list">${questions || "<li>위원별 질문 근거가 더 필요합니다.</li>"}</ul>
-      </section>
-      <section>
-        <h3>준비 체크리스트</h3>
-        <ul class="assistant-list">${checklistItems}</ul>
-      </section>
-    </div>
+    <section class="assistant-panel assistant-auto-panel">
+      <div class="assistant-panel-title">
+        <h3>자동 추출 결과</h3>
+      </div>
+      <div class="assistant-extract-stack">
+        <div>
+          <span class="assistant-kicker">감지된 쟁점 태그</span>
+          <div class="assistant-tag-list">${issues || "<span class=\"assistant-empty-chip\">감지된 핵심 쟁점 없음</span>"}</div>
+        </div>
+        <div>
+          <span class="assistant-kicker">추정 조문</span>
+          <div class="assistant-tag-list">${provisions || "<span class=\"assistant-empty-chip\">조문 후보 없음</span>"}</div>
+        </div>
+        <div>
+          <span class="assistant-kicker">추정 금액</span>
+          <strong class="assistant-amount">${escapeHtml(amountText)}</strong>
+          ${amountBasis ? `<p class="assistant-amount-basis">${escapeHtml(amountBasis)}</p>` : ""}
+          ${amountEvidenceItems ? `<ul class="assistant-amount-evidence">${amountEvidenceItems}</ul>` : ""}
+        </div>
+        <p class="assistant-auto-note">유사 안건 분석과 예상 질의 생성 결과는 자동으로 저장되어 회의 준비 자료에 바로 반영할 수 있습니다.</p>
+        ${similar ? `<div class="assistant-similar-strip"><span class="assistant-kicker">유사 안건</span><ul class="assistant-list">${similar}</ul></div>` : ""}
+      </div>
+    </section>
+    <section class="assistant-panel assistant-questions-panel">
+      <div class="assistant-panel-title">
+        <h3>예상 질의 (${commissionerQuestions.length || 0})</h3>
+      </div>
+      <div class="assistant-question-list">${questions || "<p class=\"section-caption\">안건 초안을 입력하면 위원 질의 후보를 생성합니다.</p>"}</div>
+    </section>
+    <section class="assistant-panel assistant-checklist-panel">
+      <div class="assistant-panel-title">
+        <h3>상정 전 체크리스트</h3>
+      </div>
+      <div class="assistant-check-list">${checklistItems}</div>
+    </section>
   `;
 }

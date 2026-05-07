@@ -1,0 +1,36 @@
+{
+  "meetingId": "a47c6ac8-3acb-4644-8048-0f5333cc3102",
+  "meetingLabel": "2026년 제5회 보호위원회",
+  "date": "2026-03-25",
+  "format": "reference_style_vertical_webtoon",
+  "pageCount": 6,
+  "sourceTurnCount": 29,
+  "chair": "송경희",
+  "kimHwigangRole": "위원",
+  "pages": [
+    {
+      "src": "./webtoon_pages/page_001.png",
+      "alt": "웹툰 1페이지"
+    },
+    {
+      "src": "./webtoon_pages/page_002.png",
+      "alt": "웹툰 2페이지"
+    },
+    {
+      "src": "./webtoon_pages/page_003.png",
+      "alt": "웹툰 3페이지"
+    },
+    {
+      "src": "./webtoon_pages/page_004.png",
+      "alt": "웹툰 4페이지"
+    },
+    {
+      "src": "./webtoon_pages/page_005.png",
+      "alt": "웹툰 5페이지"
+    },
+    {
+      "src": "./webtoon_pages/page_006.png",
+      "alt": "웹툰 6페이지"
+    }
+  ]
+}

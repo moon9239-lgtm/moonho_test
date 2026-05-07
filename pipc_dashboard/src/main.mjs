@@ -24,13 +24,19 @@ let activeMeetingDetail = null;
 let activeAnimationTimeline = null;
 let activeSceneIndex = 0;
 let animationTimer = null;
+let activeAssistantResult = null;
+let activeCommissionerModel = null;
+let activeAgendaMemoId = null;
+
+const PIPC_2026_FIFTH_MEETING_ID = 'a47c6ac8-3acb-4644-8048-0f5333cc3102';
+const AGENDA_MEMOS_KEY = "pipc-new-agenda-memos";
 
 const tabTitles = {
   stats: "전체회의 통계·동향 대시보드",
   search: "안건 통합검색",
   meeting: "회의별 속기록 조회",
   commissioner: "위원별 대시보드",
-  assistant: "신규 안건 준비 도우미",
+  assistant: "신규안건 준비 도우미",
 };
 
 function $(selector, root = document) {
@@ -65,7 +71,10 @@ init();
 
 function renderAssistantTab() {
   const assistantTab = $("#tab-assistant");
-  if (assistantTab) assistantTab.innerHTML = renderAgendaAssistant();
+  if (assistantTab) {
+    assistantTab.innerHTML = renderAgendaAssistant();
+    renderSavedAgendaMemos();
+  }
 }
 
 function renderSearchTab(filters = {}) {
@@ -166,10 +175,23 @@ async function renderCommissionerTab(dashboardData) {
     commissionerCharacters,
     detailIndex: meetingAnalysisIndex,
   });
+  activeCommissionerModel = commissionerModel;
   commissionerTab.innerHTML = renderCommissionerAnalysis(commissionerModel);
 }
 
 renderCommissionerTab(dashboardData);
+
+function currentSecondCommissionersForAssistant() {
+  const excludeExecutive = (rows = []) => rows.filter((commissioner) => !/위원장|부위원장/.test(`${commissioner.role || ""} ${commissioner.roleTone || ""}`));
+  if (Array.isArray(activeCommissionerModel?.currentSecondCommissioners) && activeCommissionerModel.currentSecondCommissioners.length) {
+    return excludeExecutive(activeCommissionerModel.currentSecondCommissioners);
+  }
+  return excludeExecutive(buildCommissionerAnalysisModel({
+    secondCommissioners: dashboardData.secondCommissioners || [],
+    commissionerActivity: dashboardData.commissionerActivity || [],
+    detailIndex: meetingAnalysisIndex,
+  }).currentSecondCommissioners || []);
+}
 
 function transcriptToUtterances(text) {
   return String(text || "")
@@ -178,6 +200,15 @@ function transcriptToUtterances(text) {
     .filter((item) => item.text);
 }
 
+function renderedMediaForMeeting(meeting = {}) {
+  const isFifthMeeting = meeting.id === PIPC_2026_FIFTH_MEETING_ID || meeting.date === '2026-03-25';
+  if (!isFifthMeeting) return null;
+  return {
+    src: './assets/animation/pipc_2026_5_full_animatic.gif',
+    poster: './assets/animation/pipc_2026_5_full_animatic_poster.png',
+    alt: 'PIPC 2026 fifth plenary meeting animation',
+  };
+}
 function buildAnimationTimelineFromDetail(detail = {}) {
   const meeting = detail.meeting || {};
   const utterances = Array.isArray(detail.utterances) && detail.utterances.length
@@ -189,10 +220,13 @@ function buildAnimationTimelineFromDetail(detail = {}) {
     characters: Array.isArray(meetingAnalysisIndex.characterAssets) ? meetingAnalysisIndex.characterAssets : [],
   });
 
+  const renderedMedia = renderedMediaForMeeting(meeting);
   return {
     ...fallbackTimeline,
     agendas: Array.isArray(detail.agendas) ? detail.agendas : [],
     scenes: fallbackTimeline.scenes,
+    renderedMedia: renderedMedia || fallbackTimeline.renderedMedia,
+    completedMeetingAnimation: renderedMedia ? true : fallbackTimeline.completedMeetingAnimation,
   };
 }
 
@@ -382,6 +416,94 @@ function handleAnimationAction(action) {
   }
 }
 
+function collectAgendaDraft(form) {
+  if (!form) return {};
+  const formData = new FormData(form);
+  return {
+    title: formData.get("title") || "",
+    target: formData.get("target") || "",
+    summary: formData.get("summary") || "",
+  };
+}
+
+function loadAgendaMemos() {
+  try {
+    const parsed = JSON.parse(window.localStorage.getItem(AGENDA_MEMOS_KEY) || "[]");
+    return Array.isArray(parsed) ? parsed.filter((memo) => memo && typeof memo === "object") : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeAgendaMemos(memos = []) {
+  window.localStorage.setItem(AGENDA_MEMOS_KEY, JSON.stringify(memos.slice(0, 20)));
+}
+
+function memoTitle(memo = {}) {
+  return String(memo.title || memo.target || "저장된 신규안건").trim() || "저장된 신규안건";
+}
+
+function renderSavedAgendaMemos() {
+  const target = $("[data-agenda-saved-memos]");
+  if (!target) return;
+  const memos = loadAgendaMemos();
+  if (!memos.length) {
+    target.innerHTML = `<p class="section-caption">저장된 준비안이 없습니다.</p>`;
+    return;
+  }
+  target.innerHTML = memos.map((memo) => {
+    const savedDate = memo.savedAt ? new Date(memo.savedAt) : null;
+    const savedLabel = savedDate && !Number.isNaN(savedDate.getTime())
+      ? new Intl.DateTimeFormat("ko-KR", { dateStyle: "short", timeStyle: "short" }).format(savedDate)
+      : "저장일 확인 필요";
+    return `
+      <button class="assistant-saved-memo" type="button" data-load-agenda-memo-id="${String(memo.id || "")}">
+        <strong>${memoTitle(memo).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</strong>
+        <span>${savedLabel}</span>
+      </button>
+    `;
+  }).join("");
+}
+
+function restoreAgendaMemo(memo = {}) {
+  const form = $("[data-agenda-form]");
+  if (!form) return;
+  form.elements.title.value = memo.title || "";
+  form.elements.target.value = memo.target || "";
+  form.elements.summary.value = memo.summary || "";
+  activeAgendaMemoId = memo.id || null;
+  activeAssistantResult = memo.result || null;
+  const resultNode = $("#assistant-result");
+  if (resultNode) resultNode.innerHTML = renderAgendaPreparationResult(activeAssistantResult || {});
+  const status = $("[data-agenda-save-status]");
+  if (status) status.textContent = "저장된 준비안을 불러왔습니다.";
+}
+
+function saveAgendaDraft(form, result = activeAssistantResult, options = {}) {
+  const status = $("[data-agenda-save-status]");
+  const draft = collectAgendaDraft(form);
+  const memos = loadAgendaMemos();
+  const now = new Date().toISOString();
+  const id = activeAgendaMemoId || (window.crypto?.randomUUID ? window.crypto.randomUUID() : `memo-${Date.now()}`);
+  const payload = {
+    id,
+    ...draft,
+    result,
+    savedAt: now,
+  };
+  try {
+    const nextMemos = [payload, ...memos.filter((memo) => memo.id !== id)];
+    writeAgendaMemos(nextMemos);
+    activeAgendaMemoId = id;
+    renderSavedAgendaMemos();
+    if (status && !options.silent) {
+      status.textContent = `저장됨 · ${new Intl.DateTimeFormat("ko-KR", { timeStyle: "short" }).format(new Date())}`;
+    }
+  } catch {
+    if (status) status.textContent = "브라우저 저장소에 저장하지 못했습니다.";
+  }
+}
+
 document.addEventListener("click", (event) => {
   const card = event.target.closest(".meeting-card[data-meeting-id]");
   if (card) showMeetingDetail(card.dataset.meetingId);
@@ -423,6 +545,18 @@ document.addEventListener("click", (event) => {
   if (searchChip) {
     renderSearchTab({ query: searchChip.dataset.searchChip, facet: "all" });
   }
+
+  const saveButton = event.target.closest("[data-save-agenda-draft]");
+  if (saveButton) {
+    event.preventDefault();
+    saveAgendaDraft(document.querySelector("[data-agenda-form]"));
+  }
+
+  const loadMemoButton = event.target.closest("[data-load-agenda-memo-id]");
+  if (loadMemoButton) {
+    const memo = loadAgendaMemos().find((item) => item.id === loadMemoButton.dataset.loadAgendaMemoId);
+    if (memo) restoreAgendaMemo(memo);
+  }
 });
 
 document.addEventListener("change", (event) => {
@@ -451,10 +585,12 @@ document.addEventListener("submit", (event) => {
   const formData = new FormData(form);
   const result = buildAgendaPreparationResult({
     title: formData.get("title"),
+    target: formData.get("target"),
     summary: formData.get("summary"),
     historicalAgendas: buildHistoricalAgendas(dashboardData),
-    commissionerActivity: dashboardData.commissionerActivity || [],
+    currentSecondCommissioners: currentSecondCommissionersForAssistant(),
   });
+  activeAssistantResult = result;
   const resultNode = $("#assistant-result");
   if (resultNode) resultNode.innerHTML = renderAgendaPreparationResult(result);
 });
