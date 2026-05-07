@@ -198,13 +198,22 @@ test("buildMeetingDetailModel re-extracts law references from embedded utterance
   ]);
 });
 
-test("renderMeetingDetail includes animation action", () => {
-  const detail = buildMeetingDetailModel(dashboardFixture, "2025-24");
-  const html = renderMeetingDetail(detail);
+test("renderMeetingDetail keeps only the webtoon action when available", () => {
+  const html = renderMeetingDetail({
+    meeting: { id: "meeting-webtoon", meetingLabel: "2026년 제5회 보호위원회", date: "2026-03-25" },
+    meetingOptions: [],
+    transcriptText: "",
+    relatedDocuments: [],
+    agendas: [],
+    utterances: [],
+    lawReferences: [],
+  });
 
   assert.match(html, /회의별 속기록 조회/);
-  assert.match(html, /애니메이션으로 보기/);
-  assert.match(html, /속기록/);
+  assert.match(html, /웹툰으로 보기/);
+  assert.match(html, /pipc_2026_5_webtoon\.html/);
+  assert.doesNotMatch(html, /애니메이션으로 보기/);
+  assert.doesNotMatch(html, /data-animation-meeting-id/);
 });
 
 test("renderMeetingDetail renders all meeting options inside the detail tab", () => {
@@ -251,7 +260,7 @@ test("renderMeetingDetail escapes detail fields", () => {
 
   assert.doesNotMatch(html, /<script>/);
   assert.doesNotMatch(html, /<b>/);
-  assert.match(html, /data-animation-meeting-id="&lt;script&gt;alert\(&quot;id&quot;\)&lt;\/script&gt;"/);
+  assert.doesNotMatch(html, /data-animation-meeting-id/);
   assert.match(html, /&lt;script&gt;alert\(&quot;transcript&quot;\)&lt;\/script&gt;/);
   assert.doesNotMatch(html, /href="docs\/&lt;raw&gt;&amp;&quot;path&quot;.md"/);
 });

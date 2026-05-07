@@ -26,7 +26,6 @@ node pipc_dashboard\tests\data-model.test.mjs
 node pipc_dashboard\tests\renderers.test.mjs
 node pipc_dashboard\tests\meeting-detail.test.mjs
 node pipc_dashboard\tests\law-references.test.mjs
-node pipc_dashboard\tests\animation-model.test.mjs
 node pipc_dashboard\tests\commissioner-model.test.mjs
 node pipc_dashboard\tests\agenda-assistant-model.test.mjs
 ```
@@ -44,7 +43,6 @@ node pipc_dashboard\tools\fetch-dashboard-data.mjs
 - 회의 운영 상황판
 - 회의 상세 탐색
 - 속기록 내 법조항 참조 감지와 비교 패널 구조
-- 선택형 회의 애니메이션 프로토타입
 - 위원별 분석 초기 화면
 - 텍스트 입력 기반 새 안건 준비 도우미
 

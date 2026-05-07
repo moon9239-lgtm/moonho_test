@@ -56,54 +56,6 @@ function webtoonHrefForMeeting(meeting = {}) {
   return isFifthMeeting ? "./assets/animation/pipc_2026_5_webtoon.html" : "";
 }
 
-const DEFAULT_RENDERED_ANIMATION = {
-  src: "",
-  poster: "./assets/animation/pipc-committee-rigged.png",
-  closeupSrc: "",
-  alt: "PIPC Blender meeting animation prototype",
-};
-
-function renderedAnimationMedia(timeline = {}) {
-  if (!timeline?.renderedMedia || typeof timeline.renderedMedia !== "object") return null;
-  const media = timeline?.renderedMedia && typeof timeline.renderedMedia === "object"
-    ? timeline.renderedMedia
-    : {};
-  const src = media.src || media.url || "";
-  if (!src) return null;
-  return {
-    ...DEFAULT_RENDERED_ANIMATION,
-    ...media,
-    src,
-  };
-}
-
-function sceneSpeechText(scene = {}) {
-  return scene.text || scene.shortText || "";
-}
-
-function renderRenderedAnimation(media, scene = {}) {
-  if (!media?.src) return "";
-  const closeup = media.closeupSrc
-    ? `<span class="rendered-animation-closeup" aria-hidden="true"><img src="${escapeHtml(media.closeupSrc)}" alt=""></span>`
-    : "";
-  return `
-    <figure class="rendered-animation-panel" data-rendered-animation>
-      <img class="rendered-animation-media" src="${escapeHtml(media.src)}" alt="${escapeHtml(media.alt || DEFAULT_RENDERED_ANIMATION.alt)}" loading="eager">
-      <figcaption class="rendered-speech-card" data-rendered-speech-card>
-        <span class="rendered-speech-kicker" data-stage-label>${escapeHtml(scene.stageNote || scene.phase || "속기록 장면")}</span>
-        <span class="rendered-speaker-portrait" aria-hidden="true">
-          <img data-rendered-speaker-image alt="" hidden>
-          <b data-rendered-speaker-initial>${escapeHtml((scene.speakerName || scene.speaker || "발").slice(0, 1))}</b>
-        </span>
-        <strong data-stage-speaker>${escapeHtml(scene.speakerName || scene.speaker || "발언자")}</strong>
-        <span class="rendered-mouth" aria-hidden="true"><i></i><i></i><i></i></span>
-        <p data-stage-text>${escapeHtml(sceneSpeechText(scene))}</p>
-      </figcaption>
-      ${closeup}
-    </figure>
-  `;
-}
-
 function formatValue(value) {
   if (typeof value === "string") return escapeHtml(value);
   return formatNumber(value);
@@ -695,12 +647,14 @@ export function renderMeetingDetail(detail) {
     ? detail.meetingOptions
     : [{ ...detail.meeting, selected: true }];
 
-  const meetingViewActions = `
-    <div class="meeting-view-actions">
-      <button class="tool-button" type="button" data-animation-meeting-id="${escapeHtml(detail.meeting.id)}">애니메이션으로 보기</button>
-      ${webtoonHrefForMeeting(detail.meeting) ? `<a class="tool-button" href="${escapeHtml(webtoonHrefForMeeting(detail.meeting))}" target="_blank" rel="noopener">웹툰으로 보기</a>` : ""}
-    </div>
-  `;
+  const webtoonHref = webtoonHrefForMeeting(detail.meeting);
+  const meetingViewActions = webtoonHref
+    ? `
+      <div class="meeting-view-actions">
+        <a class="tool-button" href="${escapeHtml(webtoonHref)}" target="_blank" rel="noopener">웹툰으로 보기</a>
+      </div>
+    `
+    : "";
   return `
     <section class="section-band meeting-detail">
       <div class="section-header">
@@ -728,82 +682,6 @@ export function renderMeetingDetail(detail) {
         </article>
       </div>
       ${renderLawDrawer()}
-    </section>
-  `;
-}
-
-export function renderAnimationViewer(timeline = {}) {
-  const scenes = Array.isArray(timeline?.scenes) ? timeline.scenes : [];
-  const members = Array.isArray(timeline?.members) ? timeline.members : [];
-  const characterActors = !members.length && Array.isArray(timeline?.characters) ? timeline.characters.slice(0, 10) : [];
-  const staffActors = Array.isArray(timeline?.staffActors) ? timeline.staffActors : [{ id: "staff", name: "사무처", role: "보고자", seat: "staff-center" }];
-  const actors = [...members, ...characterActors, ...staffActors];
-  const agendas = Array.isArray(timeline?.agendas) ? timeline.agendas : [];
-  const sceneItems = scenes.map((scene, index) => `
-    <button class="animation-scene-item" type="button" data-scene-index="${index}">
-      <span>${escapeHtml(scene.phase || scene.stageNote || scene.type || "장면")}</span>
-      <strong>${escapeHtml(scene.shortText || scene.text)}</strong>
-      <em>${escapeHtml(scene.speaker)}</em>
-    </button>
-  `).join("");
-  const firstScene = scenes[0] || {};
-  const actorItems = actors.map((actor) => `
-    <div class="animation-actor ${actor.id === firstScene.memberId ? "speaking" : ""}" data-member-id="${escapeHtml(actor.id || "")}" data-seat="${escapeHtml(actor.seat || "")}">
-      ${actor.asset ? `<img src="${escapeHtml(actor.asset)}" alt="${escapeHtml(actor.name)} 캐릭터">` : `<span class="staff-avatar">${escapeHtml((actor.name || "사").slice(0, 1))}</span>`}
-      <strong>${escapeHtml(actor.name || "참석자")}</strong>
-      <small>${escapeHtml(actor.role || "")}</small>
-    </div>
-  `).join("");
-  const agendaItems = agendas.slice(0, 12).map((agenda) => `
-    <button class="animation-agenda-item" type="button" data-animation-agenda-id="${escapeHtml(agenda.id)}" data-utterance-target="${escapeHtml(agenda.startUtteranceId || "")}">
-      <span>${escapeHtml(agenda.type || "안건")}</span>
-      <strong>${escapeHtml(agenda.title || "")}</strong>
-    </button>
-  `).join("");
-
-  const renderedAnimation = renderRenderedAnimation(renderedAnimationMedia(timeline), firstScene);
-  const stageClass = renderedAnimation ? "animation-stage rendered-stage" : "animation-stage";
-  const completionStrip = timeline?.completedMeetingAnimation
-    ? `<div class="animation-completion-strip">2026년 제5회 보호위원회 · ${formatNumber(scenes.length)}개 장면 · 속기록 발언자 동기화 완료</div>`
-    : "";
-
-  return `
-    <section class="section-band animation-viewer rich-animation">
-      <div class="section-header">
-        <div>
-          <h2>회의 애니메이션 재현</h2>
-          <p class="section-caption">${escapeHtml(timeline?.meetingLabel)} 개회부터 산회까지 발언 단위로 이동합니다.</p>
-        </div>
-        <button class="tool-button" type="button" data-close-animation>속기록으로 돌아가기</button>
-      </div>
-      ${completionStrip}
-      <div class="animation-layout">
-        <div class="${stageClass}" aria-label="회의장 재현 무대" data-animation-stage>
-          ${renderedAnimation}
-          <div class="meeting-3d-scene" data-meeting-3d-scene aria-label="3D 회의장 애니메이션 무대"></div>
-          <div class="stage-screen">
-            <span data-stage-label>${escapeHtml(firstScene.stageNote || "위원 입장")}</span>
-            <strong data-stage-speaker>${escapeHtml(firstScene.speaker || "회의장")}</strong>
-          </div>
-          <div class="animation-progress" aria-label="장면 진행률">
-            <span data-animation-progress>${scenes.length ? `1 / ${scenes.length}` : "0 / 0"}</span>
-            <div><b data-animation-progress-bar style="width:${scenes.length ? Math.round(1 / scenes.length * 100) : 0}%"></b></div>
-          </div>
-          <div class="meeting-room-table animation-actor-grid">${actorItems}</div>
-          <div class="animation-controls" data-animation-controls>
-            <button class="small-button" type="button" data-animation-action="prev">이전</button>
-            <button class="small-button primary-control" type="button" data-animation-action="play">재생</button>
-            <button class="small-button" type="button" data-animation-action="next">다음</button>
-          </div>
-          <p data-stage-text>${escapeHtml(firstScene.text || "")}</p>
-        </div>
-        <aside class="animation-side-panel">
-          <h3>안건 흐름</h3>
-          <div class="animation-agenda-list">${agendaItems || `<p class="section-caption">감지된 안건 구간이 없습니다.</p>`}</div>
-          <h3>장면 타임라인</h3>
-          <div class="animation-timeline">${sceneItems}</div>
-        </aside>
-      </div>
     </section>
   `;
 }

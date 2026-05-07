@@ -5,7 +5,6 @@ const FIRST_2025_DATE = "2025-01-08";
 function compactSpaces(value) {
   return String(value || "").replace(/\s+/g, " ").trim();
 }
-
 function stripHeadingSyntax(value) {
   return String(value || "")
     .replace(/^#{1,6}\s*/, "")
@@ -362,37 +361,4 @@ export function parseTranscript(rawText, meeting = {}) {
     lawReferences,
     transcriptText: utterancesWithAgenda.map((item) => `(${item.speaker}) ${item.text}`).join("\n\n"),
   };
-}
-
-export function buildTranscriptAnimationScenes(detail = {}) {
-  const utterances = Array.isArray(detail.utterances) ? detail.utterances : [];
-  const overview = detail.overview || {};
-  const scenes = [
-    {
-      id: "opening",
-      type: "opening",
-      speaker: "회의장",
-      text: `${overview.meetingLabel || "전체회의"} 입장과 개회를 준비합니다.`,
-      stageNote: "위원 입장 · 착석",
-    },
-    ...utterances.map((utterance, index) => ({
-      id: `scene-${index + 1}`,
-      type: /개의|시작|성원/.test(utterance.text) ? "opening" : /의결|이의 없으십니까|가결/.test(utterance.text) ? "decision" : "utterance",
-      utteranceId: utterance.id,
-      speaker: utterance.speaker,
-      speakerName: utterance.speakerName,
-      speakerRole: utterance.speakerRole,
-      text: utterance.text,
-      agendaId: utterance.agendaId,
-      stageNote: utterance.sectionTitle,
-    })),
-    {
-      id: "closing",
-      type: "closing",
-      speaker: "회의장",
-      text: `${overview.meetingLabel || "전체회의"} 산회와 퇴장을 재현합니다.`,
-      stageNote: "산회 · 퇴장",
-    },
-  ];
-  return scenes;
 }

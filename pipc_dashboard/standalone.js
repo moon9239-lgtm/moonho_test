@@ -2,13 +2,11 @@
   const data = window.PIPC_DASHBOARD_DATA || {};
   const analysisIndex = window.PIPC_MEETING_ANALYSIS_INDEX || window.PIPC_MEETING_DETAIL_INDEX || {};
   const detailIndex = analysisIndex;
-  const cssEscape = window.CSS?.escape || ((value) => String(value).replace(/["\\]/g, "\\$&"));
 
   let activeMeetingId = null;
   let activeMeetingDetail = null;
-  let activeAnimationTimeline = null;
-  let activeSceneIndex = 0;
-  let animationTimer = null;
+
+  const PIPC_2026_FIFTH_MEETING_ID = "a47c6ac8-3acb-4644-8048-0f5333cc3102";
 
   const tabTitles = {
     stats: "전체회의 통계·동향 대시보드",
@@ -88,6 +86,12 @@
   function selectedMeeting(id) {
     const items = transcripts();
     return id ? items.find((item) => item.id === id) || items[0] : items[0];
+  }
+
+  function webtoonHrefForMeeting(meeting = {}) {
+    if (!meeting || typeof meeting !== "object") return "";
+    const isFifthMeeting = meeting.id === PIPC_2026_FIFTH_MEETING_ID || meeting.date === "2026-03-25";
+    return isFifthMeeting ? "./assets/animation/pipc_2026_5_webtoon.html" : "";
   }
 
   function setSnapshotTime() {
@@ -370,7 +374,6 @@
               <span class="speaker-role">${escapeHtml(utterance.speakerRole || "발언")}</span>
               <strong>${escapeHtml(utterance.speakerName || utterance.speaker)}</strong>
               <em>${escapeHtml(utterance.sectionTitle || "")}</em>
-              <button class="utterance-animation-jump" type="button" data-animation-meeting-id="${escapeHtml(meetingId)}" data-animation-utterance-id="${escapeHtml(utterance.id)}">장면 이동</button>
             </header>
             <p>${renderUtteranceText(utterance)}</p>
           </article>
@@ -387,11 +390,12 @@
     const lawRefs = detail?.lawReferences || [];
     const overview = detail?.overview || {};
     const attendees = Array.isArray(overview.attendees) ? overview.attendees : [];
+    const webtoonHref = webtoonHrefForMeeting(meeting);
     return `
       <section class="section-band meeting-detail">
         <div class="section-header">
           <div><h2>회의별 속기록 조회</h2><p class="section-caption">${escapeHtml(meeting.meetingLabel)} · ${escapeHtml(meeting.date)}</p></div>
-          <button class="tool-button" type="button" data-animation-meeting-id="${escapeHtml(meeting.id)}">애니메이션으로 보기</button>
+          ${webtoonHref ? `<a class="tool-button" href="${escapeHtml(webtoonHref)}" target="_blank" rel="noopener">웹툰으로 보기</a>` : ""}
         </div>
         ${detail ? `
           <div class="meeting-overview-grid">
@@ -413,57 +417,6 @@
             <h3>법조항 비교</h3>
             ${lawRefs.map((ref, index) => `<button class="law-reference-item" type="button" data-law-ref-index="${index}"><strong>${escapeHtml(ref.lawName)} ${escapeHtml(ref.article)}</strong><span>${escapeHtml(ref.title || ref.meetingDate || "")}</span></button>`).join("") || `<p class="section-caption">감지된 법조항이 없습니다.</p>`}
             <div id="law-detail-panel" class="law-detail-panel">${lawDetail(lawRefs[0])}</div>
-          </aside>
-        </div>
-      </section>
-    `;
-  }
-
-  function renderAnimationViewer(id) {
-    const meeting = selectedMeeting(id);
-    if (!meeting) return renderMeetingDetail(id);
-    const detail = embeddedMeetingDetail(meeting);
-    activeMeetingDetail = detail;
-    const timeline = detail?.animationTimeline || { meetingId: meeting.id, meetingLabel: meeting.meetingLabel, scenes: [] };
-    activeAnimationTimeline = timeline;
-    const scenes = timeline.scenes || [];
-    const firstScene = scenes[0] || {};
-    const actors = [...(timeline.members || []), ...(timeline.staffActors || [{ id: "staff", name: "사무처", role: "보고자", seat: "staff-center" }])];
-    const actorItems = actors.map((actor) => `
-      <div class="animation-actor ${actor.id === firstScene.memberId ? "speaking" : ""}" data-member-id="${escapeHtml(actor.id || "")}" data-seat="${escapeHtml(actor.seat || "")}">
-        ${actor.asset ? `<img src="${escapeHtml(actor.asset)}" alt="${escapeHtml(actor.name)} 캐릭터">` : `<span class="staff-avatar">${escapeHtml((actor.name || "사").slice(0, 1))}</span>`}
-        <strong>${escapeHtml(actor.name || "참석자")}</strong><small>${escapeHtml(actor.role || "")}</small>
-      </div>
-    `).join("");
-    const sceneItems = scenes.map((scene, index) => `
-      <button class="animation-scene-item" type="button" data-scene-index="${index}">
-        <span>${escapeHtml(scene.phase || scene.stageNote || scene.type || "장면")}</span>
-        <strong>${escapeHtml(scene.shortText || scene.text || "")}</strong>
-        <em>${escapeHtml(scene.speaker || "")}</em>
-      </button>
-    `).join("");
-    return `
-      <section class="section-band animation-viewer rich-animation">
-        <div class="section-header">
-          <div><h2>회의 애니메이션 재현</h2><p class="section-caption">${escapeHtml(timeline.meetingLabel || meeting.meetingLabel)} 개회부터 산회까지 발언 단위로 이동합니다.</p></div>
-          <button class="tool-button" type="button" data-close-animation>속기록으로 돌아가기</button>
-        </div>
-        <div class="animation-layout">
-          <div class="animation-stage" aria-label="회의장 재현 무대" data-animation-stage>
-            <div class="stage-screen"><span data-stage-label>${escapeHtml(firstScene.stageNote || "위원 입장")}</span><strong data-stage-speaker>${escapeHtml(firstScene.speaker || "회의장")}</strong></div>
-            <div class="meeting-room-table animation-actor-grid">${actorItems}</div>
-            <div class="animation-controls" data-animation-controls>
-              <button class="small-button" type="button" data-animation-action="prev">이전</button>
-              <button class="small-button primary-control" type="button" data-animation-action="play">재생</button>
-              <button class="small-button" type="button" data-animation-action="next">다음</button>
-            </div>
-            <p data-stage-text>${escapeHtml(firstScene.text || "")}</p>
-          </div>
-          <aside class="animation-side-panel">
-            <h3>안건 흐름</h3>
-            <div class="animation-agenda-list">${renderAgendaList(timeline.agendas || [])}</div>
-            <h3>장면 타임라인</h3>
-            <div class="animation-timeline">${sceneItems}</div>
           </aside>
         </div>
       </section>
@@ -928,16 +881,6 @@
     setActiveTab("meeting");
   }
 
-  function showAnimationViewer(id, initialUtteranceId = "") {
-    activeMeetingId = id;
-    const meetingTab = $("#tab-meeting");
-    if (meetingTab) meetingTab.innerHTML = renderAnimationViewer(id);
-    setActiveTab("meeting");
-    const scenes = activeAnimationTimeline?.scenes || [];
-    const initialIndex = initialUtteranceId ? scenes.findIndex((scene) => scene.utteranceId === initialUtteranceId) : 0;
-    setAnimationScene(Math.max(initialIndex || 0, 0));
-  }
-
   function scrollToUtterance(id) {
     const target = id ? document.getElementById(id) : null;
     if (!target) return;
@@ -950,66 +893,6 @@
     const panel = $("#law-detail-panel");
     const ref = activeMeetingDetail?.lawReferences?.[Number(index)];
     if (panel && ref) panel.innerHTML = lawDetail(ref);
-  }
-
-  function sceneText(scene = {}) {
-    const utterance = activeMeetingDetail?.utterances?.find((item) => item.id === scene.utteranceId);
-    return utterance?.text || scene.text || scene.shortText || "";
-  }
-
-  function setAnimationScene(index) {
-    const scenes = activeAnimationTimeline?.scenes || [];
-    if (!scenes.length) return;
-    activeSceneIndex = Math.max(0, Math.min(index, scenes.length - 1));
-    const scene = scenes[activeSceneIndex];
-    const stage = $("[data-animation-stage]");
-    if (!stage) return;
-    const button = $(`.animation-scene-item[data-scene-index="${activeSceneIndex}"]`);
-    document.querySelector(".animation-scene-item.active")?.classList.remove("active");
-    button?.classList.add("active");
-    $("[data-stage-label]", stage).textContent = scene.stageNote || scene.phase || "";
-    $("[data-stage-speaker]", stage).textContent = scene.speaker || scene.speakerName || "";
-    $("[data-stage-text]", stage).textContent = sceneText(scene);
-    document.querySelectorAll(".animation-actor.speaking").forEach((node) => node.classList.remove("speaking"));
-    if (scene.memberId) document.querySelector(`.animation-actor[data-member-id="${cssEscape(scene.memberId)}"]`)?.classList.add("speaking");
-    button?.scrollIntoView({ block: "nearest" });
-  }
-
-  function stopAnimationPlayback() {
-    if (!animationTimer) return;
-    window.clearInterval(animationTimer);
-    animationTimer = null;
-    const play = $('[data-animation-action="play"]');
-    if (play) play.textContent = "재생";
-  }
-
-  function startAnimationPlayback() {
-    stopAnimationPlayback();
-    const play = $('[data-animation-action="play"]');
-    if (play) play.textContent = "일시정지";
-    animationTimer = window.setInterval(() => {
-      const scenes = activeAnimationTimeline?.scenes || [];
-      if (activeSceneIndex >= scenes.length - 1) {
-        stopAnimationPlayback();
-        return;
-      }
-      setAnimationScene(activeSceneIndex + 1);
-    }, 1800);
-  }
-
-  function handleAnimationAction(action) {
-    if (action === "prev") {
-      stopAnimationPlayback();
-      setAnimationScene(activeSceneIndex - 1);
-    }
-    if (action === "next") {
-      stopAnimationPlayback();
-      setAnimationScene(activeSceneIndex + 1);
-    }
-    if (action === "play") {
-      if (animationTimer) stopAnimationPlayback();
-      else startAnimationPlayback();
-    }
   }
 
   function init() {
@@ -1026,26 +909,11 @@
     const meeting = event.target.closest(".meeting-card[data-meeting-id]");
     if (meeting) showMeetingDetail(meeting.dataset.meetingId);
 
-    const animation = event.target.closest("[data-animation-meeting-id]");
-    if (animation) showAnimationViewer(animation.dataset.animationMeetingId, animation.dataset.animationUtteranceId || "");
-
-    const closeAnimation = event.target.closest("[data-close-animation]");
-    if (closeAnimation && activeMeetingId) {
-      stopAnimationPlayback();
-      showMeetingDetail(activeMeetingId);
-    }
-
     const agendaJump = event.target.closest("[data-utterance-target]");
     if (agendaJump) scrollToUtterance(agendaJump.dataset.utteranceTarget);
 
     const lawReference = event.target.closest("[data-law-ref-index]");
     if (lawReference) updateLawDetail(lawReference.dataset.lawRefIndex);
-
-    const scene = event.target.closest(".animation-scene-item[data-scene-index]");
-    if (scene) setAnimationScene(Number(scene.dataset.sceneIndex || 0));
-
-    const animationAction = event.target.closest("[data-animation-action]");
-    if (animationAction) handleAnimationAction(animationAction.dataset.animationAction);
 
     const searchMeeting = event.target.closest("[data-search-meeting-id]");
     if (searchMeeting) {

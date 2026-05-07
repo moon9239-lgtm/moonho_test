@@ -1,5 +1,5 @@
 import { buildLawLookupRequest, extractLawReferences } from "./law-references.mjs";
-import { attachAgendaIds, buildTranscriptAnimationScenes, deriveAgendaSegments } from "./transcript-model.mjs";
+import { attachAgendaIds, deriveAgendaSegments } from "./transcript-model.mjs";
 
 export function toNumber(value) {
   const number = Number(value);
@@ -216,8 +216,6 @@ export function buildMeetingDetailModel(data = {}, transcriptId, options = {}) {
       selected: Boolean(meeting && item.id === meeting.id),
     })),
     analysis: embedded?.analysis || null,
-    animationTimeline: embedded?.animationTimeline || null,
-    animationScenes: embedded?.animationTimeline?.scenes || (embedded ? buildTranscriptAnimationScenes({ ...embedded, agendas, utterances }) : []),
     relatedDocuments: meeting ? [{ label: "속기록 원문", path: meeting.path }] : [],
   };
 }

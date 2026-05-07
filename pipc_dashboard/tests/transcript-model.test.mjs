@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { buildTranscriptAnimationScenes, parseTranscript } from "../src/transcript-model.mjs";
+import { parseTranscript } from "../src/transcript-model.mjs";
 
 const sample = `
 2025년 제1회 개인정보 보호위원회 속기록
@@ -30,7 +30,6 @@ test("parseTranscript repairs pdf-wrapped lines into speaker utterances", () => 
   assert.match(detail.utterances[0].text, /시작하겠습니다/);
   assert.ok(detail.agendas.some((item) => /의결안건 1번/.test(item.title)));
 });
-
 test("parseTranscript extracts law references and lookup shape", () => {
   const detail = parseTranscript(sample, { date: "2025-01-08", meetingLabel: "2025년 제1회 보호위원회" });
 
@@ -99,13 +98,4 @@ test("parseTranscript joins split agenda headings and anchors them to the first 
   assert.equal(detail.agendas[2].title, "나. 개인정보보호 법규 위반행위에 대한 시정조치에 관한 건(2025조일0026, 0028, 0035) (의안 제2026-003-008~010호)");
   assert.equal(detail.agendas[2].startUtteranceId, "utt-3");
   assert.equal(detail.utterances[1].agendaId, detail.agendas[1].id);
-});
-
-test("buildTranscriptAnimationScenes covers opening, utterances, and closing", () => {
-  const detail = parseTranscript(sample, { date: "2025-01-08", meetingLabel: "2025년 제1회 보호위원회" });
-  const scenes = buildTranscriptAnimationScenes(detail);
-
-  assert.equal(scenes[0].type, "opening");
-  assert.equal(scenes.at(-1).type, "closing");
-  assert.ok(scenes.some((scene) => scene.utteranceId === detail.utterances[0].id));
 });
