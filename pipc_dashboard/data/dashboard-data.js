@@ -11526,7 +11526,7 @@ window.PIPC_DASHBOARD_DATA = {
       "minutes_first_seen": "2025-03-26",
       "official_term_text": "2025-03-14~확인 필요",
       "commissioner_status": "current",
-      "recommendation_route": "조소영 후임, 위원장 제청 계열 추정"
+      "recommendation_route": "위원장 제청"
     },
     {
       "name": "송경희",

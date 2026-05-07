@@ -24,6 +24,7 @@ test("buildCommissionerAnalysisModel prioritizes current second-term character c
       { name: "김일환", generation: "2기", role_current: "위원", term_status: "current", commissioner_status: "current", official_term_text: "2023-09-21~2026-09-20", recommendation_route: "여당 추천", appearances: 51 },
       { name: "송경희", generation: "2기", role_current: "위원장", term_status: "current", commissioner_status: "current", official_term_text: "2025-10~현재", recommendation_route: "상임위원 임명", appearances: 6 },
       { name: "이정렬", generation: "2기", role_current: "부위원장", term_status: "current", commissioner_status: "current", official_term_text: "2025-11~현재", recommendation_route: "상임위원 임명", appearances: 7 },
+      { name: "김휘강", generation: "2기", role_current: "위원", term_status: "current", commissioner_status: "current", official_term_text: "2025-03-14~확인 필요", recommendation_route: "위원장 제청", appearances: 19 },
       { name: "조소영", generation: "2기", role_current: "위원", term_status: "former", commissioner_status: "former", official_term_text: "2023-09-21~중도 사퇴", recommendation_route: "위원장 제청", appearances: 25 },
     ],
     commissionerActivity: [
@@ -45,11 +46,12 @@ test("buildCommissionerAnalysisModel prioritizes current second-term character c
       },
       { id: "lee_jungryul", name: "이정렬", generation: "2기", role: "부위원장", status: "current", character_type: "정책 집행 건축가", asset: "lee.png" },
       { id: "kim_ilwhan", name: "김일환", generation: "2기", role: "비상임위원", status: "current", character_type: "원칙 중심 제도 설계자", asset: "kim.png" },
+      { id: "kim_hwigang", name: "김휘강", generation: "2기", role: "비상임위원", status: "current", character_type: "기술 보안 감시자", asset: "hwi.png" },
       { id: "yoon_jongin", name: "윤종인", generation: "1기", role: "위원장", status: "former", character_type: "출범기 기반 설계자", asset: "yoon.png" },
     ],
   });
 
-  assert.deepEqual(model.currentSecondCommissioners.map((item) => item.name), ["송경희", "이정렬", "김일환"]);
+  assert.deepEqual(model.currentSecondCommissioners.map((item) => item.name), ["송경희", "이정렬", "김일환", "김휘강"]);
   assert.equal(model.currentSecondCommissioners[0].asset, "song.png");
   assert.equal(model.currentSecondCommissioners[0].roleTone, "chair");
   assert.equal(model.currentSecondCommissioners[0].isExecutive, true);
@@ -59,6 +61,9 @@ test("buildCommissionerAnalysisModel prioritizes current second-term character c
   assert.deepEqual(model.currentSecondCommissioners[0].topTagDetails, [{ label: "AI·데이터 활용", count: null }]);
   assert.equal(model.currentSecondCommissioners[1].roleTone, "vice");
   assert.equal(model.currentSecondCommissioners[2].termText, "2023-09-21~2026-09-20");
+  const kimHwigang = model.currentSecondCommissioners.find((item) => item.name === "김휘강");
+  assert.equal(kimHwigang.recommendationRoute, "위원장 제청");
+  assert.doesNotMatch(kimHwigang.recommendationRoute, /조소영 후임|계열 추정/);
   assert.deepEqual(model.formerSecondCommissioners.map((item) => item.name), ["조소영"]);
   assert.deepEqual(model.firstGenerationCommissioners.map((item) => item.name), ["윤종인"]);
 });
