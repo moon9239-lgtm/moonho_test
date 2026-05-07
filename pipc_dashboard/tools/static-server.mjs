@@ -10,6 +10,7 @@ import { formatHistoricalLawArticle, lawVersionsDiffer, selectEffectiveLawIdenti
 const dashboardRoot = path.resolve(import.meta.dirname, "..");
 const root = path.resolve(dashboardRoot, "..");
 const lawCacheDir = path.join(dashboardRoot, "data", "law-cache");
+const agendaPreparationPath = path.join(dashboardRoot, "data", "agenda-preparations.json");
 const lawCacheVersion = 6;
 const envFiles = [
   path.join(dashboardRoot, ".env.local"),
@@ -31,24 +32,24 @@ const mimeTypes = {
 };
 
 const lawAliases = new Map([
-  ["개인정보보호법", "개인정보 보호법"],
-  ["보호법", "개인정보 보호법"],
-  ["개인정보보호법시행령", "개인정보 보호법 시행령"],
-  ["신용정보법", "신용정보의 이용 및 보호에 관한 법률"],
-  ["신용정보법시행령", "신용정보의 이용 및 보호에 관한 법률 시행령"],
-  ["개인정보보호위원회운영규칙", "개인정보 보호위원회 운영규칙"],
-  ["위원회운영규칙", "개인정보 보호위원회 운영규칙"],
-  ["운영규칙", "개인정보 보호위원회 운영규칙"],
-  ["개인정보의안전성확보조치기준", "개인정보의 안전성 확보조치 기준"],
-  ["개인정보의안전성확보조치기준고시", "개인정보의 안전성 확보조치 기준"],
-  ["개인정보안전성확보조치기준", "개인정보의 안전성 확보조치 기준"],
-  ["개인정보안전성확보조치기준고시", "개인정보의 안전성 확보조치 기준"],
-  ["안전성확보조치기준", "개인정보의 안전성 확보조치 기준"],
-  ["안전성확보조치기준고시", "개인정보의 안전성 확보조치 기준"],
-  ["국가연구개발혁신법", "국가연구개발혁신법"],
-  ["연구개발혁신법", "국가연구개발혁신법"],
-  ["국가연구개발혁신법시행령", "국가연구개발혁신법 시행령"],
-  ["연구개발혁신법시행령", "국가연구개발혁신법 시행령"],
+  ["개인?�보보호�?, "개인?�보 보호�?],
+  ["보호�?, "개인?�보 보호�?],
+  ["개인?�보보호법시?�령", "개인?�보 보호�??�행??],
+  ["?�용?�보�?, "?�용?�보???�용 �?보호??관??법률"],
+  ["?�용?�보법시?�령", "?�용?�보???�용 �?보호??관??법률 ?�행??],
+  ["개인?�보보호?�원?�운?�규�?, "개인?�보 보호?�원???�영규칙"],
+  ["?�원?�운?�규�?, "개인?�보 보호?�원???�영규칙"],
+  ["?�영규칙", "개인?�보 보호?�원???�영규칙"],
+  ["개인?�보?�안?�성?�보조치기�?", "개인?�보???�전???�보조치 기�?"],
+  ["개인?�보?�안?�성?�보조치기�?고시", "개인?�보???�전???�보조치 기�?"],
+  ["개인?�보?�전?�확보조치기준", "개인?�보???�전???�보조치 기�?"],
+  ["개인?�보?�전?�확보조치기준고시", "개인?�보???�전???�보조치 기�?"],
+  ["?�전?�확보조치기준", "개인?�보???�전???�보조치 기�?"],
+  ["?�전?�확보조치기준고시", "개인?�보???�전???�보조치 기�?"],
+  ["�???�구개발?�신�?, "�???�구개발?�신�?],
+  ["?�구개발?�신�?, "�???�구개발?�신�?],
+  ["�???�구개발?�신법시?�령", "�???�구개발?�신�??�행??],
+  ["?�구개발?�신법시?�령", "�???�구개발?�신�??�행??],
 ]);
 
 function compact(value) {
@@ -85,7 +86,7 @@ function resolveLawApiKey() {
 }
 
 const port = Number(process.env.PORT || readLocalEnvValue("PORT") || 5174);
-const host = process.env.HOST || readLocalEnvValue("HOST") || "127.0.0.1";
+const host = process.env.HOST || readLocalEnvValue("HOST") || "0.0.0.0";
 
 function lawLookupCacheKey({ lawName, article, meetingDate }) {
   const currentDate = toYmd("current");
@@ -119,13 +120,13 @@ function normalizeLawQuery(value) {
 
 function isAdminRuleQuery(lawName) {
   const key = compact(lawName);
-  return key.includes("운영규칙")
-    || key.includes("안전성확보조치기준")
-    || /(?:고시|훈령|예규|지침|내규)/.test(key);
+  return key.includes("?�영규칙")
+    || key.includes("?�전?�확보조치기준")
+    || /(?:고시|?�령|?�규|지�??�규)/.test(key);
 }
 
 function articleToJo(value) {
-  const match = String(value || "").match(/제\s*(\d+)\s*조(?:\s*의\s*(\d+))?/);
+  const match = String(value || "").match(/??s*(\d+)\s*�??:\s*??s*(\d+))?/);
   if (!match) return "";
   return `${String(Number(match[1])).padStart(4, "0")}${String(Number(match[2] || 0)).padStart(2, "0")}`;
 }
@@ -156,15 +157,15 @@ function pickFirstLawFromXml(xmlText, lawName) {
   const doc = new DOMParser().parseFromString(xmlText, "text/xml");
   const items = asArray(Array.from(doc.getElementsByTagName("law")));
   const normalized = compact(lawName);
-  return items.find((item) => compact(firstText(item, ["법령명한글", "법령명"])).includes(normalized)) || items[0] || null;
+  return items.find((item) => compact(firstText(item, ["법령명한글", "법령�?])).includes(normalized)) || items[0] || null;
 }
 
 function lawIdentityFromXml(xmlText, lawName) {
   const law = pickFirstLawFromXml(xmlText, lawName);
   if (!law) return null;
   return {
-    lawName: firstText(law, ["법령명한글", "법령명"]) || lawName,
-    mst: firstText(law, ["법령일련번호", "MST"]),
+    lawName: firstText(law, ["법령명한글", "법령�?]) || lawName,
+    mst: firstText(law, ["법령?�련번호", "MST"]),
     lawId: firstText(law, ["법령ID", "ID"]),
   };
 }
@@ -181,12 +182,94 @@ function compactArticleText(text = "") {
     .trim();
 }
 
+function isRecord(value) {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+function normalizeAgendaPreparationItem(raw = {}) {
+  const title = String(raw.title || "").trim();
+  const summary = String(raw.summary || "").trim();
+  if (!title || !summary) return null;
+  return {
+    id: String(raw.id || crypto.randomUUID()),
+    title,
+    summary,
+    result: isRecord(raw.result) ? raw.result : null,
+    createdAt: raw.createdAt || new Date().toISOString(),
+    updatedAt: raw.updatedAt || raw.createdAt || new Date().toISOString(),
+  };
+}
+
+async function readAgendaPreparations() {
+  try {
+    const existing = JSON.parse(await fs.promises.readFile(agendaPreparationPath, "utf8"));
+    if (!Array.isArray(existing)) return [];
+    return existing
+      .map((item) => normalizeAgendaPreparationItem(item))
+      .filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
+async function writeAgendaPreparations(items) {
+  await fs.promises.mkdir(path.dirname(agendaPreparationPath), { recursive: true });
+  await fs.promises.writeFile(agendaPreparationPath, JSON.stringify(items, null, 2), "utf8");
+}
+
+function clampJsonBody(value, fallback = null) {
+  try {
+    return value == null ? fallback : JSON.parse(value);
+  } catch {
+    return fallback;
+  }
+}
+
+async function collectRequestBody(req) {
+  return new Promise((resolve, reject) => {
+    let body = "";
+    req.on("data", (chunk) => {
+      body += String(chunk || "");
+      if (body.length > 1_500_000) {
+        req.destroy();
+        reject(new Error("Request body too large"));
+      }
+    });
+    req.on("end", () => resolve(body));
+    req.on("error", reject);
+  });
+}
+
+function sanitizeAgendaPreparations(items = []) {
+  return items
+    .map((item) => {
+      return {
+        ...item,
+        title: String(item.title || "").slice(0, 280),
+        summary: String(item.summary || "").slice(0, 5000),
+      };
+    })
+    .slice(-200);
+}
+
+function parseAgendaPreparationBody(json = {}) {
+  const title = String(json.title || "").trim();
+  const summary = String(json.summary || "").trim();
+  if (!title || !summary) return null;
+  return {
+    ...json,
+    title,
+    summary,
+    result: isRecord(json.result) ? json.result : null,
+  };
+}
+
 function parseLawDisplay(text = "", fallback = {}) {
   const source = compactArticleText(text);
-  const lawName = source.match(/(?:법령명|행정규칙명):\s*([^\n]+?)(?:\s+공포일:|\n|$)/)?.[1]?.trim() || fallback.lawName || "";
-  const promulgationDate = source.match(/공포일:\s*(\d{8})/)?.[1] || "";
-  const effectiveDate = source.match(/시행일:\s*(\d{8})|시행일자:\s*(\d{8})/)?.[1] || source.match(/시행일:\s*(\d{8})|시행일자:\s*(\d{8})/)?.[2] || fallback.effectiveDate || "";
-  const articleMatch = source.match(/(제\s*\d+\s*조(?:의\s*\d+)?(?:\([^)]+\))?)([\s\S]*)/);
+  const lawName = source.match(/(?:법령�??�정규칙�?:\s*([^\n]+?)(?:\s+공포??|\n|$)/)?.[1]?.trim() || fallback.lawName || "";
+  const promulgationDate = source.match(/공포??\s*(\d{8})/)?.[1] || "";
+  const effectiveDate = source.match(/?�행??\s*(\d{8})|?�행?�자:\s*(\d{8})/)?.[1] || source.match(/?�행??\s*(\d{8})|?�행?�자:\s*(\d{8})/)?.[2] || fallback.effectiveDate || "";
+  const articleMatch = source.match(/(??s*\d+\s*�??:??s*\d+)?(?:\([^)]+\))?)([\s\S]*)/);
   const articleTitle = articleMatch?.[1]?.replace(/\s+/g, " ").trim() || fallback.article || "";
   const articleText = articleMatch?.[0]?.trim() || source || fallback.summary || "";
 
@@ -200,13 +283,13 @@ function parseLawDisplay(text = "", fallback = {}) {
 }
 
 function effectiveDateFromText(text) {
-  const match = String(text || "").match(/시행일:\s*(\d{8})|시행일자:\s*(\d{8})/);
+  const match = String(text || "").match(/?�행??\s*(\d{8})|?�행?�자:\s*(\d{8})/);
   return match ? match[1] || match[2] : "";
 }
 
 function isLookupNotFound(version = {}) {
   const text = String(version.articleText || version.summary || "");
-  return version.isError || text.includes("[NOT_FOUND]") || text.includes("법령 데이터를 찾을 수 없습니다") || text.includes("행정규칙 전문을 조회할 수 없습니다");
+  return version.isError || text.includes("[NOT_FOUND]") || text.includes("법령 ?�이?��? 찾을 ???�습?�다") || text.includes("?�정규칙 ?�문??조회?????�습?�다");
 }
 
 function hasLookupError(payload = {}) {
@@ -222,44 +305,44 @@ function adminRuleSearchField(text, label) {
 }
 
 function adminRuleLookupIdFromSearch(text) {
-  return adminRuleSearchField(text, "행정규칙일련번호") || adminRuleSearchField(text, "행정규칙ID");
+  return adminRuleSearchField(text, "?�정규칙?�련번호") || adminRuleSearchField(text, "?�정규칙ID");
 }
 
 function adminRuleIdFromSearch(text) {
-  return adminRuleSearchField(text, "행정규칙ID");
+  return adminRuleSearchField(text, "?�정규칙ID");
 }
 
 function adminRulePromulgationDateFromSearch(text) {
-  return adminRuleSearchField(text, "공포일");
+  return adminRuleSearchField(text, "공포??);
 }
 
 function fallbackAdminRuleArticleText(lawName, article) {
-  if (compact(lawName) !== "개인정보보호위원회운영규칙") return "";
-  if (!/^제\s*12\s*조/.test(String(article || ""))) return "";
+  if (compact(lawName) !== "개인?�보보호?�원?�운?�규�?) return "";
+  if (!/^??s*12\s*�?.test(String(article || ""))) return "";
   return [
-    "행정규칙명: 개인정보 보호위원회 운영규칙",
-    "공포일: 20200811",
+    "?�정규칙�? 개인?�보 보호?�원???�영규칙",
+    "공포?? 20200811",
     "",
-    "제12조(회의의 공개와 방청) ① 보호위원회의 회의는 공개를 원칙으로 한다. 다만, 상정 안건이 다음 각 호의 어느 하나에 해당하는 경우에는 보호위원회의 의결로 공개하지 아니할 수 있다.",
-    "1. 공개하는 경우 국가안전보장을 해할 우려가 있는 경우",
-    "2. 법령에 의하여 비밀로 분류되거나 공개가 제한된 경우",
-    "3. 개인ㆍ법인 및 그 밖의 단체의 명예를 훼손하거나 정당한 이익을 해할 우려가 있다고 인정되는 경우",
-    "4. 감사ㆍ감독ㆍ검사ㆍ규제ㆍ입찰계약ㆍ인사관리ㆍ의사결정 과정 또는 내부 검토과정에 있는 사항 등으로 공개될 경우 공정한 업무수행에 현저한 지장을 초래할 우려가 있는 경우",
-    "5. 그 밖에 공익상 필요가 있는 등 보호위원회에서 공개하는 것이 적절하지 않은 상당한 이유가 있는 경우",
-    "② 위원장은 회의의 의사일정을 회의 개최 2일 전까지 위원회 홈페이지를 통해 공표한다. 다만, 긴급을 요하거나 부득이한 사유가 있는 경우에는 그러하지 아니하다.",
-    "③ 보호위원회의 공개되는 회의는 방청할 수 있으며 방청을 희망하는 자는 회의 개최 1일 전까지 별지 제5호서식의 신청서를 제출하여 위원장의 허가를 받아야 한다.",
-    "④ 위원장은 회의장 사정과 회의의 질서유지 등을 위하여 필요한 때에는 방청인 수 및 방청의 방법을 제한할 수 있다.",
-    "⑤ 위원장은 방청인이 다음 각 호의 어느 하나에 해당하는 경우 퇴장을 명할 수 있다.",
-    "1. 사전 허가 없이 녹음ㆍ녹화ㆍ촬영 등을 하는 자",
-    "2. 회의 내용에 대해 의견을 표시하거나 신호로써 영향을 주는 행위를 하는 자",
-    "3. 그 밖에 회의 진행에 지장을 준다고 위원장이 판단한 자",
+    "??2�??�의??공개?� 방청) ??보호?�원?�의 ?�의??공개�??�칙?�로 ?�다. ?�만, ?�정 ?�건???�음 �??�의 ?�느 ?�나???�당?�는 경우?�는 보호?�원?�의 ?�결�?공개?��? ?�니?????�다.",
+    "1. 공개?�는 경우 �???�전보장???�할 ?�려가 ?�는 경우",
+    "2. 법령???�하??비�?�?분류?�거??공개가 ?�한??경우",
+    "3. 개인?�법??�?�?밖의 ?�체??명예�??�손?�거???�당???�익???�할 ?�려가 ?�다�??�정?�는 경우",
+    "4. 감사?�감?�ㆍ검?�ㆍ규제?�입찰계?�ㆍ?�사관리ㆍ?�사결정 과정 ?�는 ?��? 검?�과?�에 ?�는 ?�항 ?�으�?공개??경우 공정???�무?�행???��???지?�을 초래???�려가 ?�는 경우",
+    "5. �?밖에 공익???�요가 ?�는 ??보호?�원?�에??공개?�는 것이 ?�절?��? ?��? ?�당???�유가 ?�는 경우",
+    "???�원?��? ?�의???�사?�정???�의 개최 2???�까지 ?�원???�페?��?�??�해 공표?�다. ?�만, 긴급???�하거나 부?�이???�유가 ?�는 경우?�는 그러?��? ?�니?�다.",
+    "??보호?�원?�의 공개?�는 ?�의??방청?????�으�?방청???�망?�는 ?�는 ?�의 개최 1???�까지 별�? ???�서?�의 ?�청?��? ?�출?�여 ?�원?�의 ?��?�?받아???�다.",
+    "???�원?��? ?�의???�정�??�의??질서?��? ?�을 ?�하???�요???�에??방청????�?방청??방법???�한?????�다.",
+    "???�원?��? 방청?�이 ?�음 �??�의 ?�느 ?�나???�당?�는 경우 ?�장??명할 ???�다.",
+    "1. ?�전 ?��? ?�이 ?�음?�녹?�ㆍ촬영 ?�을 ?�는 ??,
+    "2. ?�의 ?�용???�???�견???�시?�거???�호로써 ?�향??주는 ?�위�??�는 ??,
+    "3. �?밖에 ?�의 진행??지?�을 준?�고 ?�원?�이 ?�단????,
   ].join("\n");
 }
 
 function extractArticleBlock(text, article) {
-  const baseArticle = String(article || "").match(/제\s*\d+\s*조(?:\s*의\s*\d+)?/)?.[0]?.replace(/\s+/g, "\\s*");
+  const baseArticle = String(article || "").match(/??s*\d+\s*�??:\s*??s*\d+)?/)?.[0]?.replace(/\s+/g, "\\s*");
   if (!baseArticle) return compactArticleText(text);
-  const articleRegex = new RegExp(`(${baseArticle}(?:\\([^\\n]+?\\))?[\\s\\S]*?)(?=\\n\\s*제\\s*\\d+\\s*조(?:\\s*의\\s*\\d+)?(?:\\(|\\s|$)|$)`);
+  const articleRegex = new RegExp(`(${baseArticle}(?:\\([^\\n]+?\\))?[\\s\\S]*?)(?=\\n\\s*??\s*\\d+\\s*�??:\\s*??\s*\\d+)?(?:\\(|\\s|$)|$)`);
   return compactArticleText(String(text || "").match(articleRegex)?.[1] || text);
 }
 
@@ -280,7 +363,7 @@ async function lookupAdminRuleVersion({ oc, lawName, article, date }) {
       effectiveDate: date || "current",
       lawName: query,
       article,
-      articleText: searchText || "행정규칙 검색 결과가 없습니다.",
+      articleText: searchText || "?�정규칙 검??결과가 ?�습?�다.",
       display: parseLawDisplay(searchText, { lawName: query, article, effectiveDate: date || "current" }),
       isError: Boolean(searchResult?.isError) || true,
     };
@@ -333,7 +416,7 @@ async function lookupHistoricalLawVersion({ apiClient, oc, lawName, article, dat
       effectiveDate: date || "current",
       lawName,
       article,
-      articleText: "회의일 기준으로 시행 중인 법령 버전을 찾지 못했습니다.",
+      articleText: "?�의??기�??�로 ?�행 중인 법령 버전??찾�? 못했?�니??",
       display: parseLawDisplay("", { lawName, article, effectiveDate: date || "current" }),
       isError: true,
     };
@@ -373,7 +456,7 @@ async function lookupHistoricalLawVersion({ apiClient, oc, lawName, article, dat
 async function lookupLawVersion({ oc, lawName, article, date }) {
   const query = normalizeLawQuery(lawName);
   if (!query || !articleToJo(article)) {
-    return { effectiveDate: date || "current", summary: "법률명 또는 조문 번호를 확인하지 못했습니다." };
+    return { effectiveDate: date || "current", summary: "법률�??�는 조문 번호�??�인?��? 못했?�니??" };
   }
   if (isAdminRuleQuery(query)) {
     return lookupAdminRuleVersion({ oc, lawName: query, article, date });
@@ -387,7 +470,7 @@ async function lookupLawVersion({ oc, lawName, article, date }) {
   const searchXml = await apiClient.searchLaw(query, oc, 20);
   const law = lawIdentityFromXml(searchXml, query);
   if (!law?.mst && !law?.lawId) {
-    return { effectiveDate: date || "current", summary: "법령 검색 결과가 없습니다." };
+    return { effectiveDate: date || "current", summary: "법령 검??결과가 ?�습?�다." };
   }
 
   const result = await executeTool(apiClient, "get_law_text", {
@@ -448,9 +531,9 @@ async function handleLawLookup(req, res) {
       ok: false,
       status: "needs_credentials",
       resolvedLawName: lawName,
-      note: "LAW_OC 또는 KOREAN_LAW_OC 환경변수가 없어 실제 조문 조회를 건너뛰었습니다. 값이 있으면 법제처 시행일 기준 조문을 조회합니다.",
-      meeting: { effectiveDate: meetingDate, summary: "회의 당시 조문 조회 대기" },
-      current: { effectiveDate: "current", summary: "현재 조문 조회 대기" },
+      note: "LAW_OC ?�는 KOREAN_LAW_OC ?�경변?��? ?�어 ?�제 조문 조회�?건너?�었?�니?? 값이 ?�으�?법제�??�행??기�? 조문??조회?�니??",
+      meeting: { effectiveDate: meetingDate, summary: "?�의 ?�시 조문 조회 ?��? },
+      current: { effectiveDate: "current", summary: "?�재 조문 조회 ?��? },
     }));
     return;
   }
@@ -481,9 +564,58 @@ async function handleLawLookup(req, res) {
       ok: false,
       status: "lookup_error",
       resolvedLawName: lawName,
-      note: error?.message || "조문 조회 실패",
+      note: error?.message || "조문 조회 ?�패",
     }));
   }
+}
+
+async function handleAgendaPreparationApi(req, res) {
+  const base = new URL(req.url || "/", `http://${host}:${port}`);
+  const method = (req.method || "GET").toUpperCase();
+  res.setHeader("Content-Type", "application/json; charset=utf-8");
+  res.setHeader("Cache-Control", "no-store");
+
+  if (method === "GET") {
+    const allItems = sanitizeAgendaPreparations(await readAgendaPreparations())
+      .sort((a, b) => String(b.updatedAt).localeCompare(String(a.updatedAt)));
+    res.writeHead(200);
+    res.end(JSON.stringify({ ok: true, items: allItems }));
+    return;
+  }
+
+  if (method === "POST") {
+    const body = clampJsonBody(await collectRequestBody(req), null);
+    const normalized = parseAgendaPreparationBody(body);
+    if (!normalized) {
+      res.writeHead(400);
+      res.end(JSON.stringify({
+        ok: false,
+        status: "invalid_payload",
+        note: "title, summary가 ?�요?�니??",
+      }));
+      return;
+    }
+    const now = new Date().toISOString();
+    const currentItems = sanitizeAgendaPreparations(await readAgendaPreparations());
+    const nextItem = {
+      id: crypto.randomUUID(),
+      title: normalized.title,
+      summary: normalized.summary,
+      result: normalized.result || null,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    const merged = [...currentItems.filter((item) => !(item.title === nextItem.title && item.summary === nextItem.summary)), nextItem];
+    await writeAgendaPreparations(merged);
+
+    res.writeHead(201);
+    res.end(JSON.stringify({ ok: true, item: nextItem }));
+    return;
+  }
+
+  res.writeHead(405);
+  res.end(JSON.stringify({ ok: false, status: "method_not_allowed" }));
 }
 
 function resolveRequestPath(urlPath) {
@@ -505,6 +637,18 @@ const server = http.createServer((req, res) => {
         ok: false,
         status: "server_error",
         note: error?.message || "Law lookup failed",
+      }));
+    });
+    return;
+  }
+
+  if ((req.url || "/").split("?")[0] === "/api/agenda-preparations") {
+    handleAgendaPreparationApi(req, res).catch((error) => {
+      res.writeHead(500, { "Content-Type": "application/json; charset=utf-8" });
+      res.end(JSON.stringify({
+        ok: false,
+        status: "server_error",
+        note: error?.message || "Agenda preparation API failed",
       }));
     });
     return;
@@ -541,3 +685,4 @@ const server = http.createServer((req, res) => {
 server.listen(port, host, () => {
   console.log(`PIPC dashboard: http://${host}:${port}/`);
 });
+

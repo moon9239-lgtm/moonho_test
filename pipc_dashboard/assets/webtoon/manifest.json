@@ -1,0 +1,141 @@
+{
+  "pageCount": 18,
+  "attendeePlates": [
+    "김휘강 위원",
+    "이정렬 부위원장",
+    "윤영미 위원",
+    "송경희 위원장",
+    "이문한 위원",
+    "김진환 위원",
+    "김진욱 위원",
+    "박상희 위원"
+  ],
+  "records": [
+    {
+      "page": 1,
+      "name": "page_001.png",
+      "raw": "page_001_raw.png",
+      "source": "C:\\Users\\user\\.codex\\generated_images\\019e0388-3f84-7790-853c-0c3e8fb2f181\\ig_06ecb70a23d022a30169fcd221faa88191b07b78361fa60012.png",
+      "alt": "1쪽"
+    },
+    {
+      "page": 2,
+      "name": "page_002.png",
+      "raw": "page_002_raw.png",
+      "source": "C:\\Users\\user\\.codex\\generated_images\\019e0388-3f84-7790-853c-0c3e8fb2f181\\ig_06ecb70a23d022a30169fcd5d4cda8819186df73349e73cc32.png",
+      "alt": "2쪽"
+    },
+    {
+      "page": 3,
+      "name": "page_003.png",
+      "raw": "page_003_raw.png",
+      "source": "C:\\Users\\user\\.codex\\generated_images\\019e0388-3f84-7790-853c-0c3e8fb2f181\\ig_06ecb70a23d022a30169fcd80395e4819196144ac9607e8f60.png",
+      "alt": "3쪽"
+    },
+    {
+      "page": 4,
+      "name": "page_004.png",
+      "raw": "page_004_raw.png",
+      "source": "C:\\Users\\user\\.codex\\generated_images\\019e0388-3f84-7790-853c-0c3e8fb2f181\\ig_06ecb70a23d022a30169fcd86cc7988191b46dc8c0f8db1e20.png",
+      "alt": "4쪽"
+    },
+    {
+      "page": 5,
+      "name": "page_005.png",
+      "raw": "page_005_raw.png",
+      "source": "C:\\Users\\user\\.codex\\generated_images\\019e0388-3f84-7790-853c-0c3e8fb2f181\\ig_06ecb70a23d022a30169fcd8e9dfd48191b2fd93d8e238ae00.png",
+      "alt": "5쪽"
+    },
+    {
+      "page": 6,
+      "name": "page_006.png",
+      "raw": "page_006_raw.png",
+      "source": "C:\\Users\\user\\.codex\\generated_images\\019e0388-3f84-7790-853c-0c3e8fb2f181\\ig_06ecb70a23d022a30169fcd959a7a88191acdc96a63c02fb15.png",
+      "alt": "6쪽"
+    },
+    {
+      "page": 7,
+      "name": "page_007.png",
+      "raw": "page_007_raw.png",
+      "source": "C:\\Users\\user\\.codex\\generated_images\\019e0388-3f84-7790-853c-0c3e8fb2f181\\ig_06ecb70a23d022a30169fcda2b88f0819194e422972c50c2c2.png",
+      "alt": "7쪽"
+    },
+    {
+      "page": 8,
+      "name": "page_008.png",
+      "raw": "page_008_raw.png",
+      "source": "C:\\Users\\user\\.codex\\generated_images\\019e0388-3f84-7790-853c-0c3e8fb2f181\\ig_06ecb70a23d022a30169fcdb8b499c8191b7eae06426d60017.png",
+      "alt": "8쪽"
+    },
+    {
+      "page": 9,
+      "name": "page_009.png",
+      "raw": "page_009_raw.png",
+      "source": "C:\\Users\\user\\.codex\\generated_images\\019e0388-3f84-7790-853c-0c3e8fb2f181\\ig_06ecb70a23d022a30169fcdc5d3fe8819181fad8c29dc85ba0.png",
+      "alt": "9쪽"
+    },
+    {
+      "page": 10,
+      "name": "page_010.png",
+      "raw": "page_010_raw.png",
+      "source": "C:\\Users\\user\\.codex\\generated_images\\019e0388-3f84-7790-853c-0c3e8fb2f181\\ig_06ecb70a23d022a30169fcdd24b57c819197192c6f8668c7e3.png",
+      "alt": "10쪽"
+    },
+    {
+      "page": 11,
+      "name": "page_011.png",
+      "raw": "page_011_raw.png",
+      "source": "C:\\Users\\user\\.codex\\generated_images\\019e0388-3f84-7790-853c-0c3e8fb2f181\\ig_06ecb70a23d022a30169fcdde96a288191bd7c2c4ec285d334.png",
+      "alt": "11쪽"
+    },
+    {
+      "page": 12,
+      "name": "page_012.png",
+      "raw": "page_012_raw.png",
+      "source": "C:\\Users\\user\\.codex\\generated_images\\019e0388-3f84-7790-853c-0c3e8fb2f181\\ig_06ecb70a23d022a30169fcdf0be620819189de86267ccade46.png",
+      "alt": "12쪽"
+    },
+    {
+      "page": 13,
+      "name": "page_013.png",
+      "raw": "page_013_raw.png",
+      "source": "C:\\Users\\user\\.codex\\generated_images\\019e0388-3f84-7790-853c-0c3e8fb2f181\\ig_06ecb70a23d022a30169fcdfd9bf8081918895a36455287dad.png",
+      "alt": "13쪽"
+    },
+    {
+      "page": 14,
+      "name": "page_014.png",
+      "raw": "page_014_raw.png",
+      "source": "C:\\Users\\user\\.codex\\generated_images\\019e0388-3f84-7790-853c-0c3e8fb2f181\\ig_06ecb70a23d022a30169fce0a9bc0c8191a1d9fc3a8eef5207.png",
+      "alt": "14쪽"
+    },
+    {
+      "page": 15,
+      "name": "page_015.png",
+      "raw": "page_015_raw.png",
+      "source": "C:\\Users\\user\\.codex\\generated_images\\019e0388-3f84-7790-853c-0c3e8fb2f181\\ig_06ecb70a23d022a30169fce127883081919d087810932ff098.png",
+      "alt": "15쪽"
+    },
+    {
+      "page": 16,
+      "name": "page_016.png",
+      "raw": "page_016_raw.png",
+      "source": "C:\\Users\\user\\.codex\\generated_images\\019e0388-3f84-7790-853c-0c3e8fb2f181\\ig_06ecb70a23d022a30169fce2960a10819190a8492ef62dfccb.png",
+      "alt": "16쪽"
+    },
+    {
+      "page": 17,
+      "name": "page_017.png",
+      "raw": "page_017_raw.png",
+      "source": "C:\\Users\\user\\.codex\\generated_images\\019e0388-3f84-7790-853c-0c3e8fb2f181\\ig_06ecb70a23d022a30169fce31758ac8191852b426580b56706.png",
+      "alt": "17쪽"
+    },
+    {
+      "page": 18,
+      "name": "page_018.png",
+      "raw": "page_018_raw.png",
+      "source": "C:\\Users\\user\\.codex\\generated_images\\019e0388-3f84-7790-853c-0c3e8fb2f181\\ig_06ecb70a23d022a30169fce53a92008191ba4c7f1791597dd2.png",
+      "alt": "18쪽"
+    }
+  ]
+}

@@ -24,6 +24,7 @@ let activeMeetingDetail = null;
 let activeAnimationTimeline = null;
 let activeSceneIndex = 0;
 let animationTimer = null;
+let assistantSavedItems = [];
 
 const tabTitles = {
   stats: "전체회의 통계·동향 대시보드",
@@ -32,6 +33,15 @@ const tabTitles = {
   commissioner: "위원별 대시보드",
   assistant: "신규 안건 준비 도우미",
 };
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
 
 function $(selector, root = document) {
   return root.querySelector(selector);
@@ -65,7 +75,81 @@ init();
 
 function renderAssistantTab() {
   const assistantTab = $("#tab-assistant");
-  if (assistantTab) assistantTab.innerHTML = renderAgendaAssistant();
+  if (!assistantTab) return;
+  assistantTab.innerHTML = renderAgendaAssistant({
+    savedPreparations: assistantSavedItems,
+  });
+  const assistantForm = $("#tab-assistant [data-agenda-form]");
+  const titleInput = assistantForm?.querySelector("input[name='title']");
+  const summaryInput = assistantForm?.querySelector("textarea[name='summary']");
+  if (titleInput && !titleInput.id) {
+    titleInput.id = "assistant-title";
+  }
+  if (summaryInput && !summaryInput.id) {
+    summaryInput.id = "assistant-summary";
+  }
+
+  const existingList = assistantTab.querySelector(".assistant-saved-list");
+  if (existingList) existingList.remove();
+  const anchor = assistantTab.querySelector(".assistant-form");
+  if (!anchor) return;
+  const list = renderAssistantSavedList(assistantSavedItems);
+  anchor.insertAdjacentHTML("beforebegin", `<div class="assistant-saved-list">${list}</div>`);
+}
+
+function renderAssistantSavedItem(item = {}) {
+  const title = String(item.title || "").trim();
+  const summary = String(item.summary || "").trim();
+  const summaryPreview = summary
+    ? `${summary.slice(0, 220)}${summary.length > 220 ? "..." : ""}`
+    : "요약이 비어 있습니다.";
+  const payload = encodeURIComponent(JSON.stringify({
+    title,
+    summary,
+    result: item.result || null,
+  }));
+  return `
+    <article class="assistant-saved-item">
+      <h4>${escapeHtml(title || "제목 없음")}</h4>
+      <p>${escapeHtml(summaryPreview)}</p>
+      <button class="small-button" type="button" data-load-preparation="${payload}">불러와서 다시 분석하기</button>
+    </article>
+  `;
+}
+
+function renderAssistantSavedList(items = []) {
+  const list = Array.isArray(items) ? items : [];
+  if (!list.length) {
+    return `<p class="section-caption">저장된 안건이 없습니다.</p>`;
+  }
+  return `<div class="assistant-saved-grid">${list.slice(0, 8).map((item) => renderAssistantSavedItem(item)).join("")}</div>`;
+}
+
+async function fetchAgendaPreparations() {
+  try {
+    const response = await fetch("/api/agenda-preparations");
+    if (!response.ok) return [];
+    const payload = await response.json();
+    return Array.isArray(payload?.items) ? payload.items : [];
+  } catch {
+    return [];
+  }
+}
+
+async function syncAgendaPreparations() {
+  assistantSavedItems = await fetchAgendaPreparations();
+  renderAssistantTab();
+}
+
+async function saveAgendaPreparation(payload = {}) {
+  const response = await fetch("/api/agenda-preparations", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!response.ok) return null;
+  const data = await response.json();
+  return data?.item || null;
 }
 
 function renderSearchTab(filters = {}) {
@@ -423,6 +507,25 @@ document.addEventListener("click", (event) => {
   if (searchChip) {
     renderSearchTab({ query: searchChip.dataset.searchChip, facet: "all" });
   }
+
+  const loadPreparation = event.target.closest("[data-load-preparation]");
+  if (loadPreparation) {
+    const payload = loadPreparation.dataset.loadPreparation || "";
+    if (!payload) return;
+    try {
+      const parsed = JSON.parse(decodeURIComponent(payload));
+      const titleInput = $("#assistant-title");
+      const summaryInput = $("#assistant-summary");
+      if (titleInput && typeof parsed.title === "string") titleInput.value = parsed.title;
+      if (summaryInput && typeof parsed.summary === "string") summaryInput.value = parsed.summary;
+      if (parsed.result) {
+        const resultNode = $("#assistant-result");
+        if (resultNode) resultNode.innerHTML = renderAgendaPreparationResult(parsed.result);
+      }
+    } catch {
+      // ignore malformed stored payload
+    }
+  }
 });
 
 document.addEventListener("change", (event) => {
@@ -449,12 +552,25 @@ document.addEventListener("submit", (event) => {
   event.preventDefault();
 
   const formData = new FormData(form);
+  const title = String(formData.get("title") || "").trim();
+  const summary = String(formData.get("summary") || "").trim();
   const result = buildAgendaPreparationResult({
-    title: formData.get("title"),
-    summary: formData.get("summary"),
+    title,
+    summary,
     historicalAgendas: buildHistoricalAgendas(dashboardData),
     commissionerActivity: dashboardData.commissionerActivity || [],
   });
   const resultNode = $("#assistant-result");
   if (resultNode) resultNode.innerHTML = renderAgendaPreparationResult(result);
+  if (title && summary) {
+    void saveAgendaPreparation({
+      title,
+      summary,
+      result,
+    }).then(() => {
+      syncAgendaPreparations();
+    });
+  }
 });
+
+syncAgendaPreparations();

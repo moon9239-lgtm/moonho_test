@@ -29,7 +29,7 @@
 **Files:**
 - Modify: `pipc_dashboard/styles.css`
 
-- [ ] **Step 1: Locate the old visual layer**
+- [x] **Step 1: Locate the old visual layer**
 
 Run:
 
@@ -49,7 +49,7 @@ Change the existing block marker to:
 
 This confirms the file has one current visual layer.
 
-- [ ] **Step 3: Establish Altivo tokens**
+- [x] **Step 3: Establish Altivo tokens**
 
 Inside the override block, define these tokens:
 
@@ -82,7 +82,7 @@ Inside the override block, define these tokens:
 }
 ```
 
-- [ ] **Step 4: Remove one-note pastel remnants from the override**
+- [x] **Step 4: Remove one-note pastel remnants from the override**
 
 Search the override block for the previous dominant palette values:
 
@@ -97,7 +97,7 @@ Expected after cleanup: no `Dribbble-inspired`; old colors appear only if delibe
 **Files:**
 - Modify: `pipc_dashboard/styles.css`
 
-- [ ] **Step 1: Restyle the app canvas**
+- [x] **Step 1: Restyle the app canvas**
 
 Implement a crisp productivity workspace:
 
@@ -118,7 +118,7 @@ body {
 }
 ```
 
-- [ ] **Step 2: Restyle sidebar and brand**
+- [x] **Step 2: Restyle sidebar and brand**
 
 Use a compact rail with white status surfaces:
 
@@ -151,7 +151,7 @@ Use a compact rail with white status surfaces:
 }
 ```
 
-- [ ] **Step 3: Restyle navigation items**
+- [x] **Step 3: Restyle navigation items**
 
 Make active navigation feel like a productivity app command:
 
@@ -181,7 +181,7 @@ Make active navigation feel like a productivity app command:
 }
 ```
 
-- [ ] **Step 4: Restyle nav icons with geometric Altivo-like marks**
+- [x] **Step 4: Restyle nav icons with geometric Altivo-like marks**
 
 Keep the existing `data-tab` hooks:
 
@@ -214,7 +214,7 @@ Keep the existing `data-tab` hooks:
 **Files:**
 - Modify: `pipc_dashboard/styles.css`
 
-- [ ] **Step 1: Restyle headers and section surfaces**
+- [x] **Step 1: Restyle headers and section surfaces**
 
 Use strong title contrast and flatter panels:
 
@@ -244,7 +244,7 @@ Use strong title contrast and flatter panels:
 }
 ```
 
-- [ ] **Step 2: Restyle buttons and inputs**
+- [x] **Step 2: Restyle buttons and inputs**
 
 Keep clear command affordances:
 
@@ -287,7 +287,7 @@ button:focus-visible {
 }
 ```
 
-- [ ] **Step 3: Restyle chips and status labels**
+- [x] **Step 3: Restyle chips and status labels**
 
 Use role-like color semantics:
 
@@ -316,7 +316,7 @@ Use role-like color semantics:
 **Files:**
 - Modify: `pipc_dashboard/styles.css`
 
-- [ ] **Step 1: Restyle KPI cards as productivity widgets**
+- [x] **Step 1: Restyle KPI cards as productivity widgets**
 
 Implement compact strong cards:
 
@@ -340,7 +340,7 @@ Implement compact strong cards:
 }
 ```
 
-- [ ] **Step 2: Restyle operations panels and tables**
+- [x] **Step 2: Restyle operations panels and tables**
 
 Keep data dense:
 
@@ -364,7 +364,7 @@ tbody tr:hover {
 }
 ```
 
-- [ ] **Step 3: Restyle integrated search workbench**
+- [x] **Step 3: Restyle integrated search workbench**
 
 Make search the strongest command surface:
 
@@ -386,7 +386,7 @@ Make search the strongest command surface:
 }
 ```
 
-- [ ] **Step 4: Restyle search result cards**
+- [x] **Step 4: Restyle search result cards**
 
 Keep target/legal/result zones visible:
 
@@ -419,7 +419,7 @@ Keep target/legal/result zones visible:
 **Files:**
 - Modify: `pipc_dashboard/styles.css`
 
-- [ ] **Step 1: Restyle meeting selector and agenda list**
+- [x] **Step 1: Restyle meeting selector and agenda list**
 
 ```css
 .meeting-picker,
@@ -443,7 +443,7 @@ Keep target/legal/result zones visible:
 }
 ```
 
-- [ ] **Step 2: Restyle agenda section dividers**
+- [x] **Step 2: Restyle agenda section dividers**
 
 ```css
 .utterance-agenda-heading,
@@ -460,7 +460,7 @@ Keep target/legal/result zones visible:
 }
 ```
 
-- [ ] **Step 3: Restyle utterance cards as meeting log entries**
+- [x] **Step 3: Restyle utterance cards as meeting log entries**
 
 ```css
 .utterance-card {
@@ -482,7 +482,7 @@ Keep target/legal/result zones visible:
 }
 ```
 
-- [ ] **Step 4: Restyle law drawer**
+- [x] **Step 4: Restyle law drawer**
 
 ```css
 .law-drawer-panel {
@@ -508,7 +508,7 @@ Keep target/legal/result zones visible:
 **Files:**
 - Modify: `pipc_dashboard/styles.css`
 
-- [ ] **Step 1: Preserve one-column commissioner cards**
+- [x] **Step 1: Preserve one-column commissioner cards**
 
 Keep portraits large and uncropped:
 
@@ -532,7 +532,7 @@ Keep portraits large and uncropped:
 }
 ```
 
-- [ ] **Step 2: Apply role accents**
+- [x] **Step 2: Apply role accents**
 
 ```css
 .commissioner-card-chair::before {
@@ -549,7 +549,7 @@ Keep portraits large and uncropped:
 }
 ```
 
-- [ ] **Step 3: Restyle animation view**
+- [x] **Step 3: Restyle animation view**
 
 ```css
 .rendered-animation-panel,
@@ -567,7 +567,7 @@ Keep portraits large and uncropped:
 }
 ```
 
-- [ ] **Step 4: Restyle assistant view**
+- [x] **Step 4: Restyle assistant view**
 
 ```css
 .assistant-panel,
@@ -586,7 +586,7 @@ Keep portraits large and uncropped:
 - Modify: `pipc_dashboard/styles.css`
 - Verify only: `pipc_dashboard/docs/superpowers/plans/2026-05-08-altivo-dashboard-refresh.md`
 
-- [ ] **Step 1: Keep mobile sidebar usable**
+- [x] **Step 1: Keep mobile sidebar usable**
 
 Update responsive rules inside the Altivo override:
 
@@ -610,7 +610,7 @@ Update responsive rules inside the Altivo override:
 }
 ```
 
-- [ ] **Step 2: Keep cards compact on narrow widths**
+- [x] **Step 2: Keep cards compact on narrow widths**
 
 ```css
 @media (max-width: 760px) {
@@ -627,7 +627,7 @@ Update responsive rules inside the Altivo override:
 }
 ```
 
-- [ ] **Step 3: Run automated checks**
+- [x] **Step 3: Run automated checks**
 
 Run:
 
@@ -644,7 +644,7 @@ Expected:
 - `npm.cmd test` reports 70 passing tests.
 - Each `node --check` command exits with code `0`.
 
-- [ ] **Step 4: Browser smoke check**
+- [x] **Step 4: Browser smoke check**
 
 Use the existing local server at `http://127.0.0.1:5190/pipc_dashboard/` if it is running, otherwise start it:
 
@@ -662,7 +662,7 @@ Open the dashboard and check:
 - `위원별 대시보드` portraits are not vertically cropped.
 - `신규 안건 도우미` uses the same workbench panel treatment.
 
-- [ ] **Step 5: Record verification in this plan**
+- [x] **Step 5: Record verification in this plan**
 
 After checks pass, mark completed boxes in this plan and note any visual verification gaps in the final response.
 

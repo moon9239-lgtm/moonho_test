@@ -203,11 +203,54 @@ h3 {
 }
 
 .tool-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+  text-decoration: none;
 }
 
 .tool-button:hover {
   box-shadow: 0 8px 18px rgba(44, 101, 211, 0.12);
+}
+
+.transcript-viewer-actions,
+.meeting-animation-actions,
+.meeting-primary-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.meeting-animation-panel {
+  display: grid;
+  gap: 14px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f8fbff;
+}
+
+.meeting-animation-copy h3 {
+  margin: 0;
+  font-size: 15px;
+}
+
+.meeting-animation-copy p {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.meeting-animation-media {
+  display: block;
+  width: 100%;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: #eef3f8;
 }
 
 .tab-view {
@@ -3338,5 +3381,820 @@ tr:last-child td {
 
   .utterance-list {
     max-height: none;
+  }
+}
+
+/* Altivo-inspired productivity refresh layer */
+:root {
+  --bg: #f7f7f2;
+  --bg-soft: #f1f4ec;
+  --surface: #ffffff;
+  --surface-strong: #fffdf7;
+  --surface-muted: #f4f6ef;
+  --surface-soft: #f4f6ef;
+  --ink: #151713;
+  --ink-soft: #3b4138;
+  --text: #151713;
+  --muted: #71796c;
+  --line: #dfe5d7;
+  --line-strong: #cbd5c1;
+  --green: #1f8f5f;
+  --green-strong: #146c49;
+  --green-soft: #e2f4e8;
+  --orange: #f29f45;
+  --orange-strong: #8a430c;
+  --orange-soft: #fff0dc;
+  --blue: #2755b0;
+  --blue-soft: #e6edff;
+  --red: #a52f27;
+  --red-soft: #ffe8e3;
+  --teal: #1f8f5f;
+  --teal-soft: #e2f4e8;
+  --coral: #f29f45;
+  --coral-soft: #fff0dc;
+  --olive: #2755b0;
+  --olive-soft: #e6edff;
+  --gold: #8a430c;
+  --gold-soft: #fff0dc;
+  --danger: #a52f27;
+  --shadow: 0 10px 28px rgba(25, 35, 20, 0.08);
+  --shadow-soft: 0 10px 28px rgba(25, 35, 20, 0.08);
+  --shadow-card: 0 6px 16px rgba(25, 35, 20, 0.06);
+  --radius: 8px;
+  --radius-sm: 6px;
+}
+
+body {
+  background:
+    linear-gradient(180deg, #fbfbf6 0%, var(--bg) 46%, #f4f1e8 100%);
+  color: var(--ink);
+}
+
+.app-shell {
+  grid-template-columns: 268px minmax(0, 1fr);
+  background: transparent;
+}
+
+.main-content {
+  background: transparent;
+}
+
+.sidebar {
+  padding: 22px 18px;
+  background: rgba(255, 255, 250, 0.88);
+  border-right: 1px solid var(--line);
+  box-shadow: 12px 0 32px rgba(28, 40, 22, 0.05);
+}
+
+.brand {
+  min-height: 58px;
+}
+
+.brand-mark {
+  border-radius: var(--radius);
+  background: var(--ink);
+  color: #ffffff;
+  box-shadow: inset 0 -4px 0 rgba(31, 143, 95, 0.35);
+}
+
+.brand-title,
+.topbar h1,
+.section-header h2,
+.section-title,
+.kpi-card strong,
+.kpi-value,
+.metric-value,
+.search-result-card h3,
+.commissioner-card h3,
+.law-detail-heading h3 {
+  color: var(--ink);
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.topbar h1,
+.section-header h2,
+.section-title {
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+.brand-subtitle,
+.section-caption,
+.search-result-meta,
+.search-procedure-note,
+.transcript-item-meta,
+.meeting-selector-count,
+.law-panel-note,
+.law-lookup-note {
+  color: var(--muted);
+}
+
+.nav-item {
+  min-height: 46px;
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  color: var(--ink-soft);
+  font-weight: 800;
+}
+
+.nav-item:hover {
+  background: var(--surface);
+  border-color: var(--line);
+  color: var(--ink);
+}
+
+.nav-item.active {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #ffffff;
+  box-shadow: var(--shadow-card);
+}
+
+.nav-item.active::before {
+  background: var(--green);
+}
+
+.nav-icon {
+  width: 14px;
+  height: 14px;
+  border-radius: var(--radius-sm);
+  background: var(--green-soft);
+  border-color: rgba(31, 143, 95, 0.28);
+}
+
+.nav-item.active .nav-icon {
+  background: var(--green);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.nav-item[data-tab="search"] .nav-icon,
+.nav-item[data-tab="meeting"] .nav-icon {
+  background: var(--blue-soft);
+  border-color: rgba(64, 111, 208, 0.25);
+}
+
+.nav-item[data-tab="assistant"] .nav-icon {
+  background: var(--orange-soft);
+  border-color: rgba(242, 159, 69, 0.3);
+}
+
+.side-note,
+.topbar,
+.section-band,
+.content-card,
+.transcript-browser,
+.transcript-viewer,
+.meeting-card,
+.meeting-detail-side,
+.transcript-panel,
+.meeting-selector-panel,
+.search-control-panel,
+.meeting-overview-card,
+.law-drawer-panel,
+.assistant-form,
+.assistant-result-grid section,
+.assistant-result-card,
+.agenda-assistant-panel,
+.assistant-panel {
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+
+.topbar {
+  border-radius: 0;
+  border-width: 0 0 1px;
+  background: rgba(247, 247, 242, 0.86);
+  backdrop-filter: blur(14px);
+  box-shadow: none;
+}
+
+button,
+.btn,
+.link-button,
+.tool-button,
+.small-button,
+.icon-button,
+input,
+select,
+textarea {
+  border-radius: var(--radius-sm);
+}
+
+.tool-button,
+.small-button,
+.icon-button,
+.status-pill,
+.meta-chip,
+.law-chip,
+.inline-law-ref,
+.provision-chip {
+  word-break: keep-all;
+  overflow-wrap: normal;
+}
+
+.section-header > .tool-button,
+.section-header > button {
+  white-space: nowrap;
+}
+
+.primary-button,
+.animation-action-primary,
+button[data-start-animation],
+.assistant-primary-action,
+.primary-control {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #ffffff;
+}
+
+.primary-button:hover,
+.animation-action-primary:hover,
+button[data-start-animation]:hover,
+.assistant-primary-action:hover,
+.primary-control:hover {
+  background: var(--green-strong);
+  border-color: var(--green-strong);
+  color: #ffffff;
+}
+
+input,
+select,
+textarea,
+.search-field input,
+.search-field select,
+.assistant-field input,
+.assistant-field textarea,
+.meeting-selector select {
+  border-color: var(--line-strong);
+  background: #ffffff;
+  color: var(--ink);
+}
+
+input:focus,
+select:focus,
+textarea:focus,
+button:focus-visible,
+.search-field input:focus,
+.search-field select:focus,
+.assistant-field input:focus,
+.assistant-field textarea:focus {
+  border-color: var(--green);
+  outline: 3px solid rgba(31, 143, 95, 0.22);
+  outline-offset: 2px;
+}
+
+.status-pill,
+.law-chip,
+.meta-chip,
+.meeting-card-badge,
+.source-confidence-badge,
+.quick-chip,
+.speaker-role,
+.commissioner-card-topline span,
+.commissioner-facts span,
+.provision-chip,
+.inline-law-ref {
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: var(--surface-muted);
+  color: var(--ink-soft);
+}
+
+.law-chip,
+.data-pill-law,
+.provision-chip,
+.inline-law-ref,
+.law-reference-item,
+.status-ready,
+.search-field .provision-chip {
+  background: var(--blue-soft);
+  border-color: rgba(64, 111, 208, 0.2);
+  color: var(--blue);
+}
+
+.status-partial,
+.result-chip,
+.disposition-chip,
+.assistant-tag-list .status-pill {
+  background: var(--orange-soft);
+  border-color: rgba(242, 159, 69, 0.3);
+  color: var(--orange-strong);
+}
+
+.status-needs_work,
+.status-needs_review,
+.status-needs_review_source_document,
+.status-needs_review_not_final_amount,
+.status-needs_review_role_classification,
+.law-lookup-error,
+.assistant-list .assistant-danger {
+  background: var(--red-soft);
+  border-color: rgba(217, 91, 79, 0.28);
+  color: var(--red);
+}
+
+.status-verified_final_amount,
+.status-verified_order_signal,
+.status-mcp_verified,
+.status-verified_document_case,
+.status-verified_official_agenda,
+.target-chip {
+  background: var(--green-soft);
+  border-color: rgba(31, 143, 95, 0.25);
+  color: var(--green-strong);
+}
+
+.kpi-card,
+.redesigned-board .kpi-card {
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+
+.kpi-card::before {
+  background: var(--green);
+  border-radius: var(--radius-sm);
+}
+
+.ops-panel,
+.rank-card,
+.table-wrap,
+.donut-card,
+.word-cloud-card,
+.quality-mini-card,
+.month-meeting-cell,
+.quarter-row,
+.meeting-overview-card {
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: #ffffff;
+  box-shadow: none;
+}
+
+thead th {
+  background: var(--surface-muted);
+  color: var(--ink-soft);
+}
+
+tbody tr:hover {
+  background: #fbf8ef;
+}
+
+.rank-list li,
+.topic-bar-track,
+.quarter-meter,
+.year-flow-track,
+.quality-mini-row,
+.similar-agenda-list li,
+.animation-agenda-item {
+  background: var(--surface-muted);
+}
+
+.rank-list strong,
+.year-flow-bar b,
+.quarter-label,
+.topic-bar-row strong,
+.quality-mini-row strong {
+  color: var(--ink);
+}
+
+.integrated-search-layout {
+  gap: 18px;
+}
+
+.search-control-panel {
+  background:
+    linear-gradient(180deg, #ffffff 0%, #fffaf1 100%);
+}
+
+.search-control-panel input[type="search"],
+.search-control-panel .search-input,
+.search-field input[type="search"] {
+  min-height: 46px;
+  border-color: rgba(31, 143, 95, 0.38);
+  box-shadow: inset 0 0 0 1px rgba(31, 143, 95, 0.08);
+}
+
+.quick-chip {
+  background: var(--green-soft);
+  border-color: rgba(31, 143, 95, 0.28);
+  color: var(--green-strong);
+}
+
+.search-result-card {
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+
+.search-result-card header {
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+.search-result-card footer {
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.search-facet-grid > div {
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--surface-strong);
+}
+
+.meeting-picker,
+.agenda-jump-list,
+.transcript-controls,
+.transcript-list,
+.meeting-selector-panel {
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.agenda-jump,
+.transcript-item {
+  border-radius: var(--radius-sm);
+  border-color: var(--line);
+  color: var(--ink-soft);
+}
+
+.agenda-jump:hover,
+.agenda-jump.active,
+.transcript-item:hover,
+.transcript-item.active {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #ffffff;
+}
+
+.utterance-agenda-heading,
+.agenda-section-heading,
+.utterance-section-header {
+  border-radius: var(--radius);
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #ffffff;
+  box-shadow: var(--shadow-card);
+}
+
+.utterance-section-title,
+.utterance-section-kicker,
+.utterance-section-count,
+.utterance-agenda-heading small,
+.agenda-section-heading small {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.utterance-section-title {
+  color: #ffffff;
+}
+
+.utterance-section-kicker,
+.utterance-section-count {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.utterance-card {
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--line-strong);
+  background: var(--surface);
+  box-shadow: none;
+}
+
+.utterance-card[data-speaker-kind="commissioner"],
+.utterance-card.speaker-commissioner {
+  border-left-color: var(--green);
+  background: linear-gradient(90deg, var(--green-soft) 0%, #ffffff 42%);
+}
+
+.utterance-card[data-speaker-kind="staff"],
+.utterance-card.speaker-staff,
+.utterance-card.speaker-secretariat {
+  border-left-color: var(--orange);
+  background: linear-gradient(90deg, var(--orange-soft) 0%, #ffffff 42%);
+}
+
+.utterance-card.speaker-other {
+  border-left-color: var(--blue);
+}
+
+.utterance-card.speaker-commissioner .speaker-role {
+  background: var(--green-soft);
+  border-color: rgba(31, 143, 95, 0.24);
+  color: var(--green-strong);
+}
+
+.utterance-card.speaker-staff .speaker-role {
+  background: var(--orange-soft);
+  border-color: rgba(242, 159, 69, 0.28);
+  color: var(--orange-strong);
+}
+
+.utterance-bubble,
+.transcript-body {
+  background: var(--surface-muted);
+  color: var(--ink);
+}
+
+.law-drawer-panel {
+  background: #fffef8;
+  border-left: 1px solid var(--line-strong);
+  box-shadow: -18px 0 34px rgba(25, 35, 20, 0.12);
+}
+
+.law-version-card,
+.law-article-card,
+.law-version-grid section,
+.law-detail-card,
+.law-field {
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: #ffffff;
+}
+
+.law-version-card.current,
+.law-article-card.current,
+.law-article-card.current-law {
+  border-color: rgba(31, 143, 95, 0.32);
+  background: var(--green-soft);
+}
+
+.commissioner-grid {
+  grid-template-columns: 1fr;
+}
+
+.commissioner-card {
+  position: relative;
+  grid-template-columns: minmax(240px, 340px) minmax(0, 1fr);
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+
+.commissioner-card::before {
+  content: "";
+  position: absolute;
+  top: 14px;
+  bottom: 14px;
+  left: 0;
+  width: 5px;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  background: var(--blue);
+}
+
+.commissioner-card-chair::before {
+  background: var(--green);
+}
+
+.commissioner-card-vice::before,
+.commissioner-card-executive::before {
+  background: var(--orange);
+}
+
+.commissioner-card-member::before {
+  background: var(--blue);
+}
+
+.commissioner-card-chair,
+.commissioner-card-vice,
+.commissioner-card-executive {
+  background: var(--surface);
+}
+
+.commissioner-portrait {
+  min-height: 420px;
+  height: 420px;
+  max-height: 420px;
+  border-radius: var(--radius);
+  background: var(--surface-muted);
+  overflow: hidden;
+}
+
+.commissioner-portrait img {
+  width: min(100%, 280px);
+  height: 400px;
+  max-height: calc(100% - 20px);
+  object-fit: contain;
+  object-position: center bottom;
+}
+
+.commissioner-card-chair .commissioner-portrait {
+  background: var(--green-soft);
+}
+
+.commissioner-card-vice .commissioner-portrait,
+.commissioner-card-executive .commissioner-portrait {
+  background: var(--orange-soft);
+}
+
+.commissioner-insight-grid > div,
+.commissioner-tag-section,
+.assistant-result-grid section {
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--surface-strong);
+}
+
+.rendered-animation-panel,
+.animation-stage,
+.animation-scene-list,
+.animation-side-panel,
+.animation-agenda-list,
+.rich-animation [data-stage-text],
+.css3d-actor-card,
+.seat {
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.rich-animation .animation-stage {
+  background:
+    linear-gradient(180deg, #ffffff 0%, var(--surface-muted) 100%);
+}
+
+.animation-scene-item.active {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #ffffff;
+}
+
+.animation-actor.speaking,
+.css3d-actor.speaking .css3d-actor-card {
+  border-color: var(--green);
+  box-shadow: 0 10px 22px rgba(31, 143, 95, 0.18);
+}
+
+.seat-chair,
+.css3d-actor[data-seat="chair"] .css3d-actor-card {
+  border-color: var(--green);
+  background: var(--green-soft);
+  color: var(--green-strong);
+}
+
+.css3d-actor[data-seat^="staff"] .css3d-actor-card {
+  border-color: var(--orange);
+}
+
+.assistant-form {
+  padding: 16px;
+  max-width: 920px;
+  background:
+    linear-gradient(180deg, #ffffff 0%, #fffaf1 100%);
+}
+
+.assistant-saved-list {
+  margin-top: 6px;
+  margin-bottom: 12px;
+}
+
+.assistant-saved-list h3 {
+  margin: 0 0 8px;
+  color: var(--ink-soft);
+}
+
+.assistant-saved-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.assistant-saved-item {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+  padding: 12px;
+}
+
+.assistant-saved-item h4 {
+  margin: 0 0 6px;
+  color: var(--ink);
+  font-size: 0.95rem;
+}
+
+.assistant-saved-item p {
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.assistant-field {
+  color: var(--ink-soft);
+}
+
+.assistant-result-grid {
+  align-items: stretch;
+}
+
+.assistant-list span,
+.law-field span,
+.law-article-body span,
+.source-confidence-badge,
+.similar-agenda-list li span,
+.similar-agenda-list li em,
+.animation-agenda-item span,
+.animation-actor small,
+.animation-scene-item em {
+  color: var(--muted);
+}
+
+.staff-avatar {
+  border-radius: var(--radius);
+  background: var(--orange-soft);
+  color: var(--orange-strong);
+}
+
+@media (max-width: 1180px) {
+  .app-shell {
+    grid-template-columns: 236px minmax(0, 1fr);
+  }
+
+  .search-control-panel {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 960px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    position: relative;
+    height: auto;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .nav-list {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .side-note {
+    position: static;
+    margin-top: 14px;
+  }
+}
+
+@media (max-width: 760px) {
+  .section-band,
+  .content-card,
+  .search-result-card,
+  .commissioner-card,
+  .meeting-overview-card,
+  .assistant-result-grid section {
+    border-radius: var(--radius);
+  }
+
+  .topbar h1 {
+    font-size: clamp(1.35rem, 6vw, 1.7rem);
+    line-height: 1.18;
+  }
+
+  .section-header {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .section-header > .tool-button,
+  .section-header > button {
+    justify-self: start;
+    width: fit-content;
+    max-width: 100%;
+  }
+
+  .search-control-panel,
+  .search-result-card header,
+  .search-result-card footer {
+    grid-template-columns: 1fr;
+  }
+
+  .commissioner-card {
+    grid-template-columns: 1fr;
+  }
+
+  .commissioner-portrait {
+    height: 520px;
+    min-height: 520px;
+    max-height: 520px;
+  }
+
+  .commissioner-portrait img {
+    width: min(100%, 310px);
+    height: 500px;
+    max-height: calc(100% - 20px);
   }
 }

@@ -17,6 +17,9 @@ export function formatNumber(value) {
   return new Intl.NumberFormat("ko-KR").format(Number.isFinite(number) ? number : 0);
 }
 
+const PIPC_2026_FIFTH_MEETING_ID = "a47c6ac8-3acb-4644-8048-0f5333cc3102";
+const PIPC_2026_FIFTH_WEBTOON_HREF = "./assets/webtoon/pipc_2026_5_image2_webtoon.html";
+
 function hasNumber(value) {
   return value !== null && value !== undefined && Number.isFinite(Number(value));
 }
@@ -671,6 +674,20 @@ function renderMeetingSelector(options = [], selectedId = "") {
   `;
 }
 
+function renderMeetingPrimaryActions(meeting = {}) {
+  const webtoonAction = meeting.id === PIPC_2026_FIFTH_MEETING_ID
+    ? `<a class="tool-button" href="${PIPC_2026_FIFTH_WEBTOON_HREF}">웹툰으로 보기</a>`
+    : "";
+  const animationAction = `<button class="tool-button" type="button" data-animation-meeting-id="${escapeHtml(meeting.id)}">애니메이션으로 보기</button>`;
+
+  return `
+    <div class="meeting-primary-actions">
+      ${webtoonAction}
+      ${animationAction}
+    </div>
+  `;
+}
+
 export function renderMeetingDetail(detail) {
   if (!detail?.meeting) {
     return `<section class="section-band"><h2>회의별 속기록 조회</h2><p class="section-caption">선택된 회의가 없습니다.</p></section>`;
@@ -687,7 +704,7 @@ export function renderMeetingDetail(detail) {
           <h2>회의별 속기록 조회</h2>
           <p class="section-caption">${escapeHtml(detail.meeting.meetingLabel)} · ${escapeHtml(detail.meeting.date)}</p>
         </div>
-        <button class="tool-button" type="button" data-animation-meeting-id="${escapeHtml(detail.meeting.id)}">애니메이션으로 보기</button>
+        ${renderMeetingPrimaryActions(detail.meeting)}
       </div>
       ${renderOverview(detail.overview || detail.meeting, detail.agendas || [])}
       <div class="meeting-detail-grid redesigned-detail">
@@ -900,7 +917,37 @@ export function renderCommissionerAnalysis(model = {}) {
   `;
 }
 
-export function renderAgendaAssistant() {
+function renderAgendaPreparationSavedItem(item = {}) {
+  const title = escapeHtml(item.title || "제목 없음");
+  const summary = escapeHtml(item.summary || "");
+  const summaryPreview = summary ? `${summary.slice(0, 220)}${summary.length > 220 ? "..." : ""}` : "요약이 없습니다.";
+  const payload = encodeURIComponent(JSON.stringify({
+    title: item.title || "",
+    summary: item.summary || "",
+    result: item.result || null,
+  }));
+  return `
+    <article class="assistant-saved-item">
+      <h4>${title}</h4>
+      <p>${summaryPreview}</p>
+      <button class="small-button" type="button" data-load-preparation="${payload}">불러와서 다시 분석하기</button>
+    </article>
+  `;
+}
+
+function renderAgendaPreparationSavedItemList(items = []) {
+  if (!items.length) {
+    return `<p class="section-caption">아직 저장된 준비안이 없습니다.</p>`;
+  }
+  return items
+    .slice(0, 8)
+    .map((item) => renderAgendaPreparationSavedItem(item))
+    .join("");
+}
+
+export function renderAgendaAssistant({
+  savedPreparations = [],
+} = {}) {
   return `
     <section class="section-band">
       <div class="section-header">
